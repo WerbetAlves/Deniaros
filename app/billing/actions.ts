@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import type Stripe from "stripe";
 import { getPlanDisplayName, type SaasPlanLike } from "@/lib/saas-plans";
-import { getAppUrl, getStripeClient } from "@/lib/stripe";
+import { getAppUrl, getStripeClient, hasStripeSecretKey } from "@/lib/stripe";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
 const billingPath = "/billing";
@@ -57,6 +57,14 @@ export async function requestPlanChange(formData: FormData) {
     );
   }
 
+  if (!hasStripeSecretKey()) {
+    redirect(
+      `${billingPath}?error=${encodeURIComponent(
+        "A Stripe ainda nao esta configurada no ambiente. Configure STRIPE_SECRET_KEY na Vercel para liberar o checkout."
+      )}`
+    );
+  }
+
   const { data: subscription } = await supabase
     .from("saas_subscriptions")
     .select("id,plan_id,status,stripe_customer_id,stripe_subscription_id")
@@ -78,6 +86,15 @@ export async function requestPlanChange(formData: FormData) {
 
 export async function openBillingPortal() {
   const { supabase, user, workspaceId } = await getWorkspaceContext();
+
+  if (!hasStripeSecretKey()) {
+    redirect(
+      `${billingPath}?error=${encodeURIComponent(
+        "A Stripe ainda nao esta configurada no ambiente. Configure STRIPE_SECRET_KEY para abrir o portal de cobranca."
+      )}`
+    );
+  }
+
   const { data: subscription, error } = await supabase
     .from("saas_subscriptions")
     .select("stripe_customer_id")
@@ -179,8 +196,8 @@ async function createStripeCheckoutUrl({
     subscription_data: {
       metadata
     },
-    success_url: `${appUrl}${billingPath}?success=${encodeURIComponent(
-      "Pagamento iniciado. A assinatura será atualizada assim que a Stripe confirmar."
+    success_url: `${appUrl}${billingPath}?stripe=success&session_id={CHECKOUT_SESSION_ID}&success=${encodeURIComponent(
+      "Pagamento confirmado pela Stripe. A assinatura sera sincronizada em instantes."
     )}`,
     cancel_url: `${appUrl}${billingPath}?error=${encodeURIComponent(
       "Checkout cancelado. Nenhuma cobrança foi concluída."

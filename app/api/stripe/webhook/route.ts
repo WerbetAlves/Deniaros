@@ -6,7 +6,12 @@ import {
   mapStripeSubscriptionStatus
 } from "@/lib/billing";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { getStripeClient, getStripeWebhookSecret } from "@/lib/stripe";
+import {
+  getStripeClient,
+  getStripeWebhookSecret,
+  hasStripeSecretKey,
+  hasStripeWebhookSecret
+} from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -21,6 +26,13 @@ type PlanByPriceRow = {
 };
 
 export async function POST(request: Request) {
+  if (!hasStripeSecretKey() || !hasStripeWebhookSecret()) {
+    return NextResponse.json(
+      { error: "Stripe webhook is not configured. Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET." },
+      { status: 500 }
+    );
+  }
+
   const stripe = getStripeClient();
   const signature = request.headers.get("stripe-signature");
 

@@ -1,5 +1,13 @@
 import Stripe from "stripe";
 
+export function hasStripeSecretKey() {
+  return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+}
+
+export function hasStripeWebhookSecret() {
+  return Boolean(process.env.STRIPE_WEBHOOK_SECRET?.trim());
+}
+
 export function getStripeClient() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
 

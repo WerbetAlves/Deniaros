@@ -50,6 +50,35 @@ npm.cmd run quality
 Antes de publicar, confirme que `.env.local` não será enviado ao GitHub e que chaves reais foram
 configuradas apenas no provedor de hospedagem.
 
+## Stripe
+
+O checkout usa os planos pagos do banco por `stripe_price_id` ou `stripe_lookup_key`.
+
+Variaveis necessarias no Vercel:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_APP_URL=https://deniaros.vercel.app
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+Crie Prices recorrentes na Stripe com estas lookup keys, ou preencha `stripe_price_id`
+diretamente em `saas_plans`:
+
+- `deniaros_silver_monthly` para Plano Prata
+- `deniaros_gold_monthly` para Plano Ouro
+- `deniaros_family_monthly` para Plano Familia
+
+Webhook de producao:
+
+```text
+https://deniaros.vercel.app/api/stripe/webhook
+```
+
+Eventos usados: `checkout.session.completed`, `customer.subscription.created`,
+`customer.subscription.updated`, `customer.subscription.deleted` e `invoice.payment_failed`.
+
 ## Homologacao do passo 01 (importacao)
 
 - roteiro: [docs/homologacao-importacao.md](./docs/homologacao-importacao.md)
