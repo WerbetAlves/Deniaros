@@ -27,7 +27,7 @@ export default async function NewTransactionPage({
 
   return (
     <AppShell userEmail={user.email}>
-      <section className="form-page">
+      <section className="form-page transaction-create-page">
         <div className="form-heading">
           <p className="section-label">Lançamentos</p>
           <h2>Novo movimento</h2>

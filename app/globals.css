@@ -2279,6 +2279,10 @@ textarea {
   line-height: 1.55;
 }
 
+.transaction-create-page {
+  max-width: 1120px;
+}
+
 .transaction-guidance-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2326,6 +2330,155 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+
+.transaction-smart-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  border: 1px solid rgba(40, 90, 67, 0.18);
+  border-radius: 8px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(184, 137, 56, 0.18), transparent 18rem),
+    linear-gradient(135deg, rgba(255, 253, 247, 0.98), rgba(232, 242, 228, 0.78));
+  box-shadow: var(--shadow-inset);
+}
+
+.transaction-smart-panel strong {
+  display: block;
+  margin: 4px 0 6px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  line-height: 1;
+}
+
+.transaction-smart-panel p:not(.section-label) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.transaction-template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.transaction-template-chip,
+.transaction-inline-actions button,
+.transaction-status-switch button,
+.transaction-payee-shortcuts button {
+  border: 1px solid rgba(82, 58, 32, 0.14);
+  border-radius: 999px;
+  color: var(--text);
+  font-weight: 900;
+  background: rgba(255, 253, 247, 0.78);
+  box-shadow: var(--shadow-inset);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.transaction-template-chip {
+  min-height: 42px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.transaction-template-chip:hover,
+.transaction-inline-actions button:hover,
+.transaction-status-switch button:hover,
+.transaction-status-switch button.active,
+.transaction-payee-shortcuts button:hover,
+.transaction-payee-shortcuts button.active {
+  transform: translateY(-1px);
+  border-color: rgba(40, 90, 67, 0.3);
+  box-shadow: 0 10px 20px rgba(24, 59, 45, 0.1), var(--shadow-inset);
+}
+
+.transaction-template-chip.expense:hover,
+.transaction-template-chip.expense:focus-visible {
+  border-color: rgba(156, 63, 41, 0.28);
+  background: rgba(255, 246, 241, 0.9);
+}
+
+.transaction-template-chip.income:hover,
+.transaction-template-chip.income:focus-visible {
+  border-color: rgba(45, 104, 75, 0.32);
+  background: rgba(242, 251, 244, 0.9);
+}
+
+.transaction-field-with-actions {
+  align-content: start;
+}
+
+.transaction-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.transaction-inline-actions button {
+  min-height: 30px;
+  padding: 6px 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.transaction-status-fieldset,
+.transaction-payee-shortcuts {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.transaction-status-fieldset legend,
+.transaction-payee-shortcuts .section-label {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.transaction-status-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.transaction-status-switch button {
+  min-height: 42px;
+  padding: 10px 12px;
+}
+
+.transaction-status-switch button.active {
+  color: var(--accent-deep);
+  background: rgba(232, 244, 226, 0.86);
+}
+
+.transaction-payee-shortcuts {
+  grid-column: 1 / -1;
+}
+
+.transaction-payee-shortcuts div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.transaction-payee-shortcuts button {
+  min-height: 34px;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .transaction-type-fieldset {
@@ -9816,6 +9969,8 @@ textarea {
   }
 
   .transaction-type-switch,
+  .transaction-smart-panel,
+  .transaction-template-grid,
   .entity-form,
   .composer-main-grid,
   .composer-advanced-grid {
