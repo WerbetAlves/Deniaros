@@ -9004,7 +9004,7 @@ textarea {
 .onboarding-overlay {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 11000;
   display: grid;
   place-items: center;
   padding: 18px;

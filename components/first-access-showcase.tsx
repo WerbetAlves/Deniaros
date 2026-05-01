@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const onboardingStages = [
   {
@@ -24,9 +25,12 @@ const onboardingStages = [
 ];
 
 export function FirstAccessShowcase({ viewerKey }: { viewerKey?: string }) {
+  const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+
     if (!viewerKey) {
       return;
     }
@@ -39,7 +43,7 @@ export function FirstAccessShowcase({ viewerKey }: { viewerKey?: string }) {
     }
   }, [viewerKey]);
 
-  if (!viewerKey || !visible) {
+  if (!mounted || !viewerKey || !visible) {
     return null;
   }
 
@@ -48,7 +52,7 @@ export function FirstAccessShowcase({ viewerKey }: { viewerKey?: string }) {
     setVisible(false);
   };
 
-  return (
+  return createPortal(
     <div className="onboarding-overlay" role="dialog" aria-modal="true">
       <div className="onboarding-card">
         <p className="section-label">Bem-vindo ao Deniaros</p>
@@ -82,7 +86,8 @@ export function FirstAccessShowcase({ viewerKey }: { viewerKey?: string }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
