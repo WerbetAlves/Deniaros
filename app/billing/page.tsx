@@ -16,6 +16,7 @@ import {
   type SaasPlanLike,
   type SaasSubscriptionLike
 } from "@/lib/saas-plans";
+import { hasStripeSecretKey } from "@/lib/stripe";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
 type BillingSearchParams = {
@@ -61,6 +62,13 @@ export default async function BillingPage({
   const publicPlans = getPublicPlanCatalog(plans, subscription?.plan_id);
   const familyPlan = plans.find((plan) => plan.id === "family");
   const loadError = subscriptionResult.error || plansResult.error;
+  const isStripeConfigured = hasStripeSecretKey();
+  const stripeReadyPlanCount = publicPlans.filter((plan) => plan.stripe_price_id || plan.stripe_lookup_key).length;
+  const billingReadiness = getBillingReadiness({
+    hasSubscription: Boolean(subscription),
+    isStripeConfigured,
+    stripeReadyPlanCount
+  });
 
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
@@ -108,6 +116,19 @@ export default async function BillingPage({
             <strong>{subscription?.seats ?? 1}</strong>
             <p>Quantidade de usuários liberados para o workspace atual.</p>
           </article>
+        </section>
+
+        <section className={`panel billing-readiness-panel billing-readiness-${billingReadiness.tone}`}>
+          <div>
+            <p className="section-label">Prontidão de cobrança</p>
+            <h3>{billingReadiness.title}</h3>
+            <p>{billingReadiness.description}</p>
+          </div>
+          <div className="billing-readiness-steps" aria-label="Etapas de ativação da cobrança">
+            <span className={subscription ? "is-done" : ""}>Plano no Deniaros</span>
+            <span className={stripeReadyPlanCount ? "is-done" : ""}>Preço da Stripe</span>
+            <span className={isStripeConfigured ? "is-done" : ""}>Checkout ativo</span>
+          </div>
         </section>
 
         {subscription?.stripe_customer_id ? (
@@ -193,6 +214,7 @@ export default async function BillingPage({
                 <PlanCard
                   currentPlanId={subscription?.plan_id}
                   hasStripeCustomer={Boolean(subscription?.stripe_customer_id)}
+                  isStripeConfigured={isStripeConfigured}
                   key={plan.id}
                   plan={plan}
                 />
@@ -229,20 +251,28 @@ export default async function BillingPage({
 function PlanCard({
   currentPlanId,
   hasStripeCustomer,
+  isStripeConfigured,
   plan
 }: {
   currentPlanId?: string;
   hasStripeCustomer?: boolean;
+  isStripeConfigured: boolean;
   plan: PlanRow;
 }) {
   const tier = resolvePlanVisualTier(plan.id, plan.tier);
   const isCurrent = currentPlanId === plan.id;
   const isStripeReady = Boolean(plan.stripe_price_id || plan.stripe_lookup_key);
+  const canUseStripe = isStripeConfigured && isStripeReady;
 
   return (
     <article className={`panel billing-plan-card billing-tier-${tier}`}>
       <div>
-        <p className="section-label">{getPlanPosition(plan)}</p>
+        <div className="billing-plan-card-topline">
+          <p className="section-label">{getPlanPosition(plan)}</p>
+          <span className={`billing-plan-status ${getPlanStatusTone({ isCurrent, isStripeConfigured, isStripeReady })}`}>
+            {getPlanStatusLabel({ isCurrent, isStripeConfigured, isStripeReady })}
+          </span>
+        </div>
         <h3>{getPlanDisplayName(plan)}</h3>
         <strong>{formatPlanPrice(plan)}</strong>
         <p>{getPlanSummary(plan)}</p>
@@ -258,13 +288,19 @@ function PlanCard({
         <input name="planId" type="hidden" value={plan.id} />
         <input name="planName" type="hidden" value={getPlanDisplayName(plan)} />
         <input name="currentPlan" type="hidden" value={currentPlanId ?? "sem plano"} />
-        <button className={isCurrent ? "ghost-button" : "primary-button"} disabled={isCurrent} type="submit">
+        <button
+          className={isCurrent || (isStripeReady && !isStripeConfigured) ? "ghost-button" : "primary-button"}
+          disabled={isCurrent || (isStripeReady && !isStripeConfigured)}
+          type="submit"
+        >
           {isCurrent
             ? "Plano atual"
-            : isStripeReady
+            : canUseStripe
               ? hasStripeCustomer
                 ? "Alterar pela Stripe"
                 : "Assinar com Stripe"
+              : isStripeReady
+                ? "Checkout em ativação"
               : "Solicitar alteração"}
         </button>
       </form>
@@ -278,6 +314,81 @@ function formatPlanPrice(plan: PlanRow) {
   }
   const interval = plan.billing_interval === "year" ? "ano" : "mês";
   return `${formatCurrency(plan.price_cents / 100, "BRL", "pt-BR")} / ${interval}`;
+}
+
+function getBillingReadiness({
+  hasSubscription,
+  isStripeConfigured,
+  stripeReadyPlanCount
+}: {
+  hasSubscription: boolean;
+  isStripeConfigured: boolean;
+  stripeReadyPlanCount: number;
+}) {
+  if (isStripeConfigured && stripeReadyPlanCount > 0) {
+    return {
+      description:
+        "O checkout pode receber assinaturas. Depois do pagamento, a Stripe avisa o Deniaros e o plano é atualizado automaticamente.",
+      title: "Cobrança pronta para clientes reais",
+      tone: "ready"
+    };
+  }
+
+  if (stripeReadyPlanCount > 0) {
+    return {
+      description:
+        "Os planos já têm chaves de preço. Falta publicar as variáveis da Stripe no ambiente para liberar o checkout.",
+      title: "Stripe quase pronta",
+      tone: "pending"
+    };
+  }
+
+  return {
+    description: hasSubscription
+      ? "Seu plano atual está registrado, mas os preços da Stripe ainda precisam ser vinculados ao catálogo."
+      : "Crie ou vincule os preços da Stripe para transformar os planos em assinatura sem depender de atendimento manual.",
+    title: "Cobrança em configuração",
+    tone: "manual"
+  };
+}
+
+function getPlanStatusLabel({
+  isCurrent,
+  isStripeConfigured,
+  isStripeReady
+}: {
+  isCurrent: boolean;
+  isStripeConfigured: boolean;
+  isStripeReady: boolean;
+}) {
+  if (isCurrent) {
+    return "Ativo";
+  }
+  if (isStripeReady && isStripeConfigured) {
+    return "Checkout";
+  }
+  if (isStripeReady) {
+    return "Aguardando env";
+  }
+  return "Manual";
+}
+
+function getPlanStatusTone({
+  isCurrent,
+  isStripeConfigured,
+  isStripeReady
+}: {
+  isCurrent: boolean;
+  isStripeConfigured: boolean;
+  isStripeReady: boolean;
+}) {
+  if (isCurrent || (isStripeReady && isStripeConfigured)) {
+    return "is-ready";
+  }
+  if (isStripeReady) {
+    return "is-pending";
+  }
+  return "is-manual";
 }
 
 function formatSubscriptionPeriod(subscription?: SubscriptionRow | null) {
