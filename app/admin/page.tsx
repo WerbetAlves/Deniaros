@@ -189,12 +189,19 @@ export default async function AdminPage({
         .returns<AdminAuditEventRow[]>()
     ]);
 
-  const workspaces = workspacesResult.data ?? [];
+  const workspaceRows = workspacesResult.data ?? [];
   const plans = plansResult.data ?? [];
   const subscriptions = subscriptionsResult.data ?? [];
   const flags = flagsResult.data ?? [];
   const tickets = ticketsResult.data ?? [];
   const adminAuditEvents = adminAuditResult.data ?? [];
+  const rawSubscriptionByWorkspaceId = new Map(
+    subscriptions
+      .filter((subscription) => subscription.workspace_id)
+      .map((subscription) => [subscription.workspace_id as string, subscription])
+  );
+  const workspaces = dedupeAdminWorkspaces(workspaceRows, rawSubscriptionByWorkspaceId);
+  const hiddenDuplicateWorkspaceCount = Math.max(0, workspaceRows.length - workspaces.length);
   const ownerIds = Array.from(new Set(workspaces.map((workspace) => workspace.owner_id))).filter(
     Boolean
   );
@@ -215,11 +222,7 @@ export default async function AdminPage({
     ticketsResult.error ||
     adminAuditResult.error;
   const profileByUserId = new Map(profiles.map((profile) => [profile.user_id, profile]));
-  const subscriptionByWorkspaceId = new Map(
-    subscriptions
-      .filter((subscription) => subscription.workspace_id)
-      .map((subscription) => [subscription.workspace_id as string, subscription])
-  );
+  const subscriptionByWorkspaceId = rawSubscriptionByWorkspaceId;
   const planById = new Map(plans.map((plan) => [plan.id, plan]));
   const subscriptionCountByPlanId = new Map<string, number>();
   let publicMrr = 0;
@@ -392,6 +395,17 @@ export default async function AdminPage({
             <span>
               Execute a migration 0014_saas_admin_foundation.sql e confirme seu registro em
               admin_users.
+            </span>
+          </section>
+        ) : null}
+
+        {hiddenDuplicateWorkspaceCount ? (
+          <section className="source-banner">
+            <strong>Duplicatas técnicas ocultadas</strong>
+            <span>
+              Encontramos {workspaceRows.length} workspace(s) na base e exibimos {workspaces.length}
+              assinante(s) consolidado(s). A migration 0026 limpa duplicatas vazias e evita novos
+              registros repetidos.
             </span>
           </section>
         ) : null}
@@ -817,6 +831,44 @@ export default async function AdminPage({
       </section>
     </AppShell>
   );
+}
+
+function dedupeAdminWorkspaces(
+  workspaces: WorkspaceRow[],
+  subscriptionByWorkspaceId: Map<string, SubscriptionRow>
+) {
+  const bestBySubscriberKey = new Map<string, WorkspaceRow>();
+
+  for (const workspace of workspaces) {
+    const key = [
+      workspace.owner_id,
+      workspace.type,
+      workspace.name.trim().toLowerCase()
+    ].join(":");
+    const current = bestBySubscriberKey.get(key);
+
+    if (!current || getWorkspaceDisplayScore(workspace, subscriptionByWorkspaceId) > getWorkspaceDisplayScore(current, subscriptionByWorkspaceId)) {
+      bestBySubscriberKey.set(key, workspace);
+    }
+  }
+
+  return Array.from(bestBySubscriberKey.values()).sort(
+    (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+  );
+}
+
+function getWorkspaceDisplayScore(
+  workspace: WorkspaceRow,
+  subscriptionByWorkspaceId: Map<string, SubscriptionRow>
+) {
+  const subscription = subscriptionByWorkspaceId.get(workspace.id);
+  const hasSubscription = subscription ? 10000 : 0;
+  const activeSubscription =
+    subscription?.status === "active" || subscription?.status === "manual" ? 2000 : 0;
+  const namedWorkspace = workspace.name.trim().toLowerCase() === "meu deniaros" ? 0 : 500;
+  const recency = Math.min(new Date(workspace.created_at).getTime() / 1000000000, 999);
+
+  return hasSubscription + activeSubscription + namedWorkspace + recency;
 }
 
 function formatDate(value: string) {
