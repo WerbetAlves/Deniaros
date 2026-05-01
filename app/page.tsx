@@ -19,6 +19,7 @@ import { RecentTransactions } from "@/components/recent-transactions";
 import { getFinancialData } from "@/lib/financial-data";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import {
   buildForecastProjection,
   getAccountBalances,
@@ -37,6 +38,11 @@ export default async function HomePage() {
   const {
     data: { user }
   } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const { accounts, categories, fallbackReason, payees, scheduledItems, source, transactions, workspace } =
     await getFinancialData({ supabase, user });
   const { data: personalProfileRow } = user
