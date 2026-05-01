@@ -6343,6 +6343,30 @@ textarea {
     linear-gradient(135deg, #16251d 0%, #234232 100%);
 }
 
+.admin-detail-hero-bronze {
+  background:
+    radial-gradient(circle at 85% 12%, rgba(236, 176, 109, 0.32), transparent 18rem),
+    linear-gradient(135deg, #201711 0%, #5a351f 100%);
+}
+
+.admin-detail-hero-silver {
+  background:
+    radial-gradient(circle at 85% 12%, rgba(230, 241, 244, 0.32), transparent 18rem),
+    linear-gradient(135deg, #172024 0%, #39525b 100%);
+}
+
+.admin-detail-hero-gold {
+  background:
+    radial-gradient(circle at 85% 12%, rgba(255, 236, 149, 0.36), transparent 18rem),
+    linear-gradient(135deg, #1f180b 0%, #614715 62%, #243225 100%);
+}
+
+.admin-detail-hero-platinum {
+  background:
+    radial-gradient(circle at 84% 10%, rgba(255, 255, 255, 0.3), transparent 18rem),
+    linear-gradient(135deg, #0f171b 0%, #263943 42%, #6b8089 66%, #152128 100%);
+}
+
 .admin-detail-hero::after {
   content: "";
   position: absolute;
@@ -6392,6 +6416,29 @@ textarea {
   border-radius: 8px;
   background: rgba(255, 250, 239, 0.1);
   box-shadow: var(--shadow-inset);
+}
+
+.admin-plan-status-bronze {
+  border-color: rgba(236, 176, 109, 0.26);
+  background: linear-gradient(135deg, rgba(255, 233, 205, 0.14), rgba(112, 66, 35, 0.2));
+}
+
+.admin-plan-status-silver {
+  border-color: rgba(230, 241, 244, 0.28);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(73, 93, 101, 0.2));
+}
+
+.admin-plan-status-gold {
+  border-color: rgba(255, 223, 126, 0.34);
+  background: linear-gradient(135deg, rgba(255, 236, 149, 0.18), rgba(100, 70, 19, 0.22));
+}
+
+.admin-plan-status-platinum {
+  border-color: rgba(242, 252, 255, 0.4);
+  background:
+    linear-gradient(110deg, transparent 0 22%, rgba(255, 255, 255, 0.12) 42%, transparent 62%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(94, 117, 127, 0.26));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26), 0 18px 34px rgba(0, 0, 0, 0.18);
 }
 
 .admin-detail-status strong {
@@ -8418,31 +8465,32 @@ textarea {
 }
 
 .topbar-plan-bronze {
-  border-color: rgba(162, 103, 52, 0.38);
+  border-color: rgba(162, 103, 52, 0.46);
   background:
-    radial-gradient(circle at 94% 10%, rgba(255, 236, 204, 0.52), transparent 18rem),
-    linear-gradient(135deg, #f4dfc4 0%, #b87947 45%, #ead1b1 100%);
+    radial-gradient(circle at 94% 10%, rgba(255, 236, 204, 0.64), transparent 18rem),
+    linear-gradient(135deg, #fff2d8 0%, #c2824a 42%, #f0d1a7 100%);
 }
 
 .topbar-plan-silver {
-  border-color: rgba(128, 146, 154, 0.42);
+  border-color: rgba(128, 146, 154, 0.52);
   background:
-    radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.64), transparent 17rem),
-    linear-gradient(135deg, #f4f7f6 0%, #b9c2c3 44%, #eef1ec 100%);
+    radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.78), transparent 17rem),
+    linear-gradient(135deg, #fbffff 0%, #aebbc0 44%, #eef1ec 100%);
 }
 
 .topbar-plan-gold {
-  border-color: rgba(184, 137, 56, 0.48);
+  border-color: rgba(184, 137, 56, 0.62);
   background:
-    radial-gradient(circle at 92% 8%, rgba(255, 255, 230, 0.62), transparent 17rem),
-    linear-gradient(135deg, #fff3c9 0%, #d7a83f 44%, #f6df9b 100%);
+    radial-gradient(circle at 92% 8%, rgba(255, 255, 230, 0.76), transparent 17rem),
+    linear-gradient(135deg, #fff7ce 0%, #d7a83f 42%, #7a551b 64%, #f8df8d 100%);
 }
 
 .topbar-plan-platinum {
-  border-color: rgba(135, 154, 172, 0.5);
+  border-color: rgba(152, 181, 195, 0.76);
   background:
-    radial-gradient(circle at 90% 8%, rgba(244, 255, 255, 0.72), transparent 18rem),
-    linear-gradient(135deg, #eef7f7 0%, #9eb4bf 38%, #e9ebe6 72%, #ffffff 100%);
+    radial-gradient(circle at 90% 6%, rgba(255, 255, 255, 0.95), transparent 18rem),
+    linear-gradient(118deg, #f8ffff 0%, #9fb7c4 30%, #e9f2f3 48%, #536a74 68%, #ffffff 100%);
+  box-shadow: 0 18px 46px rgba(67, 88, 98, 0.22), var(--shadow-inset);
 }
 
 .topbar-plan-chip {
@@ -8459,6 +8507,33 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.topbar-plan-chip-bronze {
+  border-color: rgba(132, 78, 37, 0.24);
+  color: #59351f;
+  background: linear-gradient(135deg, rgba(255, 241, 218, 0.92), rgba(190, 119, 65, 0.34));
+}
+
+.topbar-plan-chip-silver {
+  border-color: rgba(97, 118, 128, 0.24);
+  color: #25363e;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(174, 187, 192, 0.42));
+}
+
+.topbar-plan-chip-gold {
+  border-color: rgba(149, 105, 26, 0.3);
+  color: #5f4215;
+  background: linear-gradient(135deg, rgba(255, 250, 220, 0.96), rgba(215, 168, 63, 0.52));
+}
+
+.topbar-plan-chip-platinum {
+  border-color: rgba(238, 250, 255, 0.76);
+  color: #f9ffff;
+  background:
+    linear-gradient(110deg, transparent 0 20%, rgba(255, 255, 255, 0.32) 42%, transparent 60%),
+    linear-gradient(135deg, #253540, #6f8792 48%, #142028);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.48), 0 8px 18px rgba(20, 32, 40, 0.2);
 }
 
 .topbar-title-wrap h2 {
@@ -12334,6 +12409,35 @@ textarea {
   padding: 18px;
   background: rgba(255, 253, 247, 0.48);
   box-shadow: var(--shadow-inset);
+}
+
+.billing-current-card-bronze {
+  border-color: rgba(162, 103, 52, 0.28);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(255, 236, 204, 0.48), transparent 16rem),
+    linear-gradient(135deg, rgba(255, 250, 239, 0.9), rgba(225, 177, 128, 0.48));
+}
+
+.billing-current-card-silver {
+  border-color: rgba(128, 146, 154, 0.34);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.78), transparent 16rem),
+    linear-gradient(135deg, rgba(255, 253, 247, 0.92), rgba(196, 209, 214, 0.52));
+}
+
+.billing-current-card-gold {
+  border-color: rgba(184, 137, 56, 0.42);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(255, 246, 190, 0.6), transparent 16rem),
+    linear-gradient(135deg, rgba(255, 253, 247, 0.92), rgba(215, 168, 63, 0.5));
+}
+
+.billing-current-card-platinum {
+  border-color: rgba(152, 181, 195, 0.64);
+  background:
+    radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.86), transparent 16rem),
+    linear-gradient(135deg, rgba(250, 255, 255, 0.96), rgba(142, 165, 176, 0.54), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 18px 34px rgba(67, 88, 98, 0.16), var(--shadow-inset);
 }
 
 .billing-current-card span,

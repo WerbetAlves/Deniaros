@@ -3,6 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { hasAdminPermission } from "@/lib/admin-permissions";
 import { formatCurrency } from "@/lib/finance";
+import { resolvePlanVisualTier } from "@/lib/saas-plans";
 import {
   getTicketSla,
   getTicketStatusClass,
@@ -318,6 +319,7 @@ export default async function SubscriberDetailPage({
   const adminAuditEvents = adminAuditResult.data ?? [];
   const tickets = sortTicketsByAttention(ticketsResult.data ?? []);
   const plan = plans.find((entry) => entry.id === subscription?.plan_id);
+  const planTier = resolvePlanVisualTier(plan?.id ?? subscription?.plan_id, plan?.tier);
   const loadErrors = [
     workspaceResult.error,
     profileResult.error,
@@ -392,7 +394,7 @@ export default async function SubscriberDetailPage({
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
       <section className="module-page admin-workspace admin-detail-page">
-        <div className="admin-detail-hero panel">
+        <div className={`admin-detail-hero panel admin-detail-hero-${planTier}`}>
           <div>
             <Link className="micro-copy admin-back-link" href="/admin">
               Voltar ao painel
@@ -405,7 +407,7 @@ export default async function SubscriberDetailPage({
               {formatDate(workspace.created_at)}
             </p>
           </div>
-          <div className="admin-detail-status">
+          <div className={`admin-detail-status admin-plan-status-${planTier}`}>
             <span className={`status-chip ${getSubscriptionStatusClass(subscription?.status)}`}>
               {translateSubscriptionStatus(subscription?.status)}
             </span>

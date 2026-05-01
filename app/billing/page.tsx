@@ -75,7 +75,7 @@ export default async function BillingPage({
                 : "Sua assinatura ainda não foi criada no SaaS. Você pode solicitar um plano e acompanhar pelo suporte."}
             </p>
           </div>
-          <div className="billing-current-card">
+          <div className={`billing-current-card billing-current-card-${currentTier}`}>
             <span>{currentPlan ? getPlanDisplayName(currentPlan).replace("Plano ", "") : planTierLabels[currentTier]}</span>
             <strong>{currentPlan ? formatPlanPrice(currentPlan) : "Sem cobrança"}</strong>
             <small>{translateSubscriptionStatus(subscription?.status)}</small>
@@ -136,7 +136,7 @@ export default async function BillingPage({
               <p className="section-label">Plano atual</p>
               <h3>O que está liberado agora</h3>
             </div>
-            <span className={`topbar-plan-chip billing-plan-chip topbar-plan-${currentTier}`}>
+            <span className={`topbar-plan-chip topbar-plan-chip-${currentTier} billing-plan-chip`}>
               Plano {planTierLabels[currentTier]}
             </span>
           </div>

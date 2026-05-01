@@ -22,6 +22,7 @@ type PersonalProfileSummaryRow = {
 
 type SubscriptionSummaryRow = {
   plan_id: string;
+  saas_plans?: { name: string; tier: string } | { name: string; tier: string }[] | null;
   status: "trialing" | "active" | "past_due" | "canceled" | "suspended" | "manual";
 };
 
@@ -100,7 +101,7 @@ export async function AppShell({
             .eq("workspace_id", activeWorkspaceId),
           supabase
             .from("saas_subscriptions")
-            .select("plan_id,status")
+            .select("plan_id,status,saas_plans(name,tier)")
             .eq("workspace_id", activeWorkspaceId)
             .eq("user_id", user.id)
             .maybeSingle<SubscriptionSummaryRow>(),
@@ -127,8 +128,11 @@ export async function AppShell({
         ]);
 
       if (subscriptionResult.data && subscriptionResult.data.status !== "canceled") {
-        planTier = resolvePlanVisualTier(subscriptionResult.data.plan_id);
-        planLabel = getPlanDisplayNameFromId(subscriptionResult.data.plan_id);
+        const linkedPlan = Array.isArray(subscriptionResult.data.saas_plans)
+          ? subscriptionResult.data.saas_plans[0]
+          : subscriptionResult.data.saas_plans;
+        planTier = resolvePlanVisualTier(subscriptionResult.data.plan_id, linkedPlan?.tier);
+        planLabel = linkedPlan?.name ?? getPlanDisplayNameFromId(subscriptionResult.data.plan_id, linkedPlan?.tier);
       }
 
       if (workspaceResult.error) {

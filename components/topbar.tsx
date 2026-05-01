@@ -47,7 +47,9 @@ export function Topbar({
       </div>
 
       <div className="topbar-tools">
-        <span className="topbar-plan-chip">{planLabel ?? `Plano ${planTierLabels[planTier]}`}</span>
+        <span className={`topbar-plan-chip topbar-plan-chip-${planTier}`}>
+          {planLabel ?? `Plano ${planTierLabels[planTier]}`}
+        </span>
         <HelpCenter />
         <details className="topbar-notification-box">
           <summary
