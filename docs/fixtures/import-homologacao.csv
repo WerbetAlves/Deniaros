@@ -1,0 +1,6 @@
+date,description,amount,payee,category,subcategory,type
+2026-04-24,Pagamento da energia,-118.40,Conta de energia,Moradia,Utilidades,debit
+2026-04-24,Pagamento da energia,-118.40,Conta de energia,Moradia,Utilidades,debit
+2026-04-25,Supermercado semanal,-245.90,Mercado Central,Alimentacao,Supermercado,debit
+2026-04-26,Repasse Uber,1220.00,Uber,Renda,Servicos,credit
+2026-04-27,Farmacia de bairro,-89.70,Farmacia Popular,Saude,Medicamentos,debit

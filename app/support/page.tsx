@@ -1,0 +1,271 @@
+import Link from "next/link";
+import { AppShell } from "@/components/app-shell";
+import { SupportAiAssistant } from "@/components/support-ai-assistant";
+import {
+  getTicketSla,
+  normalizeSupportTopic,
+  normalizeTicketStatus,
+  parseSupportDescription,
+  supportTopicLabels,
+  ticketAreaLabels,
+  ticketPriorityLabels,
+  ticketStatusLabels,
+  type TicketArea,
+  type TicketPriority,
+  type TicketStatus
+} from "@/lib/support";
+import { getWorkspaceContext } from "@/lib/workspace-context";
+import { createSupportTicket } from "@/app/support/actions";
+
+type SupportSearchParams = {
+  question?: string;
+  error?: string;
+  q?: string;
+  status?: string;
+  success?: string;
+  topic?: string;
+};
+
+type SupportTicketRow = {
+  area: TicketArea;
+  created_at: string;
+  description: string;
+  id: string;
+  priority: TicketPriority;
+  requester_email: string | null;
+  status: TicketStatus;
+  title: string;
+  updated_at: string;
+};
+
+export default async function SupportPage({
+  searchParams
+}: {
+  searchParams: Promise<SupportSearchParams>;
+}) {
+  const { supabase, user, workspaceId } = await getWorkspaceContext();
+  const params = await searchParams;
+  const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY?.trim());
+  const query = String(params.q ?? "").trim().toLowerCase();
+  const selectedStatus = normalizeTicketStatus(params.status);
+  const selectedTopic = normalizeSupportTopic(params.topic);
+  const triageQuestion = String(params.question ?? "").trim();
+  const ticketsResult = await supabase
+    .from("saas_support_tickets")
+    .select("id,requester_email,title,description,area,priority,status,created_at,updated_at")
+    .eq("requester_id", user.id)
+    .order("updated_at", { ascending: false })
+    .limit(50)
+    .returns<SupportTicketRow[]>();
+  const supportTickets = ticketsResult.data ?? [];
+  const filteredTickets = supportTickets.filter((ticket) => {
+    const matchesStatus = selectedStatus === "all" || ticket.status === selectedStatus;
+    const matchesQuery =
+      !query ||
+      `${ticket.id} ${ticket.title} ${ticket.description} ${ticket.area}`
+        .toLowerCase()
+        .includes(query);
+
+    return matchesStatus && matchesQuery;
+  });
+  const openCount = supportTickets.filter((ticket) => ticket.status === "open").length;
+  const waitingCount = supportTickets.filter((ticket) => ticket.status === "waiting").length;
+
+  return (
+    <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
+      <section className="module-page support-workspace">
+        <div className="module-hero panel support-hero">
+          <div>
+            <p className="section-label">Atendimento inteligente</p>
+            <h2>Chat e Suporte</h2>
+            <p className="supporting-copy">
+              Primeiro a IA tenta resolver. Se precisar de análise técnica, o Deniaros organiza
+              o contexto e abre um ticket com histórico, prioridade e acompanhamento.
+            </p>
+          </div>
+          <div className="profile-badges">
+            <span className="status-chip">{hasGeminiKey ? "IA configurada" : "IA pendente"}</span>
+            <span className="status-chip">{openCount} ticket(s) aberto(s)</span>
+            <span className="status-chip">{waitingCount} aguardando</span>
+          </div>
+        </div>
+
+        {params.error ? <p className="form-error">{params.error}</p> : null}
+        {params.success ? <p className="form-success">{params.success}</p> : null}
+
+        {ticketsResult.error ? (
+          <section className="source-banner">
+            <strong>Suporte persistente indisponível</strong>
+            <span>
+              Aplique as migrations 0014, 0017 e 0018 para listar, criar e responder tickets reais.
+            </span>
+          </section>
+        ) : null}
+
+        <SupportAiAssistant
+          createTicketAction={createSupportTicket}
+          hasGeminiKey={hasGeminiKey}
+          initialQuestion={triageQuestion}
+          initialTopic={selectedTopic}
+          topicLabels={supportTopicLabels}
+        />
+
+        <section className="support-flow-grid" aria-label="Como o suporte funciona">
+          <article className="panel support-flow-card">
+            <span>1</span>
+            <strong>Pergunte com contexto</strong>
+            <p>Descreva a tela, o objetivo e o que aconteceu. A IA entende melhor quando recebe o cenário completo.</p>
+          </article>
+          <article className="panel support-flow-card">
+            <span>2</span>
+            <strong>Resolva ou encaminhe</strong>
+            <p>Se for algo de uso, ela orienta o caminho. Se for técnico, o ticket já nasce com histórico.</p>
+          </article>
+          <article className="panel support-flow-card">
+            <span>3</span>
+            <strong>Acompanhe tudo aqui</strong>
+            <p>Os tickets ficam salvos com prioridade, prazo de resposta e conversa em um só lugar.</p>
+          </article>
+        </section>
+
+        <section className="support-ticket-tools">
+          <form className="support-search-form" method="get">
+            <label>
+              Buscar tickets
+              <input defaultValue={params.q ?? ""} name="q" placeholder="Buscar por título, área ou número" />
+            </label>
+            <label>
+              Status
+              <select defaultValue={selectedStatus} name="status">
+                <option value="all">Todos os status</option>
+                {Object.entries(ticketStatusLabels).map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button className="ghost-button" type="submit">
+              Filtrar
+            </button>
+          </form>
+          <Link className="primary-button" href="#ticket-form">
+            Abrir ticket de suporte
+          </Link>
+        </section>
+
+        <section className="support-ticket-list" aria-label="Tickets de suporte">
+          {filteredTickets.length ? (
+            filteredTickets.map((ticket) => {
+              const parsedDescription = parseSupportDescription(ticket.description);
+              const sla = getTicketSla(ticket);
+
+              return (
+                <article className="panel support-ticket-card" key={ticket.id}>
+                  <div className="support-ticket-meta">
+                    <span className={`support-priority ${ticket.priority}`}>
+                      {ticketPriorityLabels[ticket.priority]}
+                    </span>
+                    <span>{ticketAreaLabels[ticket.area]}</span>
+                    <span className={`support-sla-chip ${sla.className}`}>{sla.label}</span>
+                    <span>#{ticket.id.slice(0, 8).toUpperCase()}</span>
+                  </div>
+                  <div className="support-ticket-body">
+                    <div>
+                      <h3>{ticket.title}</h3>
+                      <p>{parsedDescription.message}</p>
+                      <small>
+                        Solicitante: {ticket.requester_email ?? user.email} · Atualizado{" "}
+                        {formatDate(ticket.updated_at)} · {sla.meta}
+                      </small>
+                    </div>
+                    <span className={`support-ticket-status ${ticket.status}`}>
+                      {ticketStatusLabels[ticket.status]}
+                    </span>
+                  </div>
+                  <div className="support-ticket-card-actions">
+                    <Link className="ghost-button" href={`/support/tickets/${ticket.id}`}>
+                      Abrir histórico
+                    </Link>
+                  </div>
+                </article>
+              );
+            })
+          ) : (
+            <article className="panel empty-state">
+              <strong>Nenhum ticket encontrado.</strong>
+              <p>Ajuste a busca ou abra um novo atendimento para acompanhar por aqui.</p>
+            </article>
+          )}
+        </section>
+
+        <section className="panel support-ticket-form-panel" id="ticket-form">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Novo atendimento</p>
+              <h3>Abrir ticket de suporte</h3>
+            </div>
+            <span className="status-chip">Entra no Admin SaaS</span>
+          </div>
+          <form action={createSupportTicket} className="entity-form profile-form">
+            <label>
+              Assunto
+              <input
+                name="title"
+                placeholder="Ex.: Erro ao baixar conta recorrente"
+                required
+              />
+            </label>
+            <label>
+              Área
+              <select defaultValue="technical" name="area">
+                <option value="technical">Técnico</option>
+                <option value="feature">Funcionalidade</option>
+                <option value="billing">Assinatura</option>
+                <option value="guidance">Orientação de uso</option>
+                <option value="account">Conta e acesso</option>
+              </select>
+            </label>
+            <label>
+              Prioridade
+              <select defaultValue="medium" name="priority">
+                <option value="urgent">Urgente</option>
+                <option value="high">Alta</option>
+                <option value="medium">Média</option>
+                <option value="low">Baixa</option>
+              </select>
+            </label>
+            <label className="wide-field">
+              Descrição
+              <textarea
+                name="description"
+                placeholder="Explique o que aconteceu, o que esperava e em qual tela estava."
+                required
+                rows={5}
+              />
+            </label>
+            <p className="micro-copy wide-field">
+              O ticket será salvo no seu workspace e aparecerá na fila do Painel Admin SaaS.
+            </p>
+            <div className="form-actions">
+              <button className="ghost-button" type="reset">
+                Limpar
+              </button>
+              <button className="primary-button" type="submit">
+                Abrir ticket
+              </button>
+            </div>
+          </form>
+        </section>
+      </section>
+    </AppShell>
+  );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).format(new Date(value));
+}
