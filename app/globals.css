@@ -663,6 +663,10 @@ textarea {
   transform-origin: top center;
 }
 
+.page-transition-shell:has(.onboarding-overlay) {
+  z-index: 12000;
+}
+
 .page-transition-shell::before {
   content: "";
   position: absolute;
@@ -4719,7 +4723,7 @@ textarea {
 .wallet-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 48;
+  z-index: 420;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -8674,9 +8678,15 @@ textarea {
 
 .topbar-refined {
   position: relative;
-  z-index: 35;
+  z-index: 40;
   overflow: visible;
   padding: 14px 16px;
+}
+
+.topbar-refined:has(.topbar-notification-box[open]),
+.topbar-refined:has(.help-center.open),
+.topbar-refined:has(.help-center.pinned) {
+  z-index: 520;
 }
 
 .topbar-refined::before {
@@ -8831,7 +8841,7 @@ textarea {
 }
 
 .topbar-notification-box[open] {
-  z-index: 70;
+  z-index: 540;
 }
 
 .topbar-notification-box summary {
@@ -8880,7 +8890,7 @@ textarea {
   position: absolute;
   top: 46px;
   right: 0;
-  z-index: 80;
+  z-index: 550;
   background: rgba(255, 250, 239, 0.98);
   box-shadow: var(--shadow-lg), var(--shadow-inset);
 }
@@ -8892,7 +8902,7 @@ textarea {
 
 .help-center.open,
 .help-center.pinned {
-  z-index: 92;
+  z-index: 540;
 }
 
 .help-center-trigger svg {
@@ -8904,7 +8914,7 @@ textarea {
   position: absolute;
   right: 0;
   top: 46px;
-  z-index: 95;
+  z-index: 550;
   width: min(420px, calc(100vw - var(--sidebar-width, 284px) - 36px));
   max-height: min(72vh, 720px);
   overflow: auto;
@@ -9174,7 +9184,11 @@ textarea {
   position: fixed;
   right: 20px;
   bottom: 18px;
-  z-index: 22;
+  z-index: 96;
+}
+
+.floating-quick-actions[open] {
+  z-index: 560;
 }
 
 .floating-quick-actions summary {
@@ -9400,6 +9414,18 @@ textarea {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes ux-sheet-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -10032,14 +10058,25 @@ textarea {
   }
 
   .topbar-notification-menu {
-    right: -8px;
-    width: min(320px, calc(100vw - 28px));
+    position: fixed;
+    top: auto;
+    right: 12px;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+    max-height: min(68dvh, 520px);
+    border-radius: 18px;
   }
 
   .help-center-panel {
-    right: -54px;
-    width: min(340px, calc(100vw - 28px));
-    max-height: 74vh;
+    position: fixed;
+    top: auto;
+    right: 12px;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+    max-height: min(68dvh, 560px);
+    border-radius: 18px;
   }
 
   .help-center-header {
@@ -10087,7 +10124,7 @@ textarea {
 
   .floating-quick-actions {
     right: 14px;
-    bottom: 16px;
+    bottom: calc(88px + env(safe-area-inset-bottom));
   }
 
   .floating-quick-toggle {
@@ -10096,8 +10133,12 @@ textarea {
   }
 
   .floating-quick-menu {
-    width: 204px;
-    bottom: 58px;
+    position: fixed;
+    right: 12px;
+    bottom: calc(154px + env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+    border-radius: 18px;
   }
 
   .connection-lamp {
@@ -10105,8 +10146,16 @@ textarea {
     bottom: 12px;
   }
 
+  .onboarding-overlay {
+    place-items: end center;
+    padding: 12px;
+  }
+
   .onboarding-card {
+    max-height: min(82dvh, 760px);
     padding: 16px;
+    border-radius: 18px;
+    animation: ux-sheet-rise 220ms ease both;
   }
 
   .onboarding-actions {
@@ -10296,7 +10345,11 @@ textarea {
   }
 
   .wallet-modal-card {
-    border-radius: 18px;
+    width: 100%;
+    max-height: min(84dvh, 760px);
+    border-radius: 18px 18px 8px 8px;
+    align-self: end;
+    animation: ux-sheet-rise 220ms ease both;
   }
 
   .wallet-modal-actions {
@@ -14068,7 +14121,7 @@ textarea {
 
 .category-modal-backdrop {
   position: fixed;
-  z-index: 60;
+  z-index: 420;
   inset: 0;
   display: grid;
   place-items: center;
