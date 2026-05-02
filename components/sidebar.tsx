@@ -50,6 +50,23 @@ export function Sidebar({
   }, [pathname]);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 721px)");
+
+    function closeMobileMenuOnDesktop() {
+      if (mediaQuery.matches) {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    closeMobileMenuOnDesktop();
+    mediaQuery.addEventListener("change", closeMobileMenuOnDesktop);
+
+    return () => {
+      mediaQuery.removeEventListener("change", closeMobileMenuOnDesktop);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!mobileMenuOpen) {
       return;
     }
@@ -90,6 +107,7 @@ export function Sidebar({
           );
         })}
         <button
+          aria-label="Abrir menu completo"
           aria-expanded={mobileMenuOpen}
           className={`mobile-dock-link mobile-dock-menu${mobileMenuOpen ? " active" : ""}`}
           onClick={() => setMobileMenuOpen((current) => !current)}
@@ -153,6 +171,7 @@ export function Sidebar({
       </div>
 
       <nav className="sidebar-nav" aria-label="Principal">
+        <span className="sidebar-mobile-section-label">Navegar</span>
         {visibleNavigation.map((item) => {
             const isActive = isActivePath(pathname, item.href);
 
@@ -175,6 +194,7 @@ export function Sidebar({
       </nav>
 
       <div className="sidebar-utility-group">
+        <span className="sidebar-mobile-section-label">Sistema</span>
         <Link className="nav-item" href="/settings#idioma" title="Alterar idioma">
           <span className="nav-item-icon" aria-hidden="true">
             <GlobeIcon />
