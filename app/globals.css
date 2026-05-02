@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --bg: #efe6d4;
   --bg-elevated: rgba(255, 250, 239, 0.94);
