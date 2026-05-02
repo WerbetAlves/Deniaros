@@ -21,8 +21,13 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileName = profile?.displayName ?? userEmail?.split("@")[0] ?? "Usuário";
   const profileInitials = getProfileInitials(profileName);
+  const visibleNavigation = navigation.filter((item) => !item.adminOnly || showAdmin);
+  const mobileDockItems = visibleNavigation.filter((item) =>
+    ["home", "bills", "assistant"].includes(item.id)
+  );
 
   useEffect(() => {
     const storedValue = window.localStorage.getItem(sidebarCollapsedStorageKey);
@@ -41,8 +46,71 @@ export function Sidebar({
     };
   }, [collapsed]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return;
+    }
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    document.body.classList.add("mobile-sidebar-lock");
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.classList.remove("mobile-sidebar-lock");
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
+    <>
+      <nav className="mobile-nav-dock" aria-label="Navegacao rapida">
+        {mobileDockItems.map((item) => {
+          const isActive = isActivePath(pathname, item.href);
+
+          return (
+            <Link
+              aria-current={isActive ? "page" : undefined}
+              className={`mobile-dock-link${isActive ? " active" : ""}`}
+              href={item.href}
+              key={item.id}
+            >
+              <span aria-hidden="true">
+                <NavigationIcon icon={item.icon} />
+              </span>
+              <small>{item.shortLabel ?? item.label}</small>
+            </Link>
+          );
+        })}
+        <button
+          aria-expanded={mobileMenuOpen}
+          className={`mobile-dock-link mobile-dock-menu${mobileMenuOpen ? " active" : ""}`}
+          onClick={() => setMobileMenuOpen((current) => !current)}
+          type="button"
+        >
+          <span aria-hidden="true">
+            <MenuIcon />
+          </span>
+          <small>Menu</small>
+        </button>
+      </nav>
+
+      <button
+        aria-label="Fechar menu principal"
+        className={`sidebar-mobile-backdrop${mobileMenuOpen ? " visible" : ""}`}
+        onClick={() => setMobileMenuOpen(false)}
+        type="button"
+      />
+
+      <aside className={`sidebar${collapsed ? " collapsed" : ""}${mobileMenuOpen ? " mobile-open" : ""}`}>
       <div className="brand">
         <div className="brand-mark brand-mark-image">
           <Image
@@ -69,9 +137,7 @@ export function Sidebar({
       </div>
 
       <nav className="sidebar-nav" aria-label="Principal">
-        {navigation
-          .filter((item) => !item.adminOnly || showAdmin)
-          .map((item) => {
+        {visibleNavigation.map((item) => {
             const isActive = isActivePath(pathname, item.href);
 
             return (
@@ -145,7 +211,8 @@ export function Sidebar({
           </p>
         </section>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 
@@ -272,6 +339,14 @@ function GlobeIcon() {
     <svg viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="8" />
       <path d="M4 12h16M12 4c2.2 2.4 3.3 5 3.3 8s-1.1 5.6-3.3 8M12 4c-2.2 2.4-3.3 5-3.3 8s1.1 5.6 3.3 8" />
+    </svg>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <path d="M5 7h14M5 12h14M5 17h14" />
     </svg>
   );
 }
