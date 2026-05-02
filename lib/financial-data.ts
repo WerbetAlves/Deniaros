@@ -263,7 +263,11 @@ function getFallbackFinancialData(fallbackReason: string, workspace?: Workspace)
 }
 
 function shouldUseSampleFinancialData() {
-  return process.env.NODE_ENV !== "production" || process.env.DENIAROS_ALLOW_SAMPLE_DATA === "1";
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return process.env.DENIAROS_ALLOW_SAMPLE_DATA !== "0";
 }
 
 function buildFallbackWorkspace(id = "workspace-unavailable"): Workspace {

@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") ?? "/";
+  const next = normalizeCallbackNextPath(requestUrl.searchParams.get("next"));
   const providerError =
     requestUrl.searchParams.get("error_description") ??
     requestUrl.searchParams.get("error_code") ??
@@ -38,4 +38,12 @@ function redirectToLoginError(requestUrl: URL, message: string) {
       requestUrl.origin
     )
   );
+}
+
+function normalizeCallbackNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/";
+  }
+
+  return value;
 }
