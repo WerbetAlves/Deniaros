@@ -1380,14 +1380,26 @@ textarea {
 }
 
 .home-preference-card {
-  width: min(190px, 100%);
-  padding: 10px 12px;
+  width: fit-content;
+  min-width: 132px;
+  padding: 8px 10px;
   border: 1px solid rgba(82, 58, 32, 0.13);
   border-radius: 8px;
   background: rgba(255, 253, 247, 0.62);
   display: grid;
   align-content: center;
   gap: 6px;
+}
+
+.home-preference-card .section-label {
+  font-size: 0.62rem;
+}
+
+.home-preference-card strong {
+  color: var(--accent-deep);
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .home-layout-builder {

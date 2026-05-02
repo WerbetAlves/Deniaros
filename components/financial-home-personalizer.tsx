@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { AccountBalance, CurrencyCode, ForecastProjection, LocaleCode } from "@/lib/domain";
 import { formatCurrency, formatShortDate } from "@/lib/finance";
-import { MetricValue, WidgetWrapper } from "@/components/widget-wrapper";
+import { WidgetWrapper } from "@/components/widget-wrapper";
 
 type HomeModuleId = "reminders" | "chart" | "tip" | "accounts" | "internet";
 
@@ -165,7 +165,7 @@ export function FinancialHomePersonalizer({
       <div className="financial-home-head">
         <div className="home-preference-card">
           <p className="section-label">Personalizacao local</p>
-          <MetricValue tone="stable">{visibleModules.length}/{moduleCatalog.length}</MetricValue>
+          <strong>{visibleModules.length}/{moduleCatalog.length}</strong>
         </div>
       </div>
 
