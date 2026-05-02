@@ -4094,6 +4094,243 @@ textarea {
   background: rgba(255, 238, 232, 0.82);
 }
 
+.decisions-page {
+  gap: 20px;
+}
+
+.decisions-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: 22px;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+.decisions-hero::after {
+  content: "";
+  position: absolute;
+  right: -90px;
+  bottom: -150px;
+  width: 360px;
+  height: 360px;
+  border: 1px solid rgba(184, 137, 56, 0.16);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 16px rgba(184, 137, 56, 0.05),
+    0 0 0 42px rgba(45, 104, 75, 0.05),
+    0 0 0 76px rgba(184, 137, 56, 0.04);
+  pointer-events: none;
+}
+
+.decisions-hero h2 {
+  margin: 8px 0 12px;
+  font-family: var(--font-heading);
+  font-size: clamp(2.3rem, 5vw, 4.2rem);
+  line-height: 0.96;
+  max-width: 840px;
+}
+
+.decision-score-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-height: 220px;
+  padding: 22px;
+  border: 1px solid rgba(82, 58, 32, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(140deg, rgba(255, 252, 244, 0.9), rgba(238, 246, 237, 0.72)),
+    var(--surface);
+  box-shadow: var(--shadow-inset);
+}
+
+.decision-score-card span,
+.decision-controls label,
+.decision-scenario-card span,
+.decision-priority span,
+.decision-method-list span {
+  color: var(--muted);
+  font-weight: 850;
+}
+
+.decision-score-card strong {
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.decision-score-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.decisions-hero-danger .decision-score-card,
+.decision-scenario-danger,
+.decision-priority-danger {
+  border-color: rgba(132, 55, 48, 0.28);
+  background:
+    linear-gradient(140deg, rgba(255, 239, 232, 0.92), rgba(255, 250, 242, 0.78)),
+    var(--surface);
+}
+
+.decisions-hero-attention .decision-score-card,
+.decision-scenario-attention,
+.decision-priority-attention {
+  border-color: rgba(184, 137, 56, 0.32);
+  background:
+    linear-gradient(140deg, rgba(255, 246, 223, 0.92), rgba(255, 252, 244, 0.78)),
+    var(--surface);
+}
+
+.decisions-lab {
+  display: grid;
+  gap: 16px;
+}
+
+.decision-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.decision-controls label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.decision-controls input,
+.decision-controls select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(82, 58, 32, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 252, 244, 0.8);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  padding: 0 12px;
+}
+
+.decision-simulator-grid,
+.decisions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.decisions-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+}
+
+.decision-scenario-card {
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+  min-height: 280px;
+  padding: 18px;
+  border: 1px solid rgba(82, 58, 32, 0.13);
+  border-radius: 8px;
+  background:
+    linear-gradient(140deg, rgba(255, 252, 244, 0.92), rgba(238, 246, 237, 0.66)),
+    var(--surface);
+  box-shadow: var(--shadow-inset);
+}
+
+.decision-scenario-card h4 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: 1.65rem;
+  line-height: 1.02;
+}
+
+.decision-scenario-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.decision-scenario-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.48;
+  font-weight: 750;
+}
+
+.decision-scenario-card a,
+.decision-priority {
+  color: var(--accent-deep);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.decision-scenario-card a {
+  width: fit-content;
+  border-bottom: 1px solid currentColor;
+}
+
+.decision-priority-list,
+.decision-method-list {
+  display: grid;
+  gap: 10px;
+}
+
+.decision-priority {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid rgba(82, 58, 32, 0.13);
+  border-radius: 8px;
+  background:
+    linear-gradient(140deg, rgba(255, 252, 244, 0.92), rgba(238, 246, 237, 0.62)),
+    var(--surface);
+  box-shadow: var(--shadow-inset);
+}
+
+.decision-priority strong {
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.decision-priority p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.decisions-side-panel {
+  align-self: start;
+}
+
+.decision-method-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.decision-method-list li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(82, 58, 32, 0.12);
+}
+
+.decision-method-list li:last-child {
+  border-bottom: 0;
+}
+
 .hero-metrics {
   grid-column: 1 / -1;
   display: grid;
@@ -10316,6 +10553,10 @@ textarea {
   .bills-forecast-grid,
   .bills-lists-grid,
   .planner-map,
+  .decisions-hero,
+  .decision-controls,
+  .decision-simulator-grid,
+  .decisions-grid,
   .debt-hero,
   .debt-execution-grid,
   .debt-execution-list article,
