@@ -50,6 +50,16 @@ type ReportItem = {
   description: string;
 };
 
+type ReportInsight = {
+  href: string;
+  metricLabel: string;
+  metricValue: string;
+  nextAction: string;
+  summary: string;
+  title: string;
+  tone: "stable" | "attention" | "danger";
+};
+
 const sectionLabels: Array<{ id: SectionId; label: string }> = [
   { id: "habits", label: "Hábitos de consumo" },
   { id: "assets", label: "O que eu tenho" },
@@ -300,6 +310,12 @@ export default async function ReportsPage({
     transferTransactions,
     upcomingItems
   };
+  const reportInsight = buildReportInsight({
+    context,
+    rangeLabel: range.label,
+    report: selectedReport,
+    section: selectedSection
+  });
 
   return (
     <AppShell userEmail={user.email}>
@@ -347,6 +363,8 @@ export default async function ReportsPage({
               <Link href={`/reports?section=${selectedSection}`}>Voltar à galeria</Link>
             ) : null}
           </header>
+
+          <ReportExecutiveSummary insight={reportInsight} rangeLabel={range.label} />
 
           {selectedReport ? (
             <ReportDetail context={context} report={selectedReport} />
@@ -453,6 +471,36 @@ function ReportGallery({ reports, section }: { reports: ReportItem[]; section: S
           <span>Abra um relatório e personalize sua leitura antes de salvá-lo como favorito.</span>
         </div>
       )}
+    </section>
+  );
+}
+
+function ReportExecutiveSummary({
+  insight,
+  rangeLabel
+}: {
+  insight: ReportInsight;
+  rangeLabel: string;
+}) {
+  return (
+    <section className={`report-executive-summary ${insight.tone}`}>
+      <article>
+        <p className="section-label">Leitura executiva</p>
+        <h3>{insight.title}</h3>
+        <p>{insight.summary}</p>
+      </article>
+      <article>
+        <p className="section-label">{insight.metricLabel}</p>
+        <strong>{insight.metricValue}</strong>
+        <span>{rangeLabel}</span>
+      </article>
+      <article>
+        <p className="section-label">Proxima acao</p>
+        <p>{insight.nextAction}</p>
+        <Link className="ghost-button" href={insight.href}>
+          Agir agora
+        </Link>
+      </article>
     </section>
   );
 }
@@ -836,6 +884,154 @@ type ReportContext = {
   transferTransactions: Transaction[];
   upcomingItems: ScheduledItem[];
 };
+
+function buildReportInsight({
+  context,
+  rangeLabel,
+  report,
+  section
+}: {
+  context: ReportContext;
+  rangeLabel: string;
+  report?: ReportItem;
+  section: SectionId;
+}): ReportInsight {
+  const net = context.postedIncome - context.postedExpenses;
+  const topExpense = context.rankedCategories.find((entry) => entry.kind === "expense");
+  const topPayee = context.rankedPayees[0];
+  const nextItem = context.upcomingItems[0];
+  const isNegative = net < 0;
+
+  if (!report) {
+    return {
+      href: "/reports?section=habits&report=income-vs-expenses",
+      metricLabel: "Resultado do recorte",
+      metricValue: formatCurrency(net, context.currency, context.locale),
+      nextAction: "Abra um relatorio pela pergunta que voce quer responder agora.",
+      summary:
+        "A galeria esta organizada por decisoes: consumo, patrimonio, dividas, impostos e meses fechados.",
+      title: "Comece por uma pergunta, nao por uma tabela.",
+      tone: isNegative ? "attention" : "stable"
+    };
+  }
+
+  if (report.id === "where-money-goes" || report.id === "category-expenses") {
+    return {
+      href: "/decisions",
+      metricLabel: topExpense ? "Maior saida" : "Despesas",
+      metricValue: topExpense
+        ? formatCurrency(topExpense.total, context.currency, context.locale)
+        : formatCurrency(context.postedExpenses, context.currency, context.locale),
+      nextAction: topExpense
+        ? `Simule reduzir ${topExpense.categoryName} antes de cortar no escuro.`
+        : "Classifique movimentos para descobrir os vazamentos reais.",
+      summary: topExpense
+        ? `${topExpense.categoryName} concentra a maior pressao do recorte ${rangeLabel}.`
+        : "Ainda nao ha categorias suficientes para apontar um vazamento confiavel.",
+      title: "Seu historico mostra onde atacar primeiro.",
+      tone: topExpense ? "attention" : "stable"
+    };
+  }
+
+  if (report.id === "who-receives-money" || report.id === "payee-expenses") {
+    return {
+      href: "/payees",
+      metricLabel: topPayee ? "Favorecido lider" : "Favorecidos",
+      metricValue: topPayee
+        ? formatCurrency(topPayee.total, context.currency, context.locale)
+        : String(context.rankedPayees.length),
+      nextAction: topPayee
+        ? `Revise recorrencia, categoria e necessidade de ${topPayee.payeeName}.`
+        : "Cadastre favorecidos para transformar movimentos soltos em padrao.",
+      summary: topPayee
+        ? `${topPayee.payeeName} aparece como maior concentracao de movimento no recorte.`
+        : "Sem favorecidos suficientes para identificar concentracao de pagamentos.",
+      title: "O dinheiro tambem conta uma historia por destino.",
+      tone: topPayee && topPayee.expense > topPayee.income ? "attention" : "stable"
+    };
+  }
+
+  if (report.id === "income-vs-expenses" || report.id === "budget-health" || report.id === "my-budget") {
+    return {
+      href: isNegative ? "/decisions" : "/planner?view=budget",
+      metricLabel: "Resultado",
+      metricValue: formatCurrency(net, context.currency, context.locale),
+      nextAction: isNegative
+        ? "Use o Centro de Decisoes para testar cortes e reorganizar vencimentos."
+        : "Transforme a sobra em reserva, meta ou pagamento antecipado.",
+      summary: isNegative
+        ? "As despesas superaram as entradas no recorte. O relatorio virou alerta de decisao."
+        : "As entradas cobrem as saidas no recorte. Agora a pergunta e como usar melhor a margem.",
+      title: isNegative ? "Seu mes pede intervencao." : "Existe margem para planejar.",
+      tone: isNegative ? "danger" : "stable"
+    };
+  }
+
+  if (section === "debts") {
+    return {
+      href: "/financial-agenda",
+      metricLabel: "Compromissos",
+      metricValue: formatCurrency(context.scheduledExpenses, context.currency, context.locale),
+      nextAction: nextItem
+        ? `Revise ${nextItem.title} antes de ${formatShortDate(nextItem.dueDate, context.locale)}.`
+        : "Cadastre vencimentos para o Deniaros prever seu caixa.",
+      summary: nextItem
+        ? `O proximo compromisso e ${nextItem.title}. A agenda deve antecipar o aperto, nao so registrar atraso.`
+        : "Sem compromissos abertos no recorte. A previsao fica mais forte quando contas e depositos entram na agenda.",
+      title: "Divida boa de vencer e divida vista antes.",
+      tone: context.scheduledExpenses > context.scheduledIncome ? "attention" : "stable"
+    };
+  }
+
+  if (section === "assets") {
+    return {
+      href: "/accounts",
+      metricLabel: "Patrimonio",
+      metricValue: formatCurrency(context.totalBalance, context.currency, context.locale),
+      nextAction: "Revise carteiras sem movimento e saldos que nao refletem a vida real.",
+      summary: "Patrimonio so ajuda a decidir quando contas, ativos e passivos estao no mesmo mapa.",
+      title: "Sua posicao consolidada precisa ser confiavel.",
+      tone: context.totalBalance < 0 ? "danger" : "stable"
+    };
+  }
+
+  if (section === "taxes") {
+    return {
+      href: "/tax-categories",
+      metricLabel: "Categorias no recorte",
+      metricValue: String(context.rankedCategories.length),
+      nextAction: "Revise categorias fiscais antes do fechamento do ano.",
+      summary: "Imposto fica mais leve quando a classificacao acontece durante o ano, nao na pressa.",
+      title: "Organizacao fiscal e rotina, nao evento.",
+      tone: "attention"
+    };
+  }
+
+  if (section === "monthly") {
+    const currentMonth = context.monthlyRows[0]?.[1];
+    const monthlyNet = currentMonth ? currentMonth.income - currentMonth.expense : net;
+
+    return {
+      href: "/assistant?question=Me%20explique%20meu%20relatorio%20mensal",
+      metricLabel: "Resultado mensal",
+      metricValue: formatCurrency(monthlyNet, context.currency, context.locale),
+      nextAction: "Peca ao Consultor IA para transformar o fechamento em proximas decisoes.",
+      summary: "O relatorio mensal deve fechar o ciclo: o que aconteceu, por que aconteceu e o que mudar.",
+      title: monthlyNet < 0 ? "O mes fechou pedindo ajuste." : "O mes deixou uma leitura util.",
+      tone: monthlyNet < 0 ? "attention" : "stable"
+    };
+  }
+
+  return {
+    href: "/reports",
+    metricLabel: "Lancamentos",
+    metricValue: String(context.operationalTransactions.length),
+    nextAction: "Use os filtros para chegar na pergunta certa antes de exportar qualquer dado.",
+    summary: "Este relatorio esta pronto para leitura, filtro e comparacao.",
+    title: "Transforme detalhe em decisao.",
+    tone: "stable"
+  };
+}
 
 function buildReportHref(report: ReportItem, params: ReportsSearchParams) {
   const query = new URLSearchParams();
