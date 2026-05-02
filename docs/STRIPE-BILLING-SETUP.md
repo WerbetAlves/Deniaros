@@ -80,7 +80,17 @@ O plano `platinum_private` continua manual e nao precisa aparecer no Checkout pu
 ## Fluxo esperado
 
 1. Usuario escolhe um plano em `/billing`.
-2. Deniaros cria uma sessao Checkout na Stripe.
-3. Stripe confirma a assinatura pelo webhook.
+2. Se o workspace ainda nao tem assinatura Stripe, o Deniaros cria uma sessao Checkout.
+3. Stripe confirma a primeira assinatura pelo webhook.
 4. Deniaros sincroniza `saas_subscriptions` com plano, status, periodo, cliente e assinatura Stripe.
-5. Usuario passa a ver o botao do Customer Portal para cartao, faturas e cancelamento.
+5. Se o workspace ja tem `stripe_subscription_id`, uma troca de plano atualiza o item da assinatura existente na Stripe, sem criar assinatura duplicada.
+6. Usuario passa a ver o botao do Customer Portal para cartao, faturas e cancelamento.
+
+## Teste ponta a ponta antes de cliente real
+
+1. Assinar um plano publico sem assinatura anterior.
+2. Confirmar que o webhook preenche `stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`, `stripe_status`, periodo e plano.
+3. Abrir o Customer Portal.
+4. Trocar de Prata para Ouro ou Familia e confirmar na Stripe que continua existindo apenas uma assinatura.
+5. Cancelar no portal e confirmar que o webhook marca a assinatura como cancelada ou `cancel_at_period_end`.
+6. Simular `invoice.payment_failed` e confirmar status `past_due`.

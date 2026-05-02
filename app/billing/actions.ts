@@ -2,6 +2,10 @@
 
 import { redirect } from "next/navigation";
 import type Stripe from "stripe";
+import {
+  getStripeSubscriptionPeriod,
+  mapStripeSubscriptionStatus
+} from "@/lib/billing";
 import { getPlanDisplayName, type SaasPlanLike } from "@/lib/saas-plans";
 import { getAppUrl, getStripeClient, hasStripeSecretKey } from "@/lib/stripe";
 import { getWorkspaceContext } from "@/lib/workspace-context";
@@ -71,6 +75,23 @@ export async function requestPlanChange(formData: FormData) {
     .eq("workspace_id", workspaceId)
     .eq("user_id", user.id)
     .maybeSingle<BillingSubscriptionRow>();
+
+  if (subscription?.stripe_subscription_id && subscription.status !== "canceled") {
+    await updateStripeSubscriptionPlan({
+      currentPlan,
+      plan,
+      subscription,
+      supabase,
+      userId: user.id,
+      workspaceId
+    });
+
+    redirect(
+      `${billingPath}?success=${encodeURIComponent(
+        "Plano atualizado na Stripe. O Deniaros ja sincronizou a assinatura atual."
+      )}`
+    );
+  }
 
   const checkoutUrl = await createStripeCheckoutUrl({
     currentPlan,
@@ -154,6 +175,83 @@ async function createBillingTicket({
   }
 }
 
+async function updateStripeSubscriptionPlan({
+  currentPlan,
+  plan,
+  subscription,
+  supabase,
+  userId,
+  workspaceId
+}: {
+  currentPlan: string;
+  plan: BillingPlanRow;
+  subscription: BillingSubscriptionRow;
+  supabase: Awaited<ReturnType<typeof getWorkspaceContext>>["supabase"];
+  userId: string;
+  workspaceId: string;
+}) {
+  if (subscription.plan_id === plan.id) {
+    redirect(`${billingPath}?success=${encodeURIComponent("Este plano ja esta ativo no seu workspace.")}`);
+  }
+
+  const stripe = getStripeClient();
+  const stripePriceId = await resolveStripePriceId(stripe, plan);
+  const currentSubscription = await stripe.subscriptions.retrieve(subscription.stripe_subscription_id as string);
+  const subscriptionItem = currentSubscription.items.data[0];
+
+  if (!subscriptionItem?.id) {
+    redirect(
+      `${billingPath}?error=${encodeURIComponent(
+        "A assinatura da Stripe nao possui item ativo para troca de plano."
+      )}`
+    );
+  }
+
+  const metadata = {
+    currentPlan,
+    planId: plan.id,
+    planName: getPlanDisplayName(plan),
+    seats: String(getPlanSeats(plan)),
+    stripeLookupKey: plan.stripe_lookup_key ?? "",
+    userId,
+    workspaceId
+  };
+  const updatedSubscription = await stripe.subscriptions.update(subscription.stripe_subscription_id as string, {
+    cancel_at_period_end: false,
+    items: [
+      {
+        id: subscriptionItem.id,
+        price: stripePriceId,
+        quantity: 1
+      }
+    ],
+    metadata,
+    proration_behavior: "create_prorations"
+  });
+  const { currentPeriodEnd, currentPeriodStart } = getStripeSubscriptionPeriod(updatedSubscription);
+  const stripeCustomerId = readStripeCustomerId(updatedSubscription.customer) ?? subscription.stripe_customer_id;
+  const { error } = await supabase
+    .from("saas_subscriptions")
+    .update({
+      cancel_at_period_end: updatedSubscription.cancel_at_period_end,
+      current_period_ends_at: currentPeriodEnd,
+      current_period_starts_at: currentPeriodStart,
+      plan_id: plan.id,
+      seats: getPlanSeats(plan),
+      status: mapStripeSubscriptionStatus(updatedSubscription.status),
+      stripe_customer_id: stripeCustomerId,
+      stripe_price_id: stripePriceId,
+      stripe_status: updatedSubscription.status,
+      updated_at: new Date().toISOString()
+    })
+    .eq("workspace_id", workspaceId)
+    .eq("user_id", userId);
+
+  if (error) {
+    redirect(`${billingPath}?error=${encodeURIComponent(error.message)}`);
+  }
+}
+
 async function createStripeCheckoutUrl({
   currentPlan,
   plan,
@@ -197,7 +295,7 @@ async function createStripeCheckoutUrl({
       metadata
     },
     success_url: `${appUrl}${billingPath}?stripe=success&session_id={CHECKOUT_SESSION_ID}&success=${encodeURIComponent(
-      "Pagamento confirmado pela Stripe. A assinatura sera sincronizada em instantes."
+      "Checkout concluido. A Stripe vai confirmar a assinatura pelo webhook em instantes."
     )}`,
     cancel_url: `${appUrl}${billingPath}?error=${encodeURIComponent(
       "Checkout cancelado. Nenhuma cobrança foi concluída."
@@ -217,6 +315,10 @@ async function createStripeCheckoutUrl({
   }
 
   return session.url;
+}
+
+function readStripeCustomerId(customer: Stripe.Subscription["customer"]) {
+  return typeof customer === "string" ? customer : customer.id;
 }
 
 async function resolveStripePriceId(stripe: Stripe, plan: BillingPlanRow) {
