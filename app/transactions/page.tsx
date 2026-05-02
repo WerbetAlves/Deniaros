@@ -153,6 +153,43 @@ export default async function TransactionsPage({
   const importedCount = transactions.filter(
     (transaction) => transaction.source === "imported" || transaction.source === "openfinance"
   ).length;
+  const unclassifiedCount = transactions.filter(
+    (transaction) => !transaction.transferAccountId && !transaction.categoryId
+  ).length;
+  const actionCards = [
+    {
+      action: pendingCount ? "Conferir agora" : "Criar lançamento",
+      description: pendingCount
+        ? "Movimentos pendentes ainda não entram no saldo real. Resolva primeiro para limpar a leitura."
+        : "Sem pendências no filtro atual. Continue registrando no momento em que a vida acontece.",
+      href: pendingCount ? "/transactions?status=pending" : "/transactions/new",
+      metric: String(pendingCount),
+      tone: pendingCount ? "attention" : "stable",
+      title: "Pendências"
+    },
+    {
+      action: unclassifiedCount ? "Classificar" : "Ver relatórios",
+      description: unclassifiedCount
+        ? "Sem categoria, o passado vira ruído. Classifique para o Deniaros projetar melhor o futuro."
+        : "As categorias do filtro atual estão prontas para virar relatório e decisão.",
+      href: unclassifiedCount
+        ? "/transactions"
+        : "/reports?section=habits&report=where-money-goes",
+      metric: String(unclassifiedCount),
+      tone: unclassifiedCount ? "attention" : "stable",
+      title: "Sem categoria"
+    },
+    {
+      action: importedCount ? "Revisar origem" : "Importar extrato",
+      description: importedCount
+        ? "Movimentos vindos de importação ou Open Finance merecem conferência antes de virarem rotina."
+        : "Traga um extrato para reduzir digitação manual e acelerar o histórico financeiro.",
+      href: importedCount ? "/transactions?source=imported" : "/imports",
+      metric: String(importedCount),
+      tone: importedCount ? "stable" : "attention",
+      title: "Importados"
+    }
+  ];
 
   return (
     <AppShell userEmail={user.email}>
@@ -223,6 +260,21 @@ export default async function TransactionsPage({
             <p>Variação ainda não lançada no saldo real.</p>
           </article>
         </div>
+
+        <section className="transaction-action-panel">
+          {actionCards.map((card) => (
+            <article className={`transaction-action-card ${card.tone}`} key={card.title}>
+              <div>
+                <p className="section-label">{card.title}</p>
+                <strong>{card.metric}</strong>
+                <p>{card.description}</p>
+              </div>
+              <Link className="ghost-button" href={card.href}>
+                {card.action}
+              </Link>
+            </article>
+          ))}
+        </section>
 
         <section className="panel">
           <div className="panel-header">

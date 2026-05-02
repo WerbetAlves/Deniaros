@@ -6165,6 +6165,57 @@ textarea {
   font-size: 1.75rem;
 }
 
+.transaction-action-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.transaction-action-card {
+  min-height: 168px;
+  padding: 16px;
+  border: 1px solid rgba(82, 58, 32, 0.12);
+  border-radius: 8px;
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.92), rgba(241, 232, 214, 0.68)),
+    rgba(255, 250, 239, 0.86);
+  box-shadow: var(--shadow-md), var(--shadow-inset);
+}
+
+.transaction-action-card.attention {
+  border-color: rgba(184, 137, 56, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 250, 239, 0.96), rgba(248, 230, 190, 0.78)),
+    rgba(255, 250, 239, 0.9);
+}
+
+.transaction-action-card.stable {
+  border-color: rgba(40, 90, 67, 0.18);
+}
+
+.transaction-action-card strong {
+  display: block;
+  margin: 6px 0 8px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 0.95;
+}
+
+.transaction-action-card p:not(.section-label) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.transaction-action-card .ghost-button {
+  width: fit-content;
+  min-height: 38px;
+}
+
 .record-list {
   display: grid;
   gap: 14px;
@@ -9929,6 +9980,7 @@ textarea {
   .bills-flow-strip,
   .life-agenda-grid,
   .transaction-guidance-strip,
+  .transaction-action-panel,
   .quickstart-steps,
   .impact-grid,
   .impact-strip,
@@ -10440,6 +10492,7 @@ textarea {
   }
 
   .transaction-type-switch,
+  .transaction-action-panel,
   .transaction-smart-panel,
   .transaction-template-grid,
   .entity-form,
@@ -10461,6 +10514,11 @@ textarea {
   .form-actions .primary-button,
   .form-actions .ghost-button {
     width: 100%;
+  }
+
+  .transaction-action-card .ghost-button {
+    width: 100%;
+    justify-content: center;
   }
 
   .quickstart-check-item {
