@@ -19,9 +19,12 @@ import { RecentTransactions } from "@/components/recent-transactions";
 import { getFinancialData } from "@/lib/financial-data";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   buildForecastProjection,
+  formatCurrency,
+  formatShortDate,
   getAccountBalances,
   getOpenScheduledItems,
   getPostedExpenses,
@@ -61,6 +64,12 @@ export default async function HomePage() {
   });
   const upcomingItems = getUpcomingItems(scheduledItems);
   const openScheduledItems = getOpenScheduledItems(scheduledItems);
+  const overdueScheduleCount = openScheduledItems.filter((item) => item.status === "overdue").length;
+  const dueSoonScheduleCount = openScheduledItems.filter((item) => item.status === "due-soon").length;
+  const pendingTransactionCount = transactions.filter((transaction) => transaction.status === "pending").length;
+  const unclassifiedTransactionCount = transactions.filter(
+    (transaction) => !transaction.transferAccountId && !transaction.categoryId
+  ).length;
   const importedCount = transactions.filter(
     (transaction) => transaction.source === "imported" || transaction.source === "openfinance"
   ).length;
@@ -126,6 +135,17 @@ export default async function HomePage() {
     transactionCount: transactions.length,
     scheduledCount: openScheduledItems.length
   };
+  const homeCommandActions = buildHomeCommandActions({
+    baseCurrency: workspace.baseCurrency,
+    dueSoonScheduleCount,
+    importedCount,
+    locale: workspace.locale,
+    overdueScheduleCount,
+    pendingTransactionCount,
+    projection: forecastProjection,
+    scheduledCount: dashboard.scheduledCount,
+    unclassifiedTransactionCount
+  });
 
   return (
     <AppShell user={user} userEmail={user?.email} workspaceId={workspace.id}>
@@ -137,6 +157,7 @@ export default async function HomePage() {
       <div className="dashboard-grid">
         <DataSourceBanner fallbackReason={fallbackReason} source={source} />
         <HeroPanel dashboard={dashboard} projection={forecastProjection} />
+        <HomeCommandActions actions={homeCommandActions} />
         <FinancialHomePersonalizer
           accountBalances={accountBalances}
           baseCurrency={workspace.baseCurrency}
@@ -217,4 +238,155 @@ export default async function HomePage() {
       </div>
     </AppShell>
   );
+}
+
+type HomeCommandAction = {
+  actionLabel: string;
+  description: string;
+  href: string;
+  label: string;
+  title: string;
+  tone: "stable" | "attention" | "danger";
+  value: string;
+};
+
+function HomeCommandActions({ actions }: { actions: HomeCommandAction[] }) {
+  return (
+    <section className="home-command-actions" aria-label="Acoes recomendadas de hoje">
+      {actions.map((action) => (
+        <article className={`home-command-card ${action.tone}`} key={action.label}>
+          <div>
+            <p className="section-label">{action.label}</p>
+            <strong>{action.value}</strong>
+            <h3>{action.title}</h3>
+            <p>{action.description}</p>
+          </div>
+          <Link className={action.tone === "danger" ? "primary-button" : "ghost-button"} href={action.href}>
+            {action.actionLabel}
+          </Link>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function buildHomeCommandActions({
+  baseCurrency,
+  dueSoonScheduleCount,
+  importedCount,
+  locale,
+  overdueScheduleCount,
+  pendingTransactionCount,
+  projection,
+  scheduledCount,
+  unclassifiedTransactionCount
+}: {
+  baseCurrency: string;
+  dueSoonScheduleCount: number;
+  importedCount: number;
+  locale: string;
+  overdueScheduleCount: number;
+  pendingTransactionCount: number;
+  projection: ReturnType<typeof buildForecastProjection>;
+  scheduledCount: number;
+  unclassifiedTransactionCount: number;
+}): HomeCommandAction[] {
+  const nextEvent = projection.events[0];
+  const agendaAction: HomeCommandAction =
+    overdueScheduleCount > 0
+      ? {
+          actionLabel: "Resolver agenda",
+          description: "Compromissos vencidos distorcem previsao, saldo e decisoes. Baixe ou reagende primeiro.",
+          href: "/financial-agenda",
+          label: "Agenda",
+          title: "Existe atraso para corrigir.",
+          tone: "danger",
+          value: String(overdueScheduleCount)
+        }
+      : dueSoonScheduleCount > 0
+        ? {
+            actionLabel: "Ver vencimentos",
+            description: "Ha compromissos proximos. Antecipe o efeito no caixa antes de gastar no automatico.",
+            href: "/financial-agenda",
+            label: "Agenda",
+            title: "Proximos dias pedem atencao.",
+            tone: "attention",
+            value: String(dueSoonScheduleCount)
+          }
+        : {
+            actionLabel: "Abrir agenda",
+            description: nextEvent
+              ? `Proximo evento: ${nextEvent.title} em ${formatShortDate(nextEvent.date, locale)}.`
+              : "Cadastre contas, depositos e lembretes para transformar saldo em previsao.",
+            href: "/financial-agenda",
+            label: "Agenda",
+            title: scheduledCount ? "Agenda sob controle." : "Sua previsao precisa de agenda.",
+            tone: scheduledCount ? "stable" : "attention",
+            value: String(scheduledCount)
+          };
+
+  const transactionAction: HomeCommandAction =
+    pendingTransactionCount > 0
+      ? {
+          actionLabel: "Conferir",
+          description: "Movimentos pendentes ainda nao contam como saldo real. Finalize a conferencia antes dos relatorios.",
+          href: "/transactions?status=pending",
+          label: "Movimentos",
+          title: "Ha lancamentos pendentes.",
+          tone: "attention",
+          value: String(pendingTransactionCount)
+        }
+      : unclassifiedTransactionCount > 0
+        ? {
+            actionLabel: "Classificar",
+            description: "Sem categoria, o historico perde forca. Classifique para revelar padroes e vazamentos.",
+            href: "/transactions",
+            label: "Movimentos",
+            title: "Historico precisa de contexto.",
+            tone: "attention",
+            value: String(unclassifiedTransactionCount)
+          }
+        : {
+            actionLabel: importedCount ? "Revisar origem" : "Novo movimento",
+            description: importedCount
+              ? "Importacoes e Open Finance aceleram a rotina. Revise o que entrou para manter confianca."
+              : "Registre ou importe movimentos para o Deniaros aprender com o passado recente.",
+            href: importedCount ? "/transactions?source=imported" : "/transactions/new",
+            label: "Movimentos",
+            title: importedCount ? "Base real em construcao." : "Alimente seu historico.",
+            tone: importedCount ? "stable" : "attention",
+            value: String(importedCount)
+          };
+
+  const forecastAction: HomeCommandAction = {
+    actionLabel: projection.summary.riskLevel === "stable" ? "Pedir diagnostico" : "Simular decisao",
+    description:
+      projection.summary.riskLevel === "danger"
+        ? `A previsao pode ficar negativa em ${formatShortDate(
+            projection.summary.firstNegativeDate ?? projection.summary.lowestDate,
+            locale
+          )}.`
+        : projection.summary.riskLevel === "attention"
+          ? `O menor ponto previsto e ${formatCurrency(
+              projection.summary.lowestBalance,
+              baseCurrency,
+              locale
+            )}. Vale ajustar antes do aperto.`
+          : "Use a margem para reserva, meta ou antecipacao de dividas com mais calma.",
+    href:
+      projection.summary.riskLevel === "stable"
+        ? "/assistant?question=Me%20de%20um%20diagnostico%20acionavel%20de%20hoje"
+        : "/decisions",
+    label: "Previsao",
+    title:
+      projection.summary.riskLevel === "danger"
+        ? "O futuro acendeu alerta."
+        : projection.summary.riskLevel === "attention"
+          ? "Ainda da para agir antes."
+          : "Caixa previsto em boa zona.",
+    tone: projection.summary.riskLevel,
+    value: formatCurrency(projection.summary.lowestBalance, baseCurrency, locale)
+  };
+
+  return [agendaAction, transactionAction, forecastAction];
 }

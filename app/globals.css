@@ -915,6 +915,84 @@ textarea {
   gap: 20px;
 }
 
+.home-command-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-command-card {
+  min-height: 178px;
+  padding: 18px;
+  border: 1px solid rgba(40, 75, 55, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.96), rgba(246, 235, 213, 0.82)),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  align-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.home-command-card::after {
+  content: "";
+  width: 130px;
+  height: 130px;
+  border: 1px solid rgba(186, 140, 55, 0.16);
+  border-radius: 50%;
+  position: absolute;
+  right: -58px;
+  top: -58px;
+}
+
+.home-command-card.attention {
+  border-color: rgba(186, 140, 55, 0.34);
+}
+
+.home-command-card.danger {
+  border-color: rgba(164, 61, 45, 0.32);
+  background:
+    linear-gradient(135deg, rgba(255, 248, 238, 0.98), rgba(255, 237, 229, 0.88)),
+    var(--surface);
+}
+
+.home-command-card .section-label {
+  margin-bottom: 10px;
+}
+
+.home-command-card strong {
+  display: block;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 0.95;
+}
+
+.home-command-card h3 {
+  margin: 10px 0 8px;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.home-command-card p:not(.section-label) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.home-command-card .primary-button,
+.home-command-card .ghost-button {
+  width: fit-content;
+  min-height: 40px;
+  position: relative;
+  z-index: 1;
+}
+
 .quickstart,
 .impact-evolution,
 .financial-home-panel,
@@ -9959,6 +10037,7 @@ textarea {
   }
 
   .dashboard-grid,
+  .home-command-actions,
   .highlights-grid,
   .financial-home-head,
   .home-layout-builder,
@@ -10532,6 +10611,16 @@ textarea {
   }
 
   .quickstart-next-step .primary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .home-command-card {
+    min-height: 0;
+  }
+
+  .home-command-card .primary-button,
+  .home-command-card .ghost-button {
     width: 100%;
     justify-content: center;
   }
