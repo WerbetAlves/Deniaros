@@ -95,8 +95,8 @@ export function CategoryManager({
 
       {loadError ? (
         <section className="source-banner">
-          <strong>Base principal indisponível</strong>
-          <span>{loadError}</span>
+          <strong>Categorias temporariamente indisponiveis</strong>
+          <span>O cadastro de categorias ainda nao esta disponivel neste ambiente.</span>
         </section>
       ) : null}
       {error ? <p className="form-error">{error}</p> : null}

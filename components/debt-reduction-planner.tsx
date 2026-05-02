@@ -41,12 +41,21 @@ export function DebtReductionPlanner({
   const [strategy, setStrategy] = useState<DebtReductionStrategy>("avalanche");
   const [extraPayment, setExtraPayment] = useState(() => Math.max(0, Math.round((profile.monthlyIncome - profile.monthlyFixedCosts) * 0.2)));
   const [modalState, setModalState] = useState<DebtModalState>(null);
+  const visibleDebtLoadError = debtLoadError
+    ? "O planejador de dividas ainda nao esta disponivel neste ambiente."
+    : undefined;
   const activeDebts = debts.filter((debt) => debt.includedInPlan && debt.balance > 0);
   const plan = useMemo(
     () => buildDebtReductionPlan({ debts, extraPayment, locale, strategy }),
     [debts, extraPayment, locale, strategy]
   );
   const chart = useMemo(() => buildDebtChart(plan.months), [plan.months]);
+  const executionMonths = plan.months.slice(0, 6);
+  const firstMonth = plan.months[0];
+  const progressAfterSixMonths =
+    plan.totalDebt > 0 && executionMonths.length
+      ? Math.min(100, Math.round(((plan.totalDebt - executionMonths[executionMonths.length - 1].endingBalance) / plan.totalDebt) * 100))
+      : 0;
   const accountById = new Map(accounts.map((account) => [account.id, account]));
   const margin = profile.monthlyIncome - profile.monthlyFixedCosts;
 
@@ -71,10 +80,10 @@ export function DebtReductionPlanner({
         </div>
       </div>
 
-      {debtLoadError ? (
+      {visibleDebtLoadError ? (
         <section className="source-banner">
-          <strong>Planejador aguardando migration</strong>
-          <span>{debtLoadError}</span>
+          <strong>Planejador temporariamente indisponivel</strong>
+          <span>{visibleDebtLoadError}</span>
         </section>
       ) : null}
       {error ? <p className="form-error">{error}</p> : null}
@@ -189,6 +198,72 @@ export function DebtReductionPlanner({
           </div>
         </section>
       </div>
+
+      <section className="panel debt-execution-panel">
+        <div className="panel-header">
+          <div>
+            <p className="section-label">Plano executavel</p>
+            <h3>O que fazer nos proximos meses</h3>
+          </div>
+          <a className="ghost-button" href="/financial-agenda">
+            Criar na agenda
+          </a>
+        </div>
+        <div className="debt-execution-grid">
+          <article>
+            <span>Agora</span>
+            <strong>
+              {plan.recommendedFirstDebt
+                ? `Priorize ${plan.recommendedFirstDebt.name}`
+                : "Inclua uma divida para comecar"}
+            </strong>
+            <p>
+              {firstMonth
+                ? `Pagamento sugerido: ${formatCurrency(firstMonth.payment, baseCurrency, locale)}.`
+                : "O Deniaros monta a primeira acao quando houver saldo, juros e minimo."}
+            </p>
+          </article>
+          <article>
+            <span>6 meses</span>
+            <strong>{progressAfterSixMonths}% do saldo atacado</strong>
+            <p>
+              Progresso estimado se os pagamentos forem mantidos sem novas dividas no periodo.
+            </p>
+          </article>
+          <article>
+            <span>Meta</span>
+            <strong>{plan.payoffMonths ? plan.payoffDateLabel : "sem data"}</strong>
+            <p>
+              Revise o saldo todo mes e ajuste o extra antes de confirmar novos compromissos.
+            </p>
+          </article>
+        </div>
+        <div className="debt-execution-list" aria-label="Proximos pagamentos do plano">
+          {executionMonths.length ? (
+            executionMonths.map((month) => (
+              <article key={month.monthIndex}>
+                <div>
+                  <strong>{month.label}</strong>
+                  <span>{month.targetDebtName ? `Foco em ${month.targetDebtName}` : "Pagamento base"}</span>
+                </div>
+                <div>
+                  <strong>{formatCurrency(month.payment, baseCurrency, locale)}</strong>
+                  <span>
+                    Saldo previsto {formatCurrency(month.endingBalance, baseCurrency, locale)}
+                  </span>
+                </div>
+              </article>
+            ))
+          ) : (
+            <article>
+              <div>
+                <strong>Sem pagamentos calculados</strong>
+                <span>Cadastre ao menos uma divida ativa para gerar a sequencia.</span>
+              </div>
+            </article>
+          )}
+        </div>
+      </section>
 
       <section className="panel debt-chart-panel">
         <div className="panel-header">

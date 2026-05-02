@@ -47,11 +47,8 @@ export default async function PayeesPage({
 
         {loadError ? (
           <section className="source-banner">
-            <strong>Base principal indisponível</strong>
-            <span>
-              Execute a migration inicial do projeto para ativar o cadastro de
-              favorecidos.
-            </span>
+            <strong>Favorecidos temporariamente indisponiveis</strong>
+            <span>O cadastro de favorecidos ainda nao esta disponivel neste ambiente.</span>
           </section>
         ) : null}
 

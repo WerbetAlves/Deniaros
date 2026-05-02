@@ -57,11 +57,8 @@ export default async function ProfilePage({
 
         {profileResult.error ? (
           <section className="source-banner">
-            <strong>Perfil aguardando migration</strong>
-            <span>
-              Execute supabase/migrations/0002_user_profiles_and_avatars.sql no
-              SQL Editor para salvar foto, tema e preferenciais.
-            </span>
+            <strong>Preferencias temporariamente indisponiveis</strong>
+            <span>Nao conseguimos salvar foto, tema e preferencias agora.</span>
           </section>
         ) : null}
 

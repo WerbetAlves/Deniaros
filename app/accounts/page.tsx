@@ -313,9 +313,14 @@ export default async function AccountsPage({
 
     if (checkRowsError && (checkRowsError.code === "42P01" || checkRowsError.code === "42703")) {
       reconciliationCheckLoadError =
-        "Execute a migration 0025_account_reconciliation_checks.sql para salvar conferências de saldo.";
+        "A conferencia de saldo ainda nao esta disponivel neste ambiente.";
     } else if (checkRowsError) {
       reconciliationCheckLoadError = checkRowsError.message;
+    }
+
+    if (reconciliationCheckLoadError?.toLowerCase().includes("migration")) {
+      reconciliationCheckLoadError =
+        "A conferencia de saldo ainda nao esta disponivel neste ambiente.";
     }
   }
 
@@ -368,11 +373,10 @@ export default async function AccountsPage({
 
         {loadError ? (
           <section className="source-banner">
-            <strong>Base principal indisponível</strong>
+            <strong>Carteiras temporariamente indisponiveis</strong>
             <span>
-              Execute as migrations do projeto, incluindo a
-              `0006_account_openfinance.sql` e a `0023_money99_account_structure.sql`,
-              para ativar todas as colunas de carteiras, grupos e conexão bancária.
+              Nao conseguimos carregar toda a estrutura de carteiras agora. Tente atualizar a
+              pagina ou acione o suporte se o problema continuar.
             </span>
           </section>
         ) : null}

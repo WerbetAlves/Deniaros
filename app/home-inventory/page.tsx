@@ -52,11 +52,8 @@ export default async function HomeInventoryPage({
 
         {loadError ? (
           <section className="source-banner">
-            <strong>Ferramenta aguardando migration</strong>
-            <span>
-              Execute `supabase/migrations/0003_money99_classic_tools.sql` para
-              ativar o inventário doméstico.
-            </span>
+            <strong>Inventario temporariamente indisponivel</strong>
+            <span>O inventario domestico ainda nao esta disponivel neste ambiente.</span>
           </section>
         ) : null}
 

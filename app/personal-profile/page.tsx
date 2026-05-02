@@ -61,8 +61,7 @@ export default async function PersonalProfilePage({
 
         {loadError ? (
           <p className="form-error">
-            Execute `supabase/migrations/0007_personal_profile_classic_questionnaire.sql` para ativar o
-            questionário Money99.
+            O questionario financeiro ainda nao esta disponivel neste ambiente.
           </p>
         ) : null}
 
@@ -72,7 +71,7 @@ export default async function PersonalProfilePage({
         {isOnboarding ? (
           <section className="panel">
             <p className="supporting-copy">
-              Recomendamos preencher agora para personalizar o sistema. Se preferir, você pode pular e
+              Recomendamos preencher agora para personalizar o sistema. Se preferir, voce pode pular e
               responder depois.
             </p>
             <div className="form-actions planner-side-actions">

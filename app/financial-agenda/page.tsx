@@ -107,7 +107,7 @@ export default async function FinancialAgendaPage({
         items={agendaItems}
         loadError={
           agendaResult.error
-            ? "Execute a migration inicial do projeto para ativar a agenda financeira do workspace."
+            ? "A agenda financeira ainda nao esta disponivel neste ambiente."
             : undefined
         }
         auditEvents={auditEvents}

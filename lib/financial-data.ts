@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Account,
   Category,
   Payee,
@@ -88,7 +88,7 @@ export type FinancialData = {
   transactions: Transaction[];
   scheduledItems: ScheduledItem[];
   fallbackReason?: string;
-  source: "supabase" | "sample";
+  source: "supabase" | "sample" | "unavailable";
 };
 
 type FinancialDataOptions = {
@@ -108,7 +108,9 @@ export async function getFinancialData(
         : options.user;
 
     if (!user) {
-      return getSampleFinancialData("Sessão não encontrada. Usando amostra local apenas para demonstração.");
+      return getFallbackFinancialData(
+        "Sessao nao encontrada. Entre novamente para carregar seus dados reais."
+      );
     }
 
     const workspaceId = options.workspaceId ?? (await ensureDefaultWorkspace(supabase, user));
@@ -120,8 +122,9 @@ export async function getFinancialData(
       .maybeSingle<WorkspaceRow>();
 
     if (workspaceError || !workspaceRow) {
-      return getSampleFinancialData(
-        workspaceError?.message ?? "Workspace autenticado não encontrado."
+      return getFallbackFinancialData(
+        workspaceError?.message ?? "Workspace autenticado nao encontrado.",
+        buildFallbackWorkspace(workspaceId)
       );
     }
 
@@ -170,7 +173,7 @@ export async function getFinancialData(
       transactionsResult.error ||
       scheduledResult.error
     ) {
-      return getSampleFinancialData(
+      return getFallbackFinancialData(
         [
           accountsResult.error?.message,
           categoriesResult.error?.message,
@@ -179,7 +182,8 @@ export async function getFinancialData(
           scheduledResult.error?.message
         ]
           .filter(Boolean)
-          .join(" ")
+          .join(" "),
+        mapWorkspace(workspaceRow)
       );
     }
 
@@ -193,7 +197,7 @@ export async function getFinancialData(
       source: "supabase"
     };
   } catch (error) {
-    return getSampleFinancialData(
+    return getFallbackFinancialData(
       error instanceof Error ? error.message : "Falha inesperada ao carregar dados financeiros."
     );
   }
@@ -238,6 +242,39 @@ function getSampleFinancialData(fallbackReason?: string): FinancialData {
     scheduledItems: sampleScheduledItems,
     fallbackReason,
     source: "sample"
+  };
+}
+
+function getFallbackFinancialData(fallbackReason: string, workspace?: Workspace): FinancialData {
+  if (shouldUseSampleFinancialData()) {
+    return getSampleFinancialData(fallbackReason);
+  }
+
+  return {
+    workspace: workspace ?? buildFallbackWorkspace(),
+    accounts: [],
+    categories: [],
+    payees: [],
+    transactions: [],
+    scheduledItems: [],
+    fallbackReason,
+    source: "unavailable"
+  };
+}
+
+function shouldUseSampleFinancialData() {
+  return process.env.NODE_ENV !== "production" || process.env.DENIAROS_ALLOW_SAMPLE_DATA === "1";
+}
+
+function buildFallbackWorkspace(id = "workspace-unavailable"): Workspace {
+  return {
+    id,
+    name: "Meu Deniaros",
+    type: "personal",
+    baseCurrency: "BRL",
+    locale: "pt-BR",
+    timeZone: "America/Fortaleza",
+    countryCode: "BR"
   };
 }
 

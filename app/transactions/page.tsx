@@ -183,9 +183,9 @@ export default async function TransactionsPage({
 
         {auditMigrationMissing ? (
           <section className="source-banner">
-            <strong>Auditoria aguardando migration</strong>
+            <strong>Historico detalhado temporariamente indisponivel</strong>
             <span>
-              Execute as migrations 0012 e 0013 para exibir a trilha de alterações dos lançamentos.
+              A linha do tempo de alteracoes dos lancamentos ainda nao esta disponivel neste ambiente.
             </span>
           </section>
         ) : null}
@@ -453,17 +453,13 @@ function formatAuditDateTime(value: string, locale: string) {
 }
 
 function getTransactionsLoadErrorMessage(error: { code?: string; message?: string }) {
-  if (
-    error.code === "42703" &&
-    (error.message?.includes("scheduled_item_id") ||
-      error.message?.includes("scheduled_occurrence_date"))
-  ) {
-    return "O schema do Supabase está sem as colunas de baixa da agenda. Aplique a migration 0010_scheduled_settlement_trace.sql no projeto conectado.";
+  if (error.code === "42703") {
+    return "A baixa de compromissos ainda nao esta disponivel neste ambiente.";
   }
 
   if (error.code === "42P01") {
-    return "A tabela principal ainda não existe no Supabase conectado. Aplique a migration inicial do projeto.";
+    return "A base principal de lancamentos ainda nao esta disponivel neste ambiente.";
   }
 
-  return "Não conseguimos carregar a base principal de lançamentos agora. Verifique as migrations e as permissões do workspace conectado.";
+  return "Nao conseguimos carregar a base principal de lancamentos agora. Tente novamente ou acione o suporte.";
 }

@@ -77,9 +77,13 @@ export default async function PlannerPage({
     strategy: "avalanche"
   });
   const accountUseSummary = buildPlannerAccountUseSummary(accountBalances);
-  const budgetError = budgetsResult.error
-    ? "Execute a migration 0004_planner_tools.sql para salvar orçamentos por categoria."
+  let budgetError = budgetsResult.error
+    ? "O planejador de orcamento ainda nao esta disponivel neste ambiente."
     : undefined;
+
+  if (budgetError?.toLowerCase().includes("migration")) {
+    budgetError = "O planejador de orcamento ainda nao esta disponivel neste ambiente.";
+  }
 
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspace.id}>
@@ -133,7 +137,7 @@ export default async function PlannerPage({
               baseCurrency={workspace.baseCurrency}
               debtLoadError={
                 debtsResult.error
-                  ? "Execute a migration 0008_debt_reduction_planner.sql para salvar dívidas e planos de quitação."
+                  ? "O planejador de dividas ainda nao esta disponivel neste ambiente."
                   : undefined
               }
               debts={debts}
@@ -148,7 +152,7 @@ export default async function PlannerPage({
             <>
               {budgetError ? (
                 <section className="source-banner">
-                  <strong>Planejador de orçamento aguardando migration</strong>
+                  <strong>Planejador de orcamento temporariamente indisponivel</strong>
                   <span>{budgetError}</span>
                 </section>
               ) : null}

@@ -95,9 +95,9 @@ export default async function SupportPage({
 
         {ticketsResult.error ? (
           <section className="source-banner">
-            <strong>Suporte persistente indisponível</strong>
+            <strong>Historico de suporte temporariamente indisponivel</strong>
             <span>
-              Aplique as migrations 0014, 0017 e 0018 para listar, criar e responder tickets reais.
+              Nao conseguimos carregar ou gravar tickets agora. A conversa com a IA continua disponivel.
             </span>
           </section>
         ) : null}

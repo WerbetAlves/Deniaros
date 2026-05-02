@@ -28,7 +28,7 @@ export default async function CategoriesPage({
           error={error}
           loadError={
             loadError
-              ? "Execute a migration inicial do projeto para ativar a árvore de categorias do workspace."
+              ? "O cadastro de categorias ainda nao esta disponivel neste ambiente."
               : undefined
           }
           success={success}

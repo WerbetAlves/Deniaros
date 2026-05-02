@@ -2073,9 +2073,24 @@ textarea {
   background: rgba(235, 244, 229, 0.86);
 }
 
+.source-banner.source-banner-critical {
+  border-color: rgba(164, 58, 42, 0.28);
+  color: var(--danger);
+  background: rgba(255, 242, 236, 0.92);
+}
+
 .source-banner strong,
 .source-banner span {
   font-size: 0.9rem;
+}
+
+.source-banner a {
+  flex: 0 0 auto;
+  color: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .auth-page {
@@ -8067,6 +8082,74 @@ textarea {
   font-weight: 800;
 }
 
+.debt-execution-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.debt-execution-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.debt-execution-grid article,
+.debt-execution-list article {
+  border: 1px solid rgba(82, 58, 32, 0.12);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 252, 244, 0.9), rgba(238, 246, 237, 0.72)),
+    var(--surface);
+  box-shadow: var(--shadow-inset);
+}
+
+.debt-execution-grid article {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+}
+
+.debt-execution-grid span,
+.debt-execution-list span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.debt-execution-grid strong,
+.debt-execution-list strong {
+  color: var(--accent-deep);
+}
+
+.debt-execution-grid p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.debt-execution-list {
+  display: grid;
+  gap: 8px;
+}
+
+.debt-execution-list article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+}
+
+.debt-execution-list article > div {
+  display: grid;
+  gap: 3px;
+}
+
+.debt-execution-list article > div:last-child {
+  text-align: right;
+}
+
 .debt-chart-panel {
   grid-column: 1 / -1;
 }
@@ -10234,6 +10317,8 @@ textarea {
   .bills-lists-grid,
   .planner-map,
   .debt-hero,
+  .debt-execution-grid,
+  .debt-execution-list article,
   .debt-planner-grid,
   .debt-strategy-switch,
   .debt-card,

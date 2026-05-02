@@ -95,8 +95,8 @@ export default async function BillingPage({
 
         {loadError ? (
           <section className="source-banner">
-            <strong>Catálogo parcialmente indisponível</strong>
-            <span>Aplique a migration 0019_saas_plan_user_catalog.sql para liberar a leitura dos planos ao usuário.</span>
+            <strong>Catalogo parcialmente indisponivel</strong>
+            <span>Nao conseguimos carregar todos os planos agora. Tente atualizar a pagina em instantes.</span>
           </section>
         ) : null}
 

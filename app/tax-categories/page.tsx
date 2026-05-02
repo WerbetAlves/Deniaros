@@ -49,11 +49,8 @@ export default async function TaxCategoriesPage({
 
         {loadError ? (
           <section className="source-banner">
-            <strong>Ferramenta aguardando migration</strong>
-            <span>
-              Execute `supabase/migrations/0003_money99_classic_tools.sql` para
-              ativar as categorias de imposto.
-            </span>
+            <strong>Categorias fiscais temporariamente indisponiveis</strong>
+            <span>As regras fiscais ainda nao estao disponiveis neste ambiente.</span>
           </section>
         ) : null}
 

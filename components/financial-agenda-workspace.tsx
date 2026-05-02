@@ -300,8 +300,8 @@ export function FinancialAgendaWorkspace({
       ) : null}
       {auditMigrationMissing ? (
         <section className="source-banner">
-          <strong>Auditoria aguardando migration</strong>
-          <span>Execute as migrations 0012 e 0013 para exibir a trilha da agenda financeira.</span>
+          <strong>Historico detalhado temporariamente indisponivel</strong>
+          <span>A linha do tempo de auditoria da agenda ainda nao esta disponivel neste ambiente.</span>
         </section>
       ) : null}
       {auditLoadError ? <p className="form-error">{auditLoadError}</p> : null}
