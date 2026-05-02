@@ -11,7 +11,7 @@ type ChatMessage = {
 type AssistantResponse = {
   answer?: string;
   assistantSource?: "fallback" | "gemini";
-  contextSource?: "sample" | "supabase";
+  contextSource?: "sample" | "supabase" | "unavailable";
   error?: string;
   fallbackReason?: string;
   usedFinancialContext?: boolean;
@@ -42,6 +42,18 @@ function translateFallbackReason(reason: string) {
   }
 
   return reason;
+}
+
+function translateContextSource(source: AssistantResponse["contextSource"]) {
+  if (source === "supabase") {
+    return "Dados reais";
+  }
+
+  if (source === "unavailable") {
+    return "Dados indisponiveis";
+  }
+
+  return "Dados de amostra";
 }
 
 export function FinancialAssistantChat({
@@ -166,7 +178,7 @@ export function FinancialAssistantChat({
           </span>
           {contextSource ? (
             <span className="status-chip">
-              {contextSource === "supabase" ? "Dados reais" : "Dados de amostra"}
+              {translateContextSource(contextSource)}
             </span>
           ) : null}
           {assistantSource === "fallback" && fallbackReason ? (

@@ -60,6 +60,12 @@ export default async function AssistantPage({
                 <Link className="ghost-button" href="/financial-agenda">
                   Ver agenda financeira
                 </Link>
+                <Link className="ghost-button" href="/decisions">
+                  Abrir Centro de Decisoes
+                </Link>
+                <Link className="ghost-button" href="/planner?view=debts">
+                  Revisar plano de dividas
+                </Link>
                 <Link className="ghost-button" href="/reports">
                   Abrir relatórios
                 </Link>
