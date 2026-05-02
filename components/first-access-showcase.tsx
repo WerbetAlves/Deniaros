@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -24,7 +25,15 @@ const onboardingStages = [
   }
 ];
 
-export function FirstAccessShowcase({ viewerKey }: { viewerKey?: string }) {
+export function FirstAccessShowcase({
+  primaryHref = "/personal-profile",
+  primaryLabel = "Comecar agora",
+  viewerKey
+}: {
+  primaryHref?: string;
+  primaryLabel?: string;
+  viewerKey?: string;
+}) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
 
@@ -81,9 +90,9 @@ export function FirstAccessShowcase({ viewerKey }: { viewerKey?: string }) {
           <button className="ghost-button" onClick={dismiss} type="button">
             Pular
           </button>
-          <button className="primary-button" onClick={dismiss} type="button">
-            Comecar agora
-          </button>
+          <Link className="primary-button" href={primaryHref} onClick={dismiss}>
+            {primaryLabel}
+          </Link>
         </div>
       </div>
     </div>,

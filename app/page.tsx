@@ -67,6 +67,9 @@ export default async function HomePage() {
   const hasPersonalProfile = Boolean(personalProfileRow);
   const hasAtLeastOneAccount = accounts.length > 0;
   const hasAtLeastOneTransaction = transactions.length > 0;
+  const hasOpenSchedule = openScheduledItems.length > 0;
+  const hasOperationalBase =
+    hasPersonalProfile && hasAtLeastOneAccount && hasAtLeastOneTransaction && hasOpenSchedule;
   const quickStartSteps = [
     {
       id: "profile",
@@ -78,21 +81,38 @@ export default async function HomePage() {
     },
     {
       id: "first-account",
-      title: "Criar primeira carteira",
-      description: "Cadastre uma conta bancária ou carteira física para iniciar o controle.",
+      title: "Conectar sua base de dinheiro",
+      description: "Cadastre carteira fisica, conta manual ou prepare Open Finance para saldo confiavel.",
       href: "/accounts",
       actionLabel: "Abrir carteiras",
       done: hasAtLeastOneAccount
     },
     {
       id: "first-transaction",
-      title: "Registrar primeiro movimento",
-      description: "Comece com movimentos reais para ativar leitura de caixa e ritmo mensal.",
+      title: "Trazer movimentos reais",
+      description: "Registre ou importe entradas e saidas para o sistema entender seu passado recente.",
       href: "/transactions/new",
       actionLabel: "Novo movimento",
       done: hasAtLeastOneTransaction
+    },
+    {
+      id: "first-schedule",
+      title: "Montar agenda de previsao",
+      description: "Cadastre contas, depositos ou lembretes para projetar o caixa antes do aperto.",
+      href: "/financial-agenda",
+      actionLabel: "Abrir agenda",
+      done: hasOpenSchedule
+    },
+    {
+      id: "first-diagnosis",
+      title: "Pedir um diagnostico ao Consultor IA",
+      description: "Depois da base minima, use a IA para priorizar decisoes e proximos passos.",
+      href: "/assistant?question=Me%20de%20um%20diagnostico%20acionavel%20de%20hoje",
+      actionLabel: "Abrir Consultor IA",
+      done: hasOperationalBase
     }
   ];
+  const nextQuickStartStep = quickStartSteps.find((step) => !step.done);
 
   const dashboard = {
     totalBalance,
@@ -109,7 +129,11 @@ export default async function HomePage() {
 
   return (
     <AppShell user={user} userEmail={user?.email} workspaceId={workspace.id}>
-      <FirstAccessShowcase viewerKey={user?.id} />
+      <FirstAccessShowcase
+        primaryHref={nextQuickStartStep?.href}
+        primaryLabel={nextQuickStartStep?.actionLabel}
+        viewerKey={user?.id}
+      />
       <div className="dashboard-grid">
         <DataSourceBanner fallbackReason={fallbackReason} source={source} />
         <HeroPanel dashboard={dashboard} projection={forecastProjection} />
@@ -154,8 +178,8 @@ export default async function HomePage() {
         />
         <QuickStartGuide
           steps={quickStartSteps}
-          subtitle="Conclua seu checklist inicial para o sistema ganhar contexto real de operação."
-          title="Prepare seu arquivo em 3 passos"
+          subtitle="A ordem importa: perfil, base real, movimentos, agenda e diagnostico. Assim o Deniaros deixa de registrar o passado e comeca a projetar o futuro."
+          title="Prepare seu Deniaros para decidir com voce"
         />
         <FinancialRoutinePanel
           accountCount={dashboard.accountCount}

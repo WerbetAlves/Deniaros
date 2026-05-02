@@ -21,6 +21,7 @@ export function QuickStartGuide({
   const completed = steps.filter((step) => step.done).length;
   const allDone = completed === steps.length;
   const progress = Math.round((completed / Math.max(steps.length, 1)) * 100);
+  const nextStep = steps.find((step) => !step.done);
 
   if (allDone) {
     return null;
@@ -44,6 +45,19 @@ export function QuickStartGuide({
           </strong>
         </div>
       </div>
+
+      {nextStep ? (
+        <article className="quickstart-next-step">
+          <div>
+            <p className="section-label">Proxima acao recomendada</p>
+            <h4>{nextStep.title}</h4>
+            <p>{nextStep.description}</p>
+          </div>
+          <Link className="primary-button" href={nextStep.href}>
+            {nextStep.actionLabel}
+          </Link>
+        </article>
+      ) : null}
 
       <div className="quickstart-checklist">
         {steps.map((step) => (
