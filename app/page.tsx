@@ -12,6 +12,7 @@ import { FinancialHomePersonalizer } from "@/components/financial-home-personali
 import { FinancialRoutinePanel } from "@/components/financial-routine-panel";
 import { FinancialTrajectoryPanel } from "@/components/financial-trajectory-panel";
 import { HighlightsGrid } from "@/components/highlights-grid";
+import { HomeSecondaryTabs } from "@/components/home-secondary-tabs";
 import { ImpactEvolution } from "@/components/impact-evolution";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { RecentActivities } from "@/components/recent-activities";
@@ -155,19 +156,66 @@ export default async function HomePage() {
         primaryLabel={nextQuickStartStep?.actionLabel}
         viewerKey={user?.id}
       />
-      <div className="dashboard-grid">
+      <div className="dashboard-grid gap-6 md:gap-8">
         <DataSourceBanner fallbackReason={fallbackReason} source={source} />
         <HeroPanel dashboard={dashboard} projection={forecastProjection} />
         <HomeCommandActions actions={homeCommandActions} />
-        <FinancialHomePersonalizer
-          accountBalances={accountBalances}
-          baseCurrency={workspace.baseCurrency}
-          hasPersonalProfile={hasPersonalProfile}
-          importedCount={importedCount}
-          locale={workspace.locale}
-          openScheduledCount={dashboard.scheduledCount}
-          projection={forecastProjection}
-          transactionCount={dashboard.transactionCount}
+        <HomeSecondaryTabs
+          tabs={[
+            {
+              id: "forecast",
+              label: "Previsão",
+              title: "Previsão de saldo",
+              children: (
+                <ForecastCard
+                  baseCurrency={workspace.baseCurrency}
+                  locale={workspace.locale}
+                  projection={forecastProjection}
+                />
+              )
+            },
+            {
+              id: "cashflow",
+              label: "Fluxo",
+              title: "Fluxo de caixa",
+              children: (
+                <CashflowTrend
+                  baseCurrency={workspace.baseCurrency}
+                  locale={workspace.locale}
+                  transactions={transactions}
+                />
+              )
+            },
+            {
+              id: "health",
+              label: "Saúde",
+              title: "Saúde financeira",
+              children: (
+                <FinancialHealthPanel
+                  baseCurrency={workspace.baseCurrency}
+                  locale={workspace.locale}
+                  postedExpenses={dashboard.postedExpenses}
+                  postedIncome={dashboard.postedIncome}
+                  scheduledExpenses={dashboard.scheduledExpenses}
+                  totalBalance={dashboard.totalBalance}
+                />
+              )
+            },
+            {
+              id: "ai",
+              label: "IA",
+              title: "Dicas e estratégia da IA",
+              children: (
+                <DeepAiStrategyPanel
+                  baseCurrency={workspace.baseCurrency}
+                  hasGeminiKey={hasGeminiKey}
+                  locale={workspace.locale}
+                  projection={forecastProjection}
+                  scheduledExpenses={dashboard.scheduledExpenses}
+                />
+              )
+            }
+          ]}
         />
         <FinancialTrajectoryPanel
           baseCurrency={workspace.baseCurrency}
@@ -178,26 +226,6 @@ export default async function HomePage() {
           transactions={transactions}
         />
         <FinancialAgenda items={upcomingItems} locale={workspace.locale} payees={payees} />
-        <ForecastCard
-          baseCurrency={workspace.baseCurrency}
-          locale={workspace.locale}
-          projection={forecastProjection}
-        />
-        <FinancialHealthPanel
-          baseCurrency={workspace.baseCurrency}
-          locale={workspace.locale}
-          postedExpenses={dashboard.postedExpenses}
-          postedIncome={dashboard.postedIncome}
-          scheduledExpenses={dashboard.scheduledExpenses}
-          totalBalance={dashboard.totalBalance}
-        />
-        <DeepAiStrategyPanel
-          baseCurrency={workspace.baseCurrency}
-          hasGeminiKey={hasGeminiKey}
-          locale={workspace.locale}
-          projection={forecastProjection}
-          scheduledExpenses={dashboard.scheduledExpenses}
-        />
         <QuickStartGuide
           steps={quickStartSteps}
           subtitle="A ordem importa: perfil, base real, movimentos, agenda e diagnostico. Assim o Deniaros deixa de registrar o passado e comeca a projetar o futuro."
@@ -211,10 +239,15 @@ export default async function HomePage() {
           transactionCount={dashboard.transactionCount}
           workspaceName={workspace.name}
         />
-        <CashflowTrend
+        <FinancialHomePersonalizer
+          accountBalances={accountBalances}
           baseCurrency={workspace.baseCurrency}
+          hasPersonalProfile={hasPersonalProfile}
+          importedCount={importedCount}
           locale={workspace.locale}
-          transactions={transactions}
+          openScheduledCount={dashboard.scheduledCount}
+          projection={forecastProjection}
+          transactionCount={dashboard.transactionCount}
         />
         <AccountsOverview accounts={accountBalances} locale={workspace.locale} />
         <HighlightsGrid dashboard={dashboard} />
