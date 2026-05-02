@@ -102,6 +102,36 @@ export default async function SupportPage({
           </section>
         ) : null}
 
+        <section className="support-entry-grid" aria-label="Escolha o tipo de ajuda">
+          <article className="support-entry-card natural">
+            <div>
+              <p className="section-label">Conversa financeira</p>
+              <h3>Fale com a IA como no WhatsApp</h3>
+              <p>
+                Pergunte sobre saldo, dividas, habitos, previsao e decisoes. Ela usa o contexto do
+                seu Deniaros sem transformar tudo em ticket.
+              </p>
+            </div>
+            <Link className="primary-button" href="/assistant">
+              Abrir Consultor IA
+            </Link>
+          </article>
+
+          <article className="support-entry-card technical">
+            <div>
+              <p className="section-label">Problema ou atendimento</p>
+              <h3>Precisa de suporte?</h3>
+              <p>
+                Descreva o problema, receba uma orientacao inicial e abra um ticket com historico
+                quando precisar de analise tecnica.
+              </p>
+            </div>
+            <a className="ghost-button" href="#ai-chat">
+              Resolver aqui
+            </a>
+          </article>
+        </section>
+
         <SupportAiAssistant
           createTicketAction={createSupportTicket}
           hasGeminiKey={hasGeminiKey}

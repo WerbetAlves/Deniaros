@@ -103,7 +103,7 @@ export function SupportAiAssistant({
       <div className="support-console-main">
         <div>
           <p className="section-label">Inteligência Deniaros</p>
-          <h3>Resolva primeiro com a IA</h3>
+          <h3>Triagem tecnica, sem enrolacao</h3>
           <p>
             Conte o que está tentando fazer. A IA orienta o próximo passo e, se precisar de humano,
             já monta o ticket com contexto.

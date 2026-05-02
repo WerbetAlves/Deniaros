@@ -12349,6 +12349,67 @@ textarea {
   border-top: 3px solid var(--accent);
 }
 
+.support-entry-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.72fr);
+  gap: 14px;
+}
+
+.support-entry-card {
+  min-height: 230px;
+  padding: 20px;
+  border: 1px solid rgba(82, 58, 32, 0.14);
+  border-radius: 8px;
+  display: grid;
+  align-content: space-between;
+  gap: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(242, 232, 211, 0.82)),
+    var(--surface);
+  box-shadow: var(--shadow-md), var(--shadow-inset);
+}
+
+.support-entry-card.natural {
+  border-color: rgba(40, 90, 67, 0.22);
+  color: #fff8e9;
+  background:
+    radial-gradient(circle at 92% 18%, rgba(184, 137, 56, 0.2), transparent 16rem),
+    linear-gradient(135deg, #172019, #123d2d 84%);
+}
+
+.support-entry-card.technical {
+  border-color: rgba(184, 137, 56, 0.26);
+}
+
+.support-entry-card h3 {
+  margin: 8px 0 10px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  line-height: 1;
+}
+
+.support-entry-card.natural h3 {
+  color: #fff8e9;
+}
+
+.support-entry-card p:not(.section-label) {
+  max-width: 640px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.support-entry-card.natural .section-label,
+.support-entry-card.natural p:not(.section-label) {
+  color: rgba(255, 248, 232, 0.76);
+}
+
+.support-entry-card .primary-button,
+.support-entry-card .ghost-button {
+  width: fit-content;
+}
+
 .support-console {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.28fr);
@@ -13071,6 +13132,7 @@ textarea {
   .support-console,
   .support-console-form,
   .support-answer,
+  .support-entry-grid,
   .support-flow-grid,
   .support-ai-panel,
   .support-triage-form,
@@ -13092,6 +13154,16 @@ textarea {
     min-height: auto;
     grid-template-columns: auto minmax(0, 1fr);
     align-content: start;
+  }
+
+  .support-entry-card {
+    min-height: auto;
+  }
+
+  .support-entry-card .primary-button,
+  .support-entry-card .ghost-button {
+    width: 100%;
+    justify-content: center;
   }
 
   .support-console-main {
