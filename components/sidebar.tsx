@@ -2,6 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Bot,
+  CalendarClock,
+  ChartColumnBig,
+  ChartNoAxesColumnIncreasing,
+  GitFork,
+  Globe,
+  House,
+  LifeBuoy,
+  LogOut,
+  Menu,
+  PanelTop,
+  ReceiptText,
+  Settings,
+  ShieldCheck,
+  WalletCards,
+  X,
+  type LucideIcon
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/app/auth/actions";
@@ -114,7 +133,7 @@ export function Sidebar({
           type="button"
         >
           <span aria-hidden="true">
-            <MenuIcon />
+            <Menu strokeWidth={2.4} />
           </span>
           <small>Menu</small>
         </button>
@@ -160,7 +179,7 @@ export function Sidebar({
           onClick={() => setMobileMenuOpen(false)}
           type="button"
         >
-          <CloseIcon />
+          <X aria-hidden="true" strokeWidth={2.4} />
         </button>
       </div>
 
@@ -197,7 +216,7 @@ export function Sidebar({
         <span className="sidebar-mobile-section-label">Sistema</span>
         <Link className="nav-item" href="/settings#idioma" title="Alterar idioma">
           <span className="nav-item-icon" aria-hidden="true">
-            <GlobeIcon />
+            <Globe strokeWidth={2.15} />
           </span>
           <span className="nav-item-label">Idioma</span>
         </Link>
@@ -221,11 +240,7 @@ export function Sidebar({
               title="Sair"
               type="submit"
             >
-              <svg aria-hidden="true" viewBox="0 0 24 24">
-                <path d="M13 5h6v14h-6" />
-                <path d="M10 8 5 12l5 4" />
-                <path d="M5 12h11" />
-              </svg>
+              <LogOut aria-hidden="true" strokeWidth={2.2} />
             </button>
           </form>
         </div>
@@ -298,121 +313,21 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function NavigationIcon({ icon }: { icon: NavigationItem["icon"] }) {
-  switch (icon) {
-    case "home":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M3 11.5 12 4l9 7.5" />
-          <path d="M6.5 9.5V20h11V9.5" />
-        </svg>
-      );
-    case "wallet":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M4 7h15a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4z" />
-          <path d="M4 7V6a2 2 0 0 1 2-2h11" />
-          <circle cx="17" cy="12" r="1.2" />
-        </svg>
-      );
-    case "bills":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M7 4h10v16H7z" />
-          <path d="M9 8h6M9 12h6M9 16h4" />
-        </svg>
-      );
-    case "investments":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M5 18V9M12 18V6M19 18v-4" />
-          <path d="M4 18h16" />
-        </svg>
-      );
-    case "planner":
-      return (
-        <svg viewBox="0 0 24 24">
-          <rect x="4" y="5" width="16" height="15" rx="2" />
-          <path d="M8 3v4M16 3v4M7 11h10M7 15h6" />
-        </svg>
-      );
-    case "reports":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M5 19V5h14v14z" />
-          <path d="M8 15v-3M12 15V9M16 15v-5" />
-        </svg>
-      );
-    case "assistant":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M5 6.5h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-5l-4 3v-3H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z" />
-          <path d="M8 11h.01M12 11h.01M16 11h.01" />
-        </svg>
-      );
-    case "decisions":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M12 4v16M12 9l6-5M12 15l-6 5" />
-          <circle cx="12" cy="4" r="1.6" />
-          <circle cx="18" cy="4" r="1.6" />
-          <circle cx="6" cy="20" r="1.6" />
-        </svg>
-      );
-    case "web":
-      return (
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="5" width="18" height="14" rx="2" />
-          <path d="M3 9h18M9 19V9" />
-        </svg>
-      );
-    case "support":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M4 6h16v10H9l-5 4z" />
-          <path d="M8 10h8M8 13h6" />
-        </svg>
-      );
-    case "settings":
-      return (
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19 12a7 7 0 0 0-.1-1l2.1-1.6-2-3.4-2.5 1a7 7 0 0 0-1.7-1L14.4 3h-4.8l-.4 2.9a7 7 0 0 0-1.7 1l-2.5-1-2 3.4L5.1 11a7 7 0 0 0 0 2l-2.1 1.6 2 3.4 2.5-1a7 7 0 0 0 1.7 1l.4 2.9h4.8l.4-2.9a7 7 0 0 0 1.7-1l2.5 1 2-3.4-2.1-1.6c.1-.3.1-.7.1-1z" />
-        </svg>
-      );
-    case "admin":
-      return (
-        <svg viewBox="0 0 24 24">
-          <path d="M4 19V8l8-4 8 4v11z" />
-          <path d="M8 19v-6h8v6M8 9h8" />
-          <path d="M10 15h4" />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
+  const iconMap: Record<NavigationItem["icon"], LucideIcon> = {
+    admin: ShieldCheck,
+    assistant: Bot,
+    bills: ReceiptText,
+    decisions: GitFork,
+    home: House,
+    investments: ChartNoAxesColumnIncreasing,
+    planner: CalendarClock,
+    reports: ChartColumnBig,
+    settings: Settings,
+    support: LifeBuoy,
+    wallet: WalletCards,
+    web: PanelTop
+  };
+  const Icon = iconMap[icon];
 
-function GlobeIcon() {
-  return (
-    <svg viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="8" />
-      <path d="M4 12h16M12 4c2.2 2.4 3.3 5 3.3 8s-1.1 5.6-3.3 8M12 4c-2.2 2.4-3.3 5-3.3 8s1.1 5.6 3.3 8" />
-    </svg>
-  );
-}
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24">
-      <path d="M5 7h14M5 12h14M5 17h14" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24">
-      <path d="M7 7l10 10M17 7 7 17" />
-    </svg>
-  );
+  return <Icon aria-hidden="true" strokeWidth={2.15} />;
 }
