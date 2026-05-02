@@ -10,6 +10,7 @@ const profileOnboardingCookie = "deniaros-profile-onboarding-ready";
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const nextPath = normalizeAuthRedirectPath(formData.get("next"));
   const supabase = await createSupabaseServerClient();
   const cookieStore = await cookies();
   const currentAttempts = Number(
@@ -32,20 +33,21 @@ export async function signIn(formData: FormData) {
         sameSite: "lax"
       });
 
-      redirect(`/login?error=invalid_credentials&attempts=${nextAttempts}`);
+      redirect(buildLoginRedirectUrl({ attempts: nextAttempts, error: "invalid_credentials", nextPath }));
     }
 
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(buildLoginRedirectUrl({ error: error.message, nextPath }));
   }
 
   cookieStore.delete(loginAttemptsCookie);
-  redirect("/");
+  redirect(nextPath);
 }
 
 export async function signUp(formData: FormData) {
   const displayName = String(formData.get("displayName") ?? "").trim();
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const nextPath = normalizeAuthRedirectPath(formData.get("next"));
   const supabase = await createSupabaseServerClient();
   const origin = await getRequestOrigin();
 
@@ -56,12 +58,12 @@ export async function signUp(formData: FormData) {
       data: {
         display_name: displayName
       },
-      emailRedirectTo: `${origin}/auth/callback`
+      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
     }
   });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    redirect(buildLoginRedirectUrl({ error: error.message, mode: "signup", nextPath }));
   }
 
   redirect(
@@ -71,14 +73,15 @@ export async function signUp(formData: FormData) {
   );
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
+  const nextPath = normalizeAuthRedirectPath(formData.get("next"));
   const supabase = await createSupabaseServerClient();
   const origin = await getRequestOrigin();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback`
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
     }
   });
 
@@ -187,4 +190,57 @@ async function getRequestOrigin() {
   const protocol = headerStore.get("x-forwarded-proto") ?? "http";
 
   return origin ?? `${protocol}://${host ?? "127.0.0.1:3000"}`;
+}
+
+function normalizeAuthRedirectPath(value: FormDataEntryValue | string | null) {
+  const raw = String(value ?? "").trim();
+
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
+    return "/";
+  }
+
+  if (raw.startsWith("/login") || raw.startsWith("/auth/")) {
+    return "/";
+  }
+
+  return raw;
+}
+
+function buildLoginRedirectUrl({
+  attempts,
+  error,
+  message,
+  mode,
+  nextPath
+}: {
+  attempts?: number;
+  error?: string;
+  message?: string;
+  mode?: "signup" | "recovery";
+  nextPath: string;
+}) {
+  const params = new URLSearchParams();
+
+  if (mode) {
+    params.set("mode", mode);
+  }
+
+  if (error) {
+    params.set("error", error);
+  }
+
+  if (message) {
+    params.set("message", message);
+  }
+
+  if (attempts) {
+    params.set("attempts", String(attempts));
+  }
+
+  if (nextPath !== "/") {
+    params.set("next", nextPath);
+  }
+
+  const query = params.toString();
+  return query ? `/login?${query}` : "/login";
 }

@@ -10,6 +10,7 @@ export default async function LoginPage({
     error?: string;
     message?: string;
     mode?: string;
+    next?: string;
   }>;
 }) {
   const supabase = await createSupabaseServerClient();
@@ -17,16 +18,30 @@ export default async function LoginPage({
     data: { user }
   } = await supabase.auth.getUser();
 
+  const { attempts, error, message, mode, next } = await searchParams;
+  const nextPath = normalizeLoginNextPath(next);
+
   if (user) {
-    redirect("/");
+    redirect(nextPath);
   }
 
-  const { attempts, error, message, mode } = await searchParams;
   const isSignup = mode === "signup";
   const isRecovery = mode === "recovery";
   const alert = resolveLoginAlert(error, message, attempts);
 
-  return <LoginView alert={alert} isRecovery={isRecovery} isSignup={isSignup} />;
+  return <LoginView alert={alert} isRecovery={isRecovery} isSignup={isSignup} nextPath={nextPath} />;
+}
+
+function normalizeLoginNextPath(value?: string) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/";
+  }
+
+  if (value.startsWith("/login") || value.startsWith("/auth/")) {
+    return "/";
+  }
+
+  return value;
 }
 
 function resolveLoginAlert(error?: string, message?: string, attempts?: string) {

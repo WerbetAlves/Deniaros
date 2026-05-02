@@ -22,11 +22,15 @@ type LoginViewProps = {
   alert: LoginAlert;
   isRecovery: boolean;
   isSignup: boolean;
+  nextPath: string;
 };
 
-export function LoginView({ alert, isRecovery, isSignup }: LoginViewProps) {
+export function LoginView({ alert, isRecovery, isSignup, nextPath }: LoginViewProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const shouldPersistNextPath = nextPath !== "/";
+  const nextQuery = shouldPersistNextPath ? `&next=${encodeURIComponent(nextPath)}` : "";
+  const recoveryHref = `/login?mode=recovery${nextQuery}`;
 
   return (
     <main className="auth-page auth-v3-page">
@@ -131,6 +135,7 @@ export function LoginView({ alert, isRecovery, isSignup }: LoginViewProps) {
 
           {isSignup ? (
             <form action={signUp} className="auth-v3-form">
+              {shouldPersistNextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
               <label className="auth-v3-label">
                 Nome
                 <div className="auth-v3-input-shell">
@@ -215,6 +220,7 @@ export function LoginView({ alert, isRecovery, isSignup }: LoginViewProps) {
           ) : (
             <>
               <form action={signIn} className="auth-v3-form">
+                {shouldPersistNextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
                 <label className="auth-v3-label">
                   E-mail
                   <div className="auth-v3-input-shell">
@@ -260,7 +266,7 @@ export function LoginView({ alert, isRecovery, isSignup }: LoginViewProps) {
                     <input name="remember" type="checkbox" />
                     <span>Lembrar de mim</span>
                   </label>
-                  <Link className="auth-v3-helper-link" href="/login?mode=recovery">
+                  <Link className="auth-v3-helper-link" href={recoveryHref}>
                     Esqueci minha senha
                   </Link>
                 </div>
@@ -277,6 +283,7 @@ export function LoginView({ alert, isRecovery, isSignup }: LoginViewProps) {
               </div>
 
               <form action={signInWithGoogle} className="auth-v3-form auth-v3-oauth">
+                {shouldPersistNextPath ? <input name="next" type="hidden" value={nextPath} /> : null}
                 <button className="auth-v3-google" type="submit">
                   <GoogleIcon className="google-mark" />
                   Continuar com Google
