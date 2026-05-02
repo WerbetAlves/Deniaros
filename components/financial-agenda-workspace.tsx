@@ -74,11 +74,18 @@ type CalendarEntry = {
 };
 
 type ModalState =
-  | { mode: "create"; kind: ScheduledItem["kind"] }
+  | { mode: "create"; kind: ScheduledItem["kind"]; draft?: ScheduleDraft }
   | { mode: "edit"; item: ScheduledItem }
   | null;
 
 const weekdayLabels = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+type ScheduleDraft = {
+  amount?: number;
+  dueDate?: string;
+  recurrence?: ScheduledItem["recurrence"];
+  title?: string;
+};
+
 const emptyCalendarEntries: CalendarEntry[] = [];
 
 export function FinancialAgendaWorkspace({
@@ -123,6 +130,47 @@ export function FinancialAgendaWorkspace({
   const yearMonths = useMemo(() => buildYearMonths(anchorDate, workspace.locale), [anchorDate, workspace.locale]);
   const calendarTitle = formatCalendarTitle(anchorDate, calendarMode, workspace.locale);
   const chart = useMemo(() => buildProjectionChart(projection.dailyPoints), [projection.dailyPoints]);
+  const quickIntents = useMemo(
+    () => [
+      {
+        amount: 0,
+        copy: "Aluguel, energia, internet ou qualquer vencimento que volta todo mês.",
+        dueDate: toIsoDate(new Date()),
+        kind: "bill" as const,
+        label: "Conta fixa",
+        recurrence: "monthly" as const,
+        title: "Conta fixa"
+      },
+      {
+        amount: 0,
+        copy: "Salário, repasse, recebível ou entrada que precisa aparecer no caixa futuro.",
+        dueDate: toIsoDate(new Date()),
+        kind: "deposit" as const,
+        label: "Receita prevista",
+        recurrence: "once" as const,
+        title: "Receita prevista"
+      },
+      {
+        amount: 0,
+        copy: "Parcela, cartão, financiamento ou débito que exige acompanhamento.",
+        dueDate: toIsoDate(addDays(new Date(), 7)),
+        kind: "bill" as const,
+        label: "Dívida ou cartão",
+        recurrence: "monthly" as const,
+        title: "Pagamento de dívida"
+      },
+      {
+        amount: 0,
+        copy: "Separe dinheiro antes que ele vire sobra imaginária no fim do mês.",
+        dueDate: toIsoDate(addDays(new Date(), 15)),
+        kind: "saving" as const,
+        label: "Reserva planejada",
+        recurrence: "monthly" as const,
+        title: "Reserva do mês"
+      }
+    ],
+    []
+  );
 
   function moveCalendar(direction: -1 | 1) {
     setAnchorDate((currentDate) => shiftCalendarDate(currentDate, calendarMode, direction));
@@ -166,6 +214,47 @@ export function FinancialAgendaWorkspace({
           <p>Transforme compromissos pagos em histórico financeiro confiável.</p>
         </article>
       </div>
+
+      <section className="panel bills-intent-panel">
+        <div className="panel-header">
+          <div>
+            <p className="section-label">Compromisso rápido</p>
+            <h3>O que entra na sua agenda agora?</h3>
+            <p className="micro-copy">
+              Escolha a intenção e o Deniaros já abre o lançamento com o caminho certo. Você só ajusta
+              valor, conta e data.
+            </p>
+          </div>
+          <a className="ghost-button" href="#calendario">
+            Ver calendário
+          </a>
+        </div>
+        <div className="bills-intent-grid">
+          {quickIntents.map((intent) => (
+            <button
+              className={`bills-intent-card intent-${intent.kind}`}
+              key={intent.label}
+              onClick={() =>
+                setModalState({
+                  draft: {
+                    amount: intent.amount,
+                    dueDate: intent.dueDate,
+                    recurrence: intent.recurrence,
+                    title: intent.title
+                  },
+                  kind: intent.kind,
+                  mode: "create"
+                })
+              }
+              type="button"
+            >
+              <span>{intent.label}</span>
+              <strong>{intent.title}</strong>
+              <p>{intent.copy}</p>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <section className="panel life-agenda-panel">
         <div className="panel-header">
@@ -528,6 +617,7 @@ export function FinancialAgendaWorkspace({
         <ScheduleModal
           accounts={accounts}
           categories={categories}
+          draft={modalState.mode === "create" ? modalState.draft : undefined}
           item={modalState.mode === "edit" ? modalState.item : undefined}
           kind={modalState.mode === "create" ? modalState.kind : undefined}
           onClose={() => setModalState(null)}
@@ -766,6 +856,7 @@ function DayAgenda({
 function ScheduleModal({
   accounts,
   categories,
+  draft,
   item,
   kind = "bill",
   onClose,
@@ -774,6 +865,7 @@ function ScheduleModal({
 }: {
   accounts: Account[];
   categories: Category[];
+  draft?: ScheduleDraft;
   item?: ScheduledItem;
   kind?: ScheduledItem["kind"];
   onClose: () => void;
@@ -783,7 +875,7 @@ function ScheduleModal({
   const defaultKind = item?.kind ?? kind;
   const [selectedKind, setSelectedKind] = useState<ScheduledItem["kind"]>(defaultKind);
   const [selectedRecurrence, setSelectedRecurrence] = useState<ScheduledItem["recurrence"]>(
-    item?.recurrence ?? "once"
+    item?.recurrence ?? draft?.recurrence ?? "once"
   );
   const [selectedStatus, setSelectedStatus] = useState<ScheduledItem["status"]>(
     item?.status ?? "scheduled"
@@ -812,6 +904,9 @@ function ScheduleModal({
     }
   ];
   const selectedKindCard = kindCards.find((card) => card.id === selectedKind) ?? kindCards[0];
+  const defaultTitle = item?.title ?? draft?.title ?? "";
+  const defaultAmount = Math.abs(item?.amount ?? draft?.amount ?? 0);
+  const defaultDueDate = item?.dueDate ?? draft?.dueDate ?? toIsoDate(new Date());
   const actionLabel = item ? "Salvar alterações" : selectedKind === "deposit" ? "Criar recebimento" : "Criar compromisso";
 
   return (
@@ -821,7 +916,7 @@ function ScheduleModal({
         <div className="wallet-modal-head bills-composer-head">
           <div>
             <p className="section-label">{item ? "Editar compromisso" : "Novo compromisso"}</p>
-            <h3>{item ? item.title : "Lançamento agendado"}</h3>
+            <h3>{item ? item.title : defaultTitle || "Lançamento agendado"}</h3>
             <p className="micro-copy">Registre o essencial agora. Detalhes ficam disponíveis sem travar o fluxo.</p>
           </div>
           <button aria-label="Fechar" className="wallet-modal-close" onClick={onClose} type="button">
@@ -856,21 +951,21 @@ function ScheduleModal({
           <div className="composer-main-grid">
             <label className="composer-field composer-field-title">
               <span>Título</span>
-              <input defaultValue={item?.title ?? ""} name="title" placeholder="Ex.: Internet da casa" required />
+              <input defaultValue={defaultTitle} name="title" placeholder="Ex.: Internet da casa" required />
             </label>
 
             <label className="composer-field">
               <span>Valor</span>
               <div className={`composer-money-input ${selectedKind === "deposit" ? "positive" : "negative"}`}>
                 <small>{selectedKind === "deposit" ? "+" : "-"}</small>
-                <input defaultValue={Math.abs(item?.amount ?? 0)} min="0" name="amount" step="0.01" type="number" />
+                <input defaultValue={defaultAmount} min="0" name="amount" step="0.01" type="number" />
                 <em>{workspace.baseCurrency}</em>
               </div>
             </label>
 
             <label className="composer-field">
               <span>Vencimento</span>
-              <input defaultValue={item?.dueDate ?? toIsoDate(new Date())} name="dueDate" required type="date" />
+              <input defaultValue={defaultDueDate} name="dueDate" required type="date" />
             </label>
 
             <label className="composer-field">

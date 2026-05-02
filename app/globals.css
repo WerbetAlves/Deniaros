@@ -6943,6 +6943,83 @@ textarea {
   line-height: 1.45;
 }
 
+.bills-intent-panel {
+  border-top: 3px solid rgba(184, 137, 56, 0.5);
+  background:
+    radial-gradient(circle at 94% 8%, rgba(184, 137, 56, 0.16), transparent 16rem),
+    linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(246, 238, 221, 0.8));
+}
+
+.bills-intent-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.bills-intent-card {
+  min-width: 0;
+  min-height: 142px;
+  padding: 15px;
+  border: 1px solid rgba(82, 58, 32, 0.13);
+  border-radius: 8px;
+  text-align: left;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.84), rgba(241, 232, 214, 0.62));
+  box-shadow: var(--shadow-inset);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.bills-intent-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(40, 90, 67, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.96), rgba(235, 246, 235, 0.64));
+  box-shadow: 0 18px 34px rgba(24, 59, 45, 0.12), var(--shadow-inset);
+}
+
+.bills-intent-card span {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(82, 58, 32, 0.08);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bills-intent-card strong {
+  display: block;
+  margin: 10px 0 7px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: 1.28rem;
+  line-height: 1.04;
+}
+
+.bills-intent-card p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 750;
+  line-height: 1.42;
+}
+
+.bills-intent-card.intent-deposit {
+  border-color: rgba(40, 116, 82, 0.2);
+}
+
+.bills-intent-card.intent-bill {
+  border-color: rgba(132, 55, 48, 0.18);
+}
+
 .life-agenda-panel {
   border-top: 3px solid rgba(49, 94, 109, 0.5);
   background:
@@ -9466,6 +9543,7 @@ textarea {
   .accounts-statement-filter,
   .accounts-wallet-grid,
   .wallet-journey-strip,
+  .bills-intent-grid,
   .bills-flow-strip,
   .life-agenda-grid,
   .transaction-guidance-strip,
@@ -10097,6 +10175,7 @@ textarea {
   }
 
   .bills-hero,
+  .bills-intent-grid,
   .bills-forecast-grid,
   .bills-lists-grid,
   .planner-map,
