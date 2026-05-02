@@ -25,9 +25,8 @@ export function Sidebar({
   const profileName = profile?.displayName ?? userEmail?.split("@")[0] ?? "Usuário";
   const profileInitials = getProfileInitials(profileName);
   const visibleNavigation = navigation.filter((item) => !item.adminOnly || showAdmin);
-  const mobileDockItems = visibleNavigation.filter((item) =>
-    ["home", "bills", "assistant"].includes(item.id)
-  );
+  const activeNavigationItem = visibleNavigation.find((item) => isActivePath(pathname, item.href));
+  const mobileDockItems = getMobileDockItems(visibleNavigation, activeNavigationItem);
 
   useEffect(() => {
     const storedValue = window.localStorage.getItem(sidebarCollapsedStorageKey);
@@ -110,7 +109,10 @@ export function Sidebar({
         type="button"
       />
 
-      <aside className={`sidebar${collapsed ? " collapsed" : ""}${mobileMenuOpen ? " mobile-open" : ""}`}>
+      <aside
+        aria-label="Menu principal"
+        className={`sidebar${collapsed ? " collapsed" : ""}${mobileMenuOpen ? " mobile-open" : ""}`}
+      >
       <div className="brand">
         <div className="brand-mark brand-mark-image">
           <Image
@@ -134,6 +136,20 @@ export function Sidebar({
         >
           {collapsed ? ">" : "<"}
         </button>
+        <button
+          aria-label="Fechar menu"
+          className="sidebar-mobile-close"
+          onClick={() => setMobileMenuOpen(false)}
+          type="button"
+        >
+          <CloseIcon />
+        </button>
+      </div>
+
+      <div className="sidebar-mobile-context">
+        <small>Voce esta em</small>
+        <strong>{activeNavigationItem?.label ?? "Deniaros"}</strong>
+        <span>{activeNavigationItem?.description ?? "Escolha uma area para continuar."}</span>
       </div>
 
       <nav className="sidebar-nav" aria-label="Principal">
@@ -225,6 +241,28 @@ function getProfileInitials(displayName: string) {
     .join("");
 
   return initials || "D";
+}
+
+function getMobileDockItems(
+  visibleNavigation: NavigationItem[],
+  activeNavigationItem?: NavigationItem
+) {
+  const preferredIds = ["home", "bills", "assistant"];
+  const items: NavigationItem[] = [];
+
+  for (const id of preferredIds) {
+    const item = visibleNavigation.find((navigationItem) => navigationItem.id === id);
+
+    if (item) {
+      items.push(item);
+    }
+  }
+
+  if (activeNavigationItem && !items.some((item) => item.id === activeNavigationItem.id)) {
+    items.splice(1, 0, activeNavigationItem);
+  }
+
+  return items.slice(0, 3);
 }
 
 function isActivePath(pathname: string, href: string) {
@@ -347,6 +385,14 @@ function MenuIcon() {
   return (
     <svg viewBox="0 0 24 24">
       <path d="M5 7h14M5 12h14M5 17h14" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M7 7l10 10M17 7 7 17" />
     </svg>
   );
 }

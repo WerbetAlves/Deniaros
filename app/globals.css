@@ -252,7 +252,9 @@ textarea {
 }
 
 .mobile-nav-dock,
-.sidebar-mobile-backdrop {
+.sidebar-mobile-backdrop,
+.sidebar-mobile-close,
+.sidebar-mobile-context {
   display: none;
 }
 
@@ -10832,6 +10834,65 @@ textarea {
     margin-bottom: 18px;
   }
 
+  .sidebar .sidebar-toggle {
+    display: none;
+  }
+
+  .sidebar-mobile-close {
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+    border: 1px solid rgba(255, 246, 223, 0.18);
+    border-radius: 10px;
+    display: inline-grid;
+    place-items: center;
+    color: #fff8e9;
+    background: rgba(255, 246, 223, 0.1);
+  }
+
+  .sidebar-mobile-close svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .sidebar-mobile-context {
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid rgba(255, 246, 223, 0.13);
+    border-radius: 12px;
+    display: grid;
+    gap: 4px;
+    background:
+      linear-gradient(135deg, rgba(255, 246, 223, 0.13), rgba(255, 246, 223, 0.05)),
+      rgba(255, 246, 223, 0.07);
+  }
+
+  .sidebar-mobile-context small {
+    color: rgba(248, 237, 217, 0.56);
+    font-size: 0.64rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-mobile-context strong {
+    color: #fff8e9;
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    line-height: 1.05;
+  }
+
+  .sidebar-mobile-context span {
+    color: rgba(248, 237, 217, 0.68);
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
   .sidebar .sidebar-nav,
   .sidebar .sidebar-utility-group,
   .sidebar .sidebar-meta {
@@ -10881,7 +10942,9 @@ textarea {
     padding: 8px;
     border: 1px solid rgba(82, 58, 32, 0.16);
     border-radius: 18px;
-    background: rgba(255, 253, 247, 0.9);
+    background:
+      linear-gradient(135deg, rgba(255, 253, 247, 0.95), rgba(243, 234, 214, 0.88)),
+      rgba(255, 253, 247, 0.9);
     box-shadow: 0 18px 42px rgba(43, 36, 26, 0.18), var(--shadow-inset);
     backdrop-filter: blur(18px);
   }
@@ -10898,6 +10961,14 @@ textarea {
     background: transparent;
     text-decoration: none;
     font-weight: 900;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .mobile-dock-link:active {
+    transform: translateY(1px);
   }
 
   .mobile-dock-link span {
