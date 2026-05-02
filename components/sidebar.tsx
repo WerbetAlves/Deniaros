@@ -28,6 +28,7 @@ import { navigation, type NavigationItem } from "@/lib/navigation";
 import type { UserProfile } from "@/lib/profile";
 
 const sidebarCollapsedStorageKey = "deniaros-sidebar-collapsed";
+const showWindowsOnlyNavigation = process.env.NEXT_PUBLIC_DENIAROS_WINDOWS_APP === "1";
 
 export function Sidebar({
   showAdmin = false,
@@ -43,7 +44,17 @@ export function Sidebar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileName = profile?.displayName ?? userEmail?.split("@")[0] ?? "Usuário";
   const profileInitials = getProfileInitials(profileName);
-  const visibleNavigation = navigation.filter((item) => !item.adminOnly || showAdmin);
+  const visibleNavigation = navigation.filter((item) => {
+    if (item.adminOnly && !showAdmin) {
+      return false;
+    }
+
+    if (item.isWindowsOnly && !showWindowsOnlyNavigation) {
+      return false;
+    }
+
+    return true;
+  });
   const activeNavigationItem = visibleNavigation.find((item) => isActivePath(pathname, item.href));
   const mobileDockItems = getMobileDockItems(visibleNavigation, activeNavigationItem);
 
