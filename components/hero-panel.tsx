@@ -39,25 +39,15 @@ export function HeroPanel({ dashboard, projection }: HeroPanelProps) {
             nextEvent.currency,
             dashboard.locale
           )} em ${formatShortDate(nextEvent.date, dashboard.locale)}.`
-        : `Você tem ${dashboard.scheduledCount} compromisso${
+        : `${dashboard.scheduledCount} compromisso${
             dashboard.scheduledCount === 1 ? "" : "s"
-          } em aberto na agenda.`;
+          } em aberto.`;
 
   return (
     <section className="hero-panel command-center">
       <div className="command-center-primary">
         <p className="section-label">Centro de comando</p>
-        <h3>
-          {formatCurrency(
-            dashboard.totalBalance,
-            dashboard.baseCurrency,
-            dashboard.locale
-          )}
-        </h3>
-        <p className="supporting-copy">
-          Saldo consolidado agora, previsão de caixa e compromissos financeiros no
-          mesmo ponto de decisão.
-        </p>
+        <h3>{formatCurrency(dashboard.totalBalance, dashboard.baseCurrency, dashboard.locale)}</h3>
 
         <div className="hero-actions">
           <Link className="primary-button" href="/transactions/new">
@@ -76,26 +66,22 @@ export function HeroPanel({ dashboard, projection }: HeroPanelProps) {
       </div>
 
       <div className="hero-metrics">
-        <article className="metric-inline">
+        <article className="metric-inline" title="Inclui contas, depósitos e reservas agendadas.">
           <p className="mini-label">Saldo em 7 dias</p>
-          <strong>
-            {formatCurrency(forecastBalance, dashboard.baseCurrency, dashboard.locale)}
-          </strong>
-          <p>Inclui contas, depósitos e reservas agendadas.</p>
+          <strong>{formatCurrency(forecastBalance, dashboard.baseCurrency, dashboard.locale)}</strong>
         </article>
-        <article className="metric-inline">
+        <article className="metric-inline" title="Mostra o ponto mais sensível da projeção de 90 dias.">
           <p className="mini-label">Menor saldo em 90 dias</p>
-          <strong>
-            {formatCurrency(summary.lowestBalance, dashboard.baseCurrency, dashboard.locale)}
-          </strong>
-          <p>{formatShortDate(summary.lowestDate, dashboard.locale)} é o ponto mais sensível.</p>
+          <strong>{formatCurrency(summary.lowestBalance, dashboard.baseCurrency, dashboard.locale)}</strong>
+          <span>{formatShortDate(summary.lowestDate, dashboard.locale)}</span>
         </article>
-        <article className="metric-inline">
+        <article
+          className="metric-inline"
+          title="Entradas agendadas menos saídas agendadas no horizonte de previsão."
+        >
           <p className="mini-label">Entradas menos saídas</p>
-          <strong>
-            {formatCurrency(summary.netScheduled, dashboard.baseCurrency, dashboard.locale)}
-          </strong>
-          <p>{summary.eventCount} evento{summary.eventCount === 1 ? "" : "s"} no horizonte.</p>
+          <strong>{formatCurrency(summary.netScheduled, dashboard.baseCurrency, dashboard.locale)}</strong>
+          <span>{summary.eventCount} evento{summary.eventCount === 1 ? "" : "s"}</span>
         </article>
       </div>
     </section>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { AccountBalance, CurrencyCode, ForecastProjection, LocaleCode } from "@/lib/domain";
 import { formatCurrency, formatShortDate } from "@/lib/finance";
+import { MetricValue, WidgetWrapper } from "@/components/widget-wrapper";
 
 type HomeModuleId = "reminders" | "chart" | "tip" | "accounts" | "internet";
 
@@ -81,6 +82,7 @@ export function FinancialHomePersonalizer({
 }) {
   const [moduleOrder, setModuleOrder] = useState<HomeModuleId[]>(defaultOrder);
   const [visibleModules, setVisibleModules] = useState<HomeModuleId[]>(defaultOrder);
+  const [editingPanel, setEditingPanel] = useState(false);
 
   useEffect(() => {
     try {
@@ -148,45 +150,49 @@ export function FinancialHomePersonalizer({
   }
 
   return (
-    <section className="financial-home-panel panel" aria-labelledby="financial-home-title">
+    <WidgetWrapper
+      as="section"
+      className="financial-home-panel"
+      label="Home page financeira"
+      title="Mesa de decisão"
+      tooltip="A Home concentra lembretes, gráfico do dia, saldos e sinais operacionais para revisar o caixa sem navegar por telas longas."
+      toolbar={
+        <button className="ghost-button compact-button" onClick={() => setEditingPanel((current) => !current)} type="button">
+          {editingPanel ? "Concluir" : "Editar painel"}
+        </button>
+      }
+    >
       <div className="financial-home-head">
-        <div>
-          <p className="section-label">Home page financeira</p>
-          <h3 id="financial-home-title">Uma tela que muda com sua vida financeira</h3>
-          <p className="supporting-copy">
-            A Home deixa de ser vitrine e vira mesa de decisao: lembretes, grafico do dia,
-            saldos e dicas aparecem conforme o que precisa de atencao agora.
-          </p>
-        </div>
         <div className="home-preference-card">
           <p className="section-label">Personalizacao local</p>
-          <strong>{visibleModules.length} de {moduleCatalog.length} blocos ativos</strong>
-          <p>Escolha o que aparece e ajuste a ordem sem sair da tela inicial.</p>
+          <MetricValue tone="stable">{visibleModules.length}/{moduleCatalog.length}</MetricValue>
         </div>
       </div>
 
-      <div className="home-layout-builder" aria-label="Personalizar blocos da Home">
-        {moduleCatalog.map((module) => {
-          const active = visibleModules.includes(module.id);
-          return (
-            <article className={`home-module-toggle${active ? " active" : ""}`} key={module.id}>
-              <button
-                aria-pressed={active}
-                className="home-toggle-main"
-                onClick={() => toggleModule(module.id)}
-                type="button"
-              >
-                <span>{module.title}</span>
-                <small>{module.description}</small>
-              </button>
-              <div className="home-order-actions" aria-label={`Ordenar ${module.title}`}>
-                <button onClick={() => moveModule(module.id, -1)} type="button">Subir</button>
-                <button onClick={() => moveModule(module.id, 1)} type="button">Descer</button>
-              </div>
-            </article>
-          );
-        })}
-      </div>
+      {editingPanel ? (
+        <div className="home-layout-builder" aria-label="Personalizar blocos da Home">
+          {moduleCatalog.map((module) => {
+            const active = visibleModules.includes(module.id);
+            return (
+              <article className={`home-module-toggle${active ? " active" : ""}`} key={module.id}>
+                <button
+                  aria-pressed={active}
+                  className="home-toggle-main"
+                  onClick={() => toggleModule(module.id)}
+                  title={module.description}
+                  type="button"
+                >
+                  <span>{module.title}</span>
+                </button>
+                <div className="home-order-actions" aria-label={`Ordenar ${module.title}`}>
+                  <button onClick={() => moveModule(module.id, -1)} type="button">Subir</button>
+                  <button onClick={() => moveModule(module.id, 1)} type="button">Descer</button>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div className="financial-home-modules">
         {visibleOrderedModules.map((moduleId) => {
@@ -230,17 +236,18 @@ export function FinancialHomePersonalizer({
           );
         })}
       </div>
-    </section>
+    </WidgetWrapper>
   );
 }
 
 function ReminderModule({ reminders }: { reminders: Reminder[] }) {
   return (
-    <article className="home-dynamic-module home-reminders-module">
-      <div className="module-mini-head">
-        <p className="section-label">Lembretes</p>
-        <span>{reminders.length} ativo(s)</span>
-      </div>
+    <WidgetWrapper
+      className="home-dynamic-module home-reminders-module"
+      label="Lembretes"
+      title={`${reminders.length} ativo(s)`}
+      tooltip="Itens que merecem revisão antes de comprometer a previsão ou a leitura dos relatórios."
+    >
       <div className="home-reminder-list">
         {reminders.map((reminder) => (
           <Link className={`home-reminder-item ${reminder.tone}`} href={reminder.href} key={reminder.id}>
@@ -249,7 +256,7 @@ function ReminderModule({ reminders }: { reminders: Reminder[] }) {
           </Link>
         ))}
       </div>
-    </article>
+    </WidgetWrapper>
   );
 }
 
@@ -280,33 +287,33 @@ function ChartOfDayModule({
         : "Hoje, 7, 30, 60 e 90 dias.";
 
   return (
-    <article className="home-dynamic-module home-chart-module">
-      <div className="module-mini-head">
-        <div>
-          <p className="section-label">Grafico do dia</p>
-          <h4>{title}</h4>
-        </div>
-        <span>{subtitle}</span>
-      </div>
+    <WidgetWrapper
+      className="home-dynamic-module home-chart-module"
+      label="Grafico do dia"
+      title={title}
+      tooltip={subtitle}
+    >
       {chartMode === 1 ? (
         <AccountBars accounts={accountBalances} locale={locale} />
       ) : (
         <ForecastLine baseCurrency={baseCurrency} locale={locale} projection={projection} compact={chartMode === 2} />
       )}
-    </article>
+    </WidgetWrapper>
   );
 }
 
 function TipModule({ tip }: { tip: string }) {
   return (
-    <article className="home-dynamic-module home-tip-module">
-      <p className="section-label">Dica do dia</p>
+    <WidgetWrapper
+      className="home-dynamic-module home-tip-module"
+      label="Dica do dia"
+      tooltip="Sugestão curta para melhorar a qualidade dos dados e das decisões financeiras."
+    >
       <strong>{tip}</strong>
-      <p>Pequenos habitos mantem o sistema vivo e fazem o passado trabalhar pelo futuro.</p>
       <Link className="ghost-button" href="/assistant">
         Pedir orientacao a IA
       </Link>
-    </article>
+    </WidgetWrapper>
   );
 }
 
@@ -320,11 +327,12 @@ function AccountsModule({
   const favoriteAccounts = accountBalances.slice(0, 4);
 
   return (
-    <article className="home-dynamic-module home-accounts-module">
-      <div className="module-mini-head">
-        <p className="section-label">Saldos das contas</p>
-        <Link href="/accounts">Abrir carteiras</Link>
-      </div>
+    <WidgetWrapper
+      className="home-dynamic-module home-accounts-module"
+      label="Saldos das contas"
+      tooltip="Carteiras e contas principais para acompanhar posição atual sem abrir o módulo completo."
+      toolbar={<Link href="/accounts">Abrir</Link>}
+    >
       {favoriteAccounts.length ? (
         <div className="home-account-list">
           {favoriteAccounts.map((account) => (
@@ -344,7 +352,7 @@ function AccountsModule({
           <p>Crie sua primeira conta para a Home acompanhar seus saldos favoritos.</p>
         </div>
       )}
-    </article>
+    </WidgetWrapper>
   );
 }
 
@@ -356,13 +364,12 @@ function ExternalSignalsModule({
   transactionCount: number;
 }) {
   return (
-    <article className="home-dynamic-module home-signals-module">
-      <p className="section-label">Sinais externos</p>
-      <h4>Base para Open Finance, extratos e informes</h4>
-      <p>
-        O Money trazia noticias e links da internet. No Deniaros, esse espaco prepara
-        conexoes bancarias, importacoes revisadas e avisos de contexto financeiro.
-      </p>
+    <WidgetWrapper
+      className="home-dynamic-module home-signals-module"
+      label="Sinais externos"
+      title="Open Finance e extratos"
+      tooltip="Base para conexões bancárias, importações revisadas e avisos de contexto financeiro."
+    >
       <div className="home-signal-grid">
         <span>{importedCount} importado(s)</span>
         <span>{transactionCount} movimento(s)</span>
@@ -370,7 +377,7 @@ function ExternalSignalsModule({
       <Link className="ghost-button" href="/imports">
         Revisar importacoes
       </Link>
-    </article>
+    </WidgetWrapper>
   );
 }
 

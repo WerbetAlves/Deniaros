@@ -16,6 +16,7 @@ import { ImpactEvolution } from "@/components/impact-evolution";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { RecentActivities } from "@/components/recent-activities";
 import { RecentTransactions } from "@/components/recent-transactions";
+import { MetricValue, WidgetWrapper } from "@/components/widget-wrapper";
 import { getFinancialData } from "@/lib/financial-data";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -254,17 +255,19 @@ function HomeCommandActions({ actions }: { actions: HomeCommandAction[] }) {
   return (
     <section className="home-command-actions" aria-label="Acoes recomendadas de hoje">
       {actions.map((action) => (
-        <article className={`home-command-card ${action.tone}`} key={action.label}>
-          <div>
-            <p className="section-label">{action.label}</p>
-            <strong>{action.value}</strong>
-            <h3>{action.title}</h3>
-            <p>{action.description}</p>
-          </div>
+        <WidgetWrapper
+          className="home-command-card"
+          key={action.label}
+          label={action.label}
+          title={action.title}
+          tone={action.tone}
+          tooltip={action.description}
+        >
+          <MetricValue tone={action.tone}>{action.value}</MetricValue>
           <Link className={action.tone === "danger" ? "primary-button" : "ghost-button"} href={action.href}>
             {action.actionLabel}
           </Link>
-        </article>
+        </WidgetWrapper>
       ))}
     </section>
   );

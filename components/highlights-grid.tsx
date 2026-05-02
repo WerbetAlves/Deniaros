@@ -1,5 +1,6 @@
 import { formatCurrency } from "@/lib/finance";
 import type { CurrencyCode, LocaleCode } from "@/lib/domain";
+import { MetricValue, WidgetWrapper } from "@/components/widget-wrapper";
 
 type HighlightsGridProps = {
   dashboard: {
@@ -48,11 +49,9 @@ export function HighlightsGrid({ dashboard }: HighlightsGridProps) {
   return (
     <section className="highlights-grid">
       {cards.map((card) => (
-        <article className="panel" key={card.label}>
-          <p className="section-label">{card.label}</p>
-          <strong>{card.value}</strong>
-          <p className="table-meta">{card.text}</p>
-        </article>
+        <WidgetWrapper className="highlight-metric-card" key={card.label} label={card.label} tooltip={card.text}>
+          <MetricValue>{card.value}</MetricValue>
+        </WidgetWrapper>
       ))}
     </section>
   );
