@@ -14,6 +14,7 @@ export type DataAccessScope =
   | "privacy_settings"
   | "financial_context_ai"
   | "backup_export"
+  | "backup_restore"
   | "delete_request"
   | "support_review"
   | "admin_financial_review"

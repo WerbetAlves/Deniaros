@@ -1,9 +1,20 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
+import { restoreWorkspaceBackup } from "@/app/settings/backup/actions";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
-export default async function BackupSettingsPage() {
+type BackupSettingsSearchParams = {
+  restore_error?: string;
+  restore_success?: string;
+};
+
+export default async function BackupSettingsPage({
+  searchParams
+}: {
+  searchParams: Promise<BackupSettingsSearchParams>;
+}) {
   const { user } = await getWorkspaceContext();
+  const params = await searchParams;
 
   return (
     <AppShell userEmail={user.email}>
@@ -13,8 +24,8 @@ export default async function BackupSettingsPage() {
             <p className="section-label">Segurança</p>
             <h2>Backup e restauração</h2>
             <p className="supporting-copy">
-              Exporte uma cópia completa do workspace antes de testes com clientes, mudanças
-              sensíveis ou ajustes de dados. A restauração assistida entra na próxima rodada.
+              Exporte uma cópia completa do workspace e restaure automaticamente quando precisar
+              voltar a um ponto confiável dos seus dados financeiros.
             </p>
           </div>
           <div className="profile-badges">
@@ -26,6 +37,9 @@ export default async function BackupSettingsPage() {
             </a>
           </div>
         </div>
+
+        {params.restore_error ? <p className="form-error">{params.restore_error}</p> : null}
+        {params.restore_success ? <p className="form-success">{params.restore_success}</p> : null}
 
         <section className="panel backup-readiness-panel">
           <div>
@@ -46,10 +60,50 @@ export default async function BackupSettingsPage() {
               <p>Faça outro backup para preservar a versão validada pelo cliente.</p>
             </article>
             <article>
-              <strong>Restauração</strong>
-              <p>Por enquanto será assistida; a restauração automática fica bloqueada por segurança.</p>
+              <strong>Restauração automática</strong>
+              <p>O Deniaros substitui os dados atuais pelo conteúdo do backup em uma operação transacional.</p>
             </article>
           </div>
+        </section>
+
+        <section className="panel backup-restore-panel">
+          <div>
+            <p className="section-label">Restauração automática</p>
+            <h3>Restaurar workspace a partir de um backup</h3>
+            <p>
+              Use apenas arquivos exportados pelo Deniaros. A restauração substitui dados financeiros,
+              agenda, planejadores, importações e conferências do workspace atual.
+            </p>
+          </div>
+
+          <form action={restoreWorkspaceBackup} className="backup-restore-form">
+            <label>
+              Arquivo de backup (.json)
+              <input accept="application/json,.json" name="backupFile" required type="file" />
+            </label>
+            <label>
+              Confirmação
+              <input
+                autoComplete="off"
+                name="confirmation"
+                placeholder='Digite "RESTAURAR"'
+                required
+              />
+            </label>
+            <div className="backup-restore-summary">
+              <strong>O que será restaurado</strong>
+              <span>Contas, categorias, favorecidos, lançamentos, contas futuras, metas e orçamento.</span>
+              <span>Assinatura, plano, logs administrativos e permissões SaaS não são restaurados.</span>
+            </div>
+            <div className="form-actions">
+              <a className="ghost-button" href="/api/export/workspace">
+                Fazer backup antes
+              </a>
+              <button className="primary-button danger-button" type="submit">
+                Restaurar backup
+              </button>
+            </div>
+          </form>
         </section>
 
         <section className="panel backup-danger-panel">
