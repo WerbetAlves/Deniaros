@@ -132,6 +132,7 @@ export default async function SystemPreferencesPage({
                   defaultChecked={preferences.commandPaletteEnabled}
                   description="Prepara o sistema para abrir comandos rapidos por teclado."
                   name="commandPaletteEnabled"
+                  roadmap
                   title="Paleta de comandos"
                 />
                 <PreferenceToggle
@@ -171,6 +172,7 @@ export default async function SystemPreferencesPage({
                   defaultChecked={preferences.emailNotificationsEnabled}
                   description="Reserva para avisos por e-mail quando o canal estiver ativo."
                   name="emailNotificationsEnabled"
+                  roadmap
                   title="Notificacoes por e-mail"
                 />
                 <PreferenceToggle
@@ -195,6 +197,7 @@ export default async function SystemPreferencesPage({
                   defaultChecked={preferences.weeklyDigestEnabled}
                   description="Resumo semanal quando a rotina de envio estiver habilitada."
                   name="weeklyDigestEnabled"
+                  roadmap
                   title="Resumo semanal"
                 />
               </div>
@@ -237,18 +240,24 @@ function PreferenceToggle({
   defaultChecked,
   description,
   name,
+  roadmap = false,
   title
 }: {
   defaultChecked: boolean;
   description: string;
   name: string;
+  roadmap?: boolean;
   title: string;
 }) {
   return (
-    <label className="assistant-context-toggle">
-      <input defaultChecked={defaultChecked} name={name} type="checkbox" />
+    <label className={`assistant-context-toggle${roadmap ? " roadmap-toggle" : ""}`}>
+      {roadmap && defaultChecked ? <input name={name} type="hidden" value="on" /> : null}
+      <input defaultChecked={defaultChecked} disabled={roadmap} name={name} type="checkbox" />
       <span>
-        {title}
+        <strong>
+          {title}
+          {roadmap ? <em>Em implantação</em> : null}
+        </strong>
         <small>{description}</small>
       </span>
     </label>

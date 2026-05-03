@@ -17,10 +17,13 @@ type SettingsItem = {
   href?: string;
   status: string;
   action: string;
-  secondaryActions?: Array<{
-    label: string;
-    tone?: "default" | "danger";
-  }>;
+};
+
+type SettingsRoadmapItem = {
+  area: Exclude<SettingsArea, "all">;
+  title: string;
+  description: string;
+  status: string;
 };
 
 const settingsAreas: Array<{ id: SettingsArea; label: string; description: string }> = [
@@ -81,7 +84,7 @@ const settingsItems: SettingsItem[] = [
     id: "tax-categories",
     area: "finance",
     title: "Categorias de imposto",
-    description: "Regras fiscais para relatórios, conferências e futura exportação.",
+    description: "Regras fiscais para relatórios e conferências do arquivo financeiro.",
     href: "/tax-categories",
     status: "Disponível",
     action: "Configurar"
@@ -126,11 +129,31 @@ const settingsItems: SettingsItem[] = [
     id: "backup",
     area: "security",
     title: "Backup e restauração",
-    description: "Exportação completa do arquivo e restauração controlada.",
+    description: "Exportação, restauração e apagamento de dados com confirmação e auditoria.",
     href: "/settings/backup",
     status: "Disponível",
-    action: "Abrir backup",
-    secondaryActions: [{ label: "Apagar dados do sistema", tone: "danger" }]
+    action: "Abrir backup"
+  }
+];
+
+const settingsRoadmapItems: SettingsRoadmapItem[] = [
+  {
+    area: "finance",
+    title: "Open Finance automático",
+    description: "Conexão bancária direta entrará em área própria quando o provedor real estiver homologado.",
+    status: "Roadmap"
+  },
+  {
+    area: "system",
+    title: "Paleta global de comandos",
+    description: "Atalho universal para executar ações do sistema sem navegar por menus.",
+    status: "Em implantação"
+  },
+  {
+    area: "security",
+    title: "Alertas por e-mail",
+    description: "Canal externo para vencimentos, resumo semanal e eventos sensíveis.",
+    status: "Depende de envio"
   }
 ];
 
@@ -151,6 +174,10 @@ export default async function SettingsPage({
     return matchesArea && matchesQuery;
   });
   const availableCount = settingsItems.filter((item) => item.href).length;
+  const roadmapItems =
+    selectedArea === "all"
+      ? settingsRoadmapItems
+      : settingsRoadmapItems.filter((item) => item.area === selectedArea);
 
   return (
     <AppShell userEmail={user.email}>
@@ -166,7 +193,6 @@ export default async function SettingsPage({
           </div>
           <div className="profile-badges">
             <span className="status-chip">{availableCount} áreas disponíveis</span>
-            <span className="status-chip">Stripe no roadmap</span>
           </div>
         </div>
 
@@ -245,25 +271,9 @@ export default async function SettingsPage({
                   <p>{item.description}</p>
                 </div>
                 <div className="settings-card-footer">
-                  {item.href ? (
-                    <Link className="primary-button" href={item.href}>
-                      {item.action}
-                    </Link>
-                  ) : (
-                    <button className="ghost-button" disabled type="button">
-                      {item.action}
-                    </button>
-                  )}
-                  {item.secondaryActions?.map((action) => (
-                    <button
-                      className={`ghost-button${action.tone === "danger" ? " danger-button" : ""}`}
-                      disabled
-                      key={action.label}
-                      type="button"
-                    >
-                      {action.label}
-                    </button>
-                  ))}
+                  <Link className="primary-button" href={item.href ?? "/settings"}>
+                    {item.action}
+                  </Link>
                 </div>
               </article>
             ))
@@ -274,6 +284,29 @@ export default async function SettingsPage({
             </article>
           )}
         </section>
+
+        {roadmapItems.length ? (
+          <details className="panel settings-roadmap-panel">
+            <summary>
+              <span>
+                <p className="section-label">Em construção</p>
+                <strong>Funcionalidades planejadas ficam recolhidas</strong>
+              </span>
+              <small>{roadmapItems.length} item(ns)</small>
+            </summary>
+            <div className="settings-roadmap-list">
+              {roadmapItems.map((item) => (
+                <article key={`${item.area}-${item.title}`}>
+                  <span className="status-chip subtle">{item.status}</span>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </details>
+        ) : null}
 
         <section className="panel settings-danger-panel">
           <div>

@@ -4925,6 +4925,12 @@ textarea {
   color: var(--accent);
 }
 
+.status-chip.subtle {
+  border-color: rgba(82, 58, 32, 0.1);
+  color: rgba(82, 58, 32, 0.66);
+  background: rgba(244, 238, 225, 0.62);
+}
+
 .status-stable {
   border-color: rgba(40, 90, 67, 0.2);
   background: rgba(225, 242, 226, 0.78);
@@ -14233,6 +14239,36 @@ textarea {
   line-height: 1.35;
 }
 
+.assistant-context-toggle span strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.assistant-context-toggle span em {
+  padding: 3px 7px;
+  border: 1px solid rgba(82, 58, 32, 0.1);
+  border-radius: 999px;
+  color: rgba(82, 58, 32, 0.62);
+  background: rgba(244, 238, 225, 0.72);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.assistant-context-toggle.roadmap-toggle {
+  opacity: 0.62;
+  background: rgba(244, 238, 225, 0.42);
+}
+
+.assistant-context-toggle.roadmap-toggle input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
 .assistant-compose-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -14919,6 +14955,69 @@ textarea {
 .settings-card-footer .primary-button,
 .settings-card-footer .ghost-button {
   width: 100%;
+}
+
+.settings-roadmap-panel {
+  padding: 12px 14px;
+  border-style: dashed;
+  background: rgba(255, 253, 247, 0.58);
+  box-shadow: none;
+}
+
+.settings-roadmap-panel summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.settings-roadmap-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-roadmap-panel summary .section-label {
+  margin: 0 0 3px;
+}
+
+.settings-roadmap-panel summary strong {
+  color: rgba(82, 58, 32, 0.76);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+}
+
+.settings-roadmap-panel summary small {
+  color: var(--muted);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.settings-roadmap-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.settings-roadmap-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid rgba(82, 58, 32, 0.08);
+  border-radius: 8px;
+  background: rgba(244, 238, 225, 0.38);
+}
+
+.settings-roadmap-list strong {
+  color: rgba(41, 32, 22, 0.78);
+}
+
+.settings-roadmap-list p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  line-height: 1.4;
 }
 
 .settings-danger-panel {
