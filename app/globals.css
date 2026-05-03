@@ -14604,6 +14604,48 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.access-card {
+  min-height: 300px;
+}
+
+.security-detail-list {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0 0;
+}
+
+.security-detail-list div {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.44fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.security-detail-list dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.security-detail-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.security-provider-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
 .planner-home,
 .planner-selected-shell {
   display: grid;

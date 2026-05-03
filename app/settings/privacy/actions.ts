@@ -60,6 +60,28 @@ export async function requestDataDeletion(formData: FormData) {
   redirect("/settings/privacy?success=deletion-requested");
 }
 
+export async function signOutOtherSessions() {
+  const { supabase } = await getWorkspaceContext();
+  const { error } = await supabase.auth.signOut({ scope: "others" });
+
+  if (error) {
+    redirect(`/settings/privacy?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect("/settings/privacy?success=other-sessions-signed-out");
+}
+
+export async function signOutEverywhere() {
+  const { supabase } = await getWorkspaceContext();
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+
+  if (error) {
+    redirect(`/settings/privacy?error=${encodeURIComponent(error.message)}`);
+  }
+
+  redirect("/login");
+}
+
 function normalizeRetentionMode(value: FormDataEntryValue | null): PrivacyPreferences["dataRetentionMode"] {
   return value === "minimal" ? "minimal" : "standard";
 }
