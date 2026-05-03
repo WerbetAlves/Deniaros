@@ -31,6 +31,7 @@ npm.cmd run dev -- --hostname localhost --port 3000
 ```bash
 npm.cmd run typecheck
 npm.cmd test
+npm.cmd run test:e2e
 npm.cmd run build
 ```
 
@@ -39,6 +40,20 @@ Ou rode tudo em uma passada:
 ```bash
 npm.cmd run quality
 ```
+
+### E2E de cliente real
+
+Os testes Playwright rodam smoke público em desktop e celular. O fluxo autenticado real fica pronto para
+homologação com um usuário limpo quando estas variáveis forem informadas:
+
+```bash
+E2E_USER_EMAIL=cliente.teste@exemplo.com
+E2E_USER_PASSWORD=senha-segura
+E2E_ALLOW_MUTATION=1
+npm.cmd run test:e2e
+```
+
+Sem `E2E_ALLOW_MUTATION=1`, o teste não cria lançamento nem compromisso financeiro.
 
 ## Beta com clientes reais
 

@@ -7,6 +7,8 @@
     "build": "next build",
     "quality": "npm run typecheck && npm test && npm run build",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-strip-types tests/*.test.mts",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "test:finance": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-strip-types tests/finance.test.mts",
     "test:imports": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --experimental-strip-types tests/imports.test.mts",
     "start": "next start",
@@ -22,6 +24,7 @@
     "stripe": "^22.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
