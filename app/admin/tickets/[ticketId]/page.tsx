@@ -4,6 +4,7 @@ import { getAdminAccess } from "@/lib/admin-auth";
 import { hasAdminPermission } from "@/lib/admin-permissions";
 import { formatCurrency } from "@/lib/finance";
 import {
+  getTicketOperationalNextStep,
   getSupportResponseSuggestions,
   getTicketSla,
   getTicketStatusClass,
@@ -31,11 +32,16 @@ type SupportTicketRow = {
   area: TicketArea;
   created_at: string;
   description: string;
+  first_responded_at: string | null;
+  first_response_due_at: string | null;
   id: string;
+  next_response_due_at: string | null;
   priority: TicketPriority;
   requester_email: string | null;
   requester_id: string | null;
+  resolved_at: string | null;
   status: TicketStatus;
+  status_reason: string | null;
   title: string;
   updated_at: string;
   workspace_id: string | null;
@@ -108,7 +114,7 @@ export default async function AdminTicketDetailPage({
   const ticketResult = await supabase
     .from("saas_support_tickets")
     .select(
-      "id,workspace_id,requester_id,requester_email,title,description,area,priority,status,created_at,updated_at"
+      "id,workspace_id,requester_id,requester_email,title,description,area,priority,status,status_reason,created_at,updated_at,first_response_due_at,next_response_due_at,first_responded_at,resolved_at"
     )
     .eq("id", ticketId)
     .maybeSingle<SupportTicketRow>();
@@ -185,6 +191,7 @@ export default async function AdminTicketDetailPage({
     plansResult.error;
   const parsedDescription = parseSupportDescription(ticket.description);
   const sla = getTicketSla(ticket);
+  const nextStep = getTicketOperationalNextStep(ticket);
   const responseSuggestions = getSupportResponseSuggestions(ticket.area);
 
   return (
@@ -221,6 +228,25 @@ export default async function AdminTicketDetailPage({
           </section>
         ) : null}
 
+        <section className="support-ticket-operation-strip">
+          <article className="panel support-next-step">
+            <p className="section-label">Próxima ação operacional</p>
+            <strong>{nextStep}</strong>
+            {ticket.status_reason ? <span>{ticket.status_reason}</span> : null}
+          </article>
+          <article className="panel support-next-step">
+            <p className="section-label">SLA e resposta</p>
+            <strong>{sla.meta}</strong>
+            <span>
+              {ticket.first_responded_at
+                ? `Primeira resposta em ${formatDateTime(ticket.first_responded_at)}`
+                : ticket.first_response_due_at
+                  ? `Primeira resposta até ${formatDateTime(ticket.first_response_due_at)}`
+                  : "Prazo operacional pendente"}
+            </span>
+          </article>
+        </section>
+
         <div className="admin-detail-grid">
           <section className="panel">
             <div className="panel-header">
@@ -255,10 +281,21 @@ export default async function AdminTicketDetailPage({
                 Status
                 <select defaultValue={ticket.status} disabled={!canManageSupport} name="status">
                   <option value="open">Aberto</option>
+                  <option value="in_progress">Em análise</option>
                   <option value="waiting">Aguardando</option>
                   <option value="resolved">Resolvido</option>
                   <option value="closed">Fechado</option>
                 </select>
+              </label>
+              <label className="wide-field">
+                Motivo / próximo passo
+                <textarea
+                  defaultValue={ticket.status_reason ?? nextStep}
+                  disabled={!canManageSupport}
+                  name="statusReason"
+                  placeholder="Explique ao cliente o que mudou e qual é o próximo passo."
+                  rows={3}
+                />
               </label>
               <div className="form-actions">
                 {canManageSupport ? (
@@ -301,6 +338,10 @@ export default async function AdminTicketDetailPage({
                 <dd>
                   <span className={`support-sla-chip ${sla.className}`}>{sla.label}</span>
                 </dd>
+              </div>
+              <div>
+                <dt>Próximo retorno</dt>
+                <dd>{ticket.next_response_due_at ? formatDateTime(ticket.next_response_due_at) : "Não agendado"}</dd>
               </div>
             </dl>
             {workspace ? (
@@ -405,6 +446,13 @@ function formatDate(value: string) {
     day: "2-digit",
     month: "short",
     year: "numeric"
+  }).format(new Date(value));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short"
   }).format(new Date(value));
 }
 

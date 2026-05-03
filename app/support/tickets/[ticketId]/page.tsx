@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import {
+  getTicketOperationalNextStep,
   getTicketSla,
   parseSupportDescription,
   ticketAreaLabels,
@@ -10,6 +11,7 @@ import {
   type TicketPriority,
   type TicketStatus
 } from "@/lib/support";
+import { markSupportNotificationsRead } from "@/lib/support-operations";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 import { createUserSupportTicketMessage } from "@/app/support/actions";
 
@@ -26,11 +28,16 @@ type SupportTicketRow = {
   area: TicketArea;
   created_at: string;
   description: string;
+  first_responded_at: string | null;
+  first_response_due_at: string | null;
   id: string;
+  next_response_due_at: string | null;
   priority: TicketPriority;
   requester_email: string | null;
   requester_id: string | null;
+  resolved_at: string | null;
   status: TicketStatus;
+  status_reason: string | null;
   title: string;
   updated_at: string;
   workspace_id: string | null;
@@ -58,7 +65,9 @@ export default async function SupportTicketDetailPage({
 
   const ticketResult = await supabase
     .from("saas_support_tickets")
-    .select("id,workspace_id,requester_id,requester_email,title,description,area,priority,status,created_at,updated_at")
+    .select(
+      "id,workspace_id,requester_id,requester_email,title,description,area,priority,status,status_reason,created_at,updated_at,first_response_due_at,next_response_due_at,first_responded_at,resolved_at"
+    )
     .eq("id", ticketId)
     .eq("requester_id", user.id)
     .maybeSingle<SupportTicketRow>();
@@ -81,6 +90,8 @@ export default async function SupportTicketDetailPage({
     );
   }
 
+  await markSupportNotificationsRead(supabase, user.id, ticket.id);
+
   const messagesResult = await supabase
     .from("saas_support_ticket_messages")
     .select("id,author_role,visibility,body,created_at")
@@ -88,9 +99,10 @@ export default async function SupportTicketDetailPage({
     .order("created_at", { ascending: true })
     .returns<TicketMessageRow[]>();
   const messages = messagesResult.data ?? [];
-  const canReply = ticket.status === "open" || ticket.status === "waiting";
+  const canReply = ticket.status === "open" || ticket.status === "in_progress" || ticket.status === "waiting";
   const parsedDescription = parseSupportDescription(ticket.description);
   const sla = getTicketSla(ticket);
+  const nextStep = getTicketOperationalNextStep(ticket);
 
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
@@ -122,9 +134,22 @@ export default async function SupportTicketDetailPage({
         {ticketResult.error || messagesResult.error ? (
           <section className="source-banner">
             <strong>Histórico parcial</strong>
-            <span>Aplique a migration 0018_support_ticket_messages.sql para habilitar respostas no ticket.</span>
+            <span>Aplique a migration de suporte operacional para habilitar respostas e notificações no ticket.</span>
           </section>
         ) : null}
+
+        <section className="support-ticket-operation-strip">
+          <article className="panel support-next-step">
+            <p className="section-label">Próximo passo</p>
+            <strong>{nextStep}</strong>
+            {ticket.status_reason ? <span>{ticket.status_reason}</span> : null}
+          </article>
+          <article className="panel support-next-step">
+            <p className="section-label">SLA</p>
+            <strong>{sla.meta}</strong>
+            <span>{ticket.next_response_due_at ? `Próximo retorno: ${formatDateTime(ticket.next_response_due_at)}` : sla.label}</span>
+          </article>
+        </section>
 
         <div className="support-ticket-detail-grid">
           <section className="panel">
@@ -213,6 +238,10 @@ export default async function SupportTicketDetailPage({
                   <dd>{sla.meta}</dd>
                 </div>
                 <div>
+                  <dt>Primeira resposta</dt>
+                  <dd>{ticket.first_responded_at ? formatDateTime(ticket.first_responded_at) : "Ainda pendente"}</dd>
+                </div>
+                <div>
                   <dt>E-mail</dt>
                   <dd>{ticket.requester_email ?? user.email ?? "Não informado"}</dd>
                 </div>
@@ -237,5 +266,12 @@ function formatDate(value: string) {
     day: "2-digit",
     month: "short",
     year: "numeric"
+  }).format(new Date(value));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short"
   }).format(new Date(value));
 }

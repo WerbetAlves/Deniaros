@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { SupportAiAssistant } from "@/components/support-ai-assistant";
 import {
+  getTicketOperationalNextStep,
   getTicketSla,
   normalizeSupportTopic,
   normalizeTicketStatus,
@@ -30,12 +31,24 @@ type SupportTicketRow = {
   area: TicketArea;
   created_at: string;
   description: string;
+  first_response_due_at: string | null;
   id: string;
+  next_response_due_at: string | null;
   priority: TicketPriority;
   requester_email: string | null;
   status: TicketStatus;
   title: string;
   updated_at: string;
+};
+
+type SupportNotificationRow = {
+  body: string;
+  created_at: string;
+  id: string;
+  kind: string;
+  read_at: string | null;
+  ticket_id: string | null;
+  title: string;
 };
 
 export default async function SupportPage({
@@ -50,14 +63,27 @@ export default async function SupportPage({
   const selectedStatus = normalizeTicketStatus(params.status);
   const selectedTopic = normalizeSupportTopic(params.topic);
   const triageQuestion = String(params.question ?? "").trim();
+
   const ticketsResult = await supabase
     .from("saas_support_tickets")
-    .select("id,requester_email,title,description,area,priority,status,created_at,updated_at")
+    .select(
+      "id,requester_email,title,description,area,priority,status,created_at,updated_at,first_response_due_at,next_response_due_at"
+    )
     .eq("requester_id", user.id)
     .order("updated_at", { ascending: false })
     .limit(50)
     .returns<SupportTicketRow[]>();
+
+  const notificationsResult = await supabase
+    .from("saas_support_notifications")
+    .select("id,ticket_id,kind,title,body,read_at,created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(6)
+    .returns<SupportNotificationRow[]>();
+
   const supportTickets = ticketsResult.data ?? [];
+  const notifications = notificationsResult.data ?? [];
   const filteredTickets = supportTickets.filter((ticket) => {
     const matchesStatus = selectedStatus === "all" || ticket.status === selectedStatus;
     const matchesQuery =
@@ -69,7 +95,9 @@ export default async function SupportPage({
     return matchesStatus && matchesQuery;
   });
   const openCount = supportTickets.filter((ticket) => ticket.status === "open").length;
+  const inProgressCount = supportTickets.filter((ticket) => ticket.status === "in_progress").length;
   const waitingCount = supportTickets.filter((ticket) => ticket.status === "waiting").length;
+  const unreadNotifications = notifications.filter((notification) => !notification.read_at).length;
 
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
@@ -80,13 +108,14 @@ export default async function SupportPage({
             <h2>Chat e Suporte</h2>
             <p className="supporting-copy">
               Primeiro a IA tenta resolver. Se precisar de análise técnica, o Deniaros organiza
-              o contexto e abre um ticket com histórico, prioridade e acompanhamento.
+              o contexto e abre um ticket com histórico, prioridade, SLA e acompanhamento.
             </p>
           </div>
           <div className="profile-badges">
             <span className="status-chip">{hasGeminiKey ? "IA configurada" : "IA pendente"}</span>
-            <span className="status-chip">{openCount} ticket(s) aberto(s)</span>
+            <span className="status-chip">{openCount + inProgressCount} em atendimento</span>
             <span className="status-chip">{waitingCount} aguardando</span>
+            <span className="status-chip">{unreadNotifications} aviso(s)</span>
           </div>
         </div>
 
@@ -95,10 +124,58 @@ export default async function SupportPage({
 
         {ticketsResult.error ? (
           <section className="source-banner">
-            <strong>Historico de suporte temporariamente indisponivel</strong>
+            <strong>Histórico de suporte temporariamente indisponível</strong>
             <span>
-              Nao conseguimos carregar ou gravar tickets agora. A conversa com a IA continua disponivel.
+              Não conseguimos carregar ou gravar tickets agora. A conversa com a IA continua disponível.
             </span>
+          </section>
+        ) : null}
+
+        <section className="support-ops-grid" aria-label="Resumo operacional do suporte">
+          <article className="panel support-ops-card">
+            <p className="section-label">Fila</p>
+            <strong>{openCount}</strong>
+            <span>precisam da primeira resposta</span>
+          </article>
+          <article className="panel support-ops-card">
+            <p className="section-label">Em análise</p>
+            <strong>{inProgressCount}</strong>
+            <span>assumidos pelo suporte</span>
+          </article>
+          <article className="panel support-ops-card">
+            <p className="section-label">Com você</p>
+            <strong>{waitingCount}</strong>
+            <span>aguardam seu retorno</span>
+          </article>
+          <article className="panel support-ops-card">
+            <p className="section-label">Notificações</p>
+            <strong>{unreadNotifications}</strong>
+            <span>não lidas</span>
+          </article>
+        </section>
+
+        {notifications.length ? (
+          <section className="panel support-notification-panel">
+            <div className="panel-header">
+              <div>
+                <p className="section-label">Notificações</p>
+                <h3>Atualizações recentes</h3>
+              </div>
+              <span className="status-chip">{unreadNotifications} nova(s)</span>
+            </div>
+            <div className="support-notification-list">
+              {notifications.map((notification) => (
+                <Link
+                  className={notification.read_at ? "support-notification read" : "support-notification"}
+                  href={notification.ticket_id ? `/support/tickets/${notification.ticket_id}` : "/support"}
+                  key={notification.id}
+                >
+                  <strong>{notification.title}</strong>
+                  <span>{notification.body}</span>
+                  <small>{formatDateTime(notification.created_at)}</small>
+                </Link>
+              ))}
+            </div>
           </section>
         ) : null}
 
@@ -108,7 +185,7 @@ export default async function SupportPage({
               <p className="section-label">Conversa financeira</p>
               <h3>Fale com a IA como no WhatsApp</h3>
               <p>
-                Pergunte sobre saldo, dividas, habitos, previsao e decisoes. Ela usa o contexto do
+                Pergunte sobre saldo, dívidas, hábitos, previsão e decisões. Ela usa o contexto do
                 seu Deniaros sem transformar tudo em ticket.
               </p>
             </div>
@@ -122,8 +199,8 @@ export default async function SupportPage({
               <p className="section-label">Problema ou atendimento</p>
               <h3>Precisa de suporte?</h3>
               <p>
-                Descreva o problema, receba uma orientacao inicial e abra um ticket com historico
-                quando precisar de analise tecnica.
+                Descreva o problema, receba uma orientação inicial e abra um ticket com histórico
+                quando precisar de análise técnica.
               </p>
             </div>
             <a className="ghost-button" href="#ai-chat">
@@ -206,7 +283,7 @@ export default async function SupportPage({
                       <p>{parsedDescription.message}</p>
                       <small>
                         Solicitante: {ticket.requester_email ?? user.email} · Atualizado{" "}
-                        {formatDate(ticket.updated_at)} · {sla.meta}
+                        {formatDate(ticket.updated_at)} · {sla.meta} · {getTicketOperationalNextStep(ticket)}
                       </small>
                     </div>
                     <span className={`support-ticket-status ${ticket.status}`}>
@@ -297,5 +374,12 @@ function formatDate(value: string) {
     day: "2-digit",
     month: "short",
     year: "numeric"
+  }).format(new Date(value));
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short"
   }).format(new Date(value));
 }

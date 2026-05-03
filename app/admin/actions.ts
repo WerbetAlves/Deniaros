@@ -4,6 +4,8 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { assertAdminAccess, type AdminAccessResult, type AdminRole } from "@/lib/admin-auth";
 import { requireAdminPermission } from "@/lib/admin-permissions";
+import type { TicketPriority, TicketStatus } from "@/lib/support";
+import { buildSupportDueFields, createSupportNotification } from "@/lib/support-operations";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
 const adminPath = "/admin";
@@ -170,20 +172,28 @@ export async function updateSupportTicket(formData: FormData) {
 
   const { data: previousTicket } = await supabase
     .from("saas_support_tickets")
-    .select("id,workspace_id,requester_email,title,area,priority,status,assigned_admin_id")
+    .select("id,workspace_id,requester_id,requester_email,title,area,priority,status,assigned_admin_id")
     .eq("id", ticketId)
     .maybeSingle<Record<string, unknown>>();
+
+  const statusReason = String(formData.get("statusReason") ?? "").trim();
+  const now = new Date().toISOString();
+  const dueFields =
+    status === "open" || status === "in_progress" ? buildSupportDueFields(now, priority) : {};
 
   const { data: updatedTicket, error } = await supabase
     .from("saas_support_tickets")
     .update({
-      status,
       priority,
       assigned_admin_id: user.id,
-      updated_at: new Date().toISOString()
+      resolved_at: status === "resolved" ? now : null,
+      status,
+      status_reason: statusReason || getDefaultStatusReason(status),
+      updated_at: now,
+      ...dueFields
     })
     .eq("id", ticketId)
-    .select("id,workspace_id,requester_email,title,area,priority,status,assigned_admin_id")
+    .select("id,workspace_id,requester_id,requester_email,title,area,priority,status,assigned_admin_id,status_reason")
     .maybeSingle<Record<string, unknown>>();
 
   if (error) {
@@ -206,6 +216,28 @@ export async function updateSupportTicket(formData: FormData) {
     },
     targetId: ticketId,
     targetType: "support_ticket",
+    workspaceId
+  });
+
+  const requesterId =
+    typeof updatedTicket?.requester_id === "string"
+      ? updatedTicket.requester_id
+      : typeof previousTicket?.requester_id === "string"
+        ? previousTicket.requester_id
+        : null;
+
+  await createSupportNotification(supabase, {
+    body: `Status atualizado para ${translateStatusForNotification(status)}.${
+      statusReason ? ` Motivo: ${statusReason}` : ""
+    }`,
+    kind: "status_changed",
+    metadata: {
+      priority,
+      status
+    },
+    ticketId,
+    title: "Ticket atualizado",
+    userId: requesterId,
     workspaceId
   });
 
@@ -238,11 +270,13 @@ export async function createSupportTicketMessage(formData: FormData) {
 
   const { data: ticket } = await supabase
     .from("saas_support_tickets")
-    .select("id,workspace_id,status")
+    .select("id,workspace_id,requester_id,status,first_responded_at")
     .eq("id", ticketId)
     .maybeSingle<Record<string, unknown>>();
 
   const workspaceId = typeof ticket?.workspace_id === "string" ? ticket.workspace_id : null;
+  const requesterId = typeof ticket?.requester_id === "string" ? ticket.requester_id : null;
+  const now = new Date().toISOString();
 
   const { error } = await supabase.from("saas_support_ticket_messages").insert({
     author_id: user.id,
@@ -257,13 +291,15 @@ export async function createSupportTicketMessage(formData: FormData) {
     redirect(`${returnTo}?error=${encodeURIComponent(error.message)}`);
   }
 
-  if (visibility === "public" && ticket?.status === "open") {
+  if (visibility === "public" && ticket?.status !== "resolved" && ticket?.status !== "closed") {
     await supabase
       .from("saas_support_tickets")
       .update({
         assigned_admin_id: user.id,
+        first_responded_at: ticket?.first_responded_at ?? now,
+        status_reason: "Suporte respondeu e aguarda retorno do solicitante.",
         status: "waiting",
-        updated_at: new Date().toISOString()
+        updated_at: now
       })
       .eq("id", ticketId);
   } else {
@@ -271,16 +307,34 @@ export async function createSupportTicketMessage(formData: FormData) {
       .from("saas_support_tickets")
       .update({
         assigned_admin_id: user.id,
-        updated_at: new Date().toISOString()
+        status_reason: visibility === "internal" ? "Nota interna registrada." : "Interacao administrativa registrada.",
+        updated_at: now
       })
       .eq("id", ticketId);
+  }
+
+  if (visibility === "public") {
+    await createSupportNotification(supabase, {
+      body: "O suporte respondeu seu ticket. Revise o histórico e envie retorno se precisar.",
+      kind: "admin_replied",
+      metadata: {
+        previousStatus: ticket?.status ?? null
+      },
+      ticketId,
+      title: "Resposta do suporte",
+      userId: requesterId,
+      workspaceId
+    });
   }
 
   await recordAdminAudit(supabase, user, access, {
     action: "support_ticket_changed",
     afterState: {
       message_visibility: visibility,
-      status_after_reply: visibility === "public" && ticket?.status === "open" ? "waiting" : ticket?.status
+      status_after_reply:
+        visibility === "public" && ticket?.status !== "resolved" && ticket?.status !== "closed"
+          ? "waiting"
+          : ticket?.status
     },
     beforeState: ticket ?? null,
     metadata: {
@@ -394,14 +448,20 @@ function normalizeSubscriptionStatus(value: FormDataEntryValue | null) {
     : "trialing";
 }
 
-function normalizeTicketStatus(value: FormDataEntryValue | null) {
+function normalizeTicketStatus(value: FormDataEntryValue | null): TicketStatus {
   const raw = String(value ?? "open");
-  return ["open", "waiting", "resolved", "closed"].includes(raw) ? raw : "open";
+  if (raw === "in_progress" || raw === "waiting" || raw === "resolved" || raw === "closed") {
+    return raw;
+  }
+  return "open";
 }
 
-function normalizeTicketPriority(value: FormDataEntryValue | null) {
+function normalizeTicketPriority(value: FormDataEntryValue | null): TicketPriority {
   const raw = String(value ?? "medium");
-  return ["low", "medium", "high", "urgent"].includes(raw) ? raw : "medium";
+  if (raw === "low" || raw === "high" || raw === "urgent") {
+    return raw;
+  }
+  return "medium";
 }
 
 function normalizeMessageVisibility(value: FormDataEntryValue | null) {
@@ -428,4 +488,28 @@ function getPermissionError(check: () => void) {
   } catch (error) {
     return error instanceof Error ? error.message : "Ação administrativa não autorizada.";
   }
+}
+
+function getDefaultStatusReason(status: string) {
+  const reasons: Record<string, string> = {
+    closed: "Atendimento fechado pela administracao.",
+    in_progress: "Ticket assumido para análise do suporte.",
+    open: "Ticket mantido na fila de suporte.",
+    resolved: "Ticket marcado como resolvido.",
+    waiting: "Suporte aguarda retorno do solicitante."
+  };
+
+  return reasons[status] ?? "Status atualizado pelo suporte.";
+}
+
+function translateStatusForNotification(status: string) {
+  const labels: Record<string, string> = {
+    closed: "fechado",
+    in_progress: "em análise",
+    open: "aberto",
+    resolved: "resolvido",
+    waiting: "aguardando você"
+  };
+
+  return labels[status] ?? status;
 }

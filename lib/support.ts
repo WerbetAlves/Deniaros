@@ -1,4 +1,4 @@
-export type TicketStatus = "open" | "waiting" | "resolved" | "closed";
+export type TicketStatus = "open" | "in_progress" | "waiting" | "resolved" | "closed";
 export type TicketPriority = "urgent" | "high" | "medium" | "low";
 export type TicketArea = "technical" | "feature" | "billing" | "guidance" | "account";
 export type SupportTopic = "launch" | "billing" | "open_finance" | "reports" | "bug" | "access";
@@ -7,6 +7,8 @@ export type SupportTicketLike = {
   area: TicketArea | string;
   created_at: string;
   description?: string;
+  first_response_due_at?: string | null;
+  next_response_due_at?: string | null;
   priority: TicketPriority;
   status: TicketStatus;
   updated_at: string;
@@ -14,9 +16,10 @@ export type SupportTicketLike = {
 
 export const ticketStatusLabels: Record<TicketStatus, string> = {
   closed: "Fechado",
-  open: "Aberto",
+  in_progress: "Em análise",
+  open: "Aberto - aguardando suporte",
   resolved: "Resolvido",
-  waiting: "Aguardando retorno"
+  waiting: "Aguardando você"
 };
 
 export const ticketPriorityLabels: Record<TicketPriority, string> = {
@@ -67,7 +70,13 @@ const priorityScore: Record<TicketPriority, number> = {
 };
 
 export function normalizeTicketStatus(value?: string): TicketStatus | "all" {
-  if (value === "open" || value === "waiting" || value === "resolved" || value === "closed") {
+  if (
+    value === "open" ||
+    value === "in_progress" ||
+    value === "waiting" ||
+    value === "resolved" ||
+    value === "closed"
+  ) {
     return value;
   }
 
@@ -108,14 +117,14 @@ export function getTicketStatusClass(status: TicketStatus) {
   if (status === "waiting") {
     return "status-info";
   }
+  if (status === "in_progress") {
+    return "status-attention";
+  }
   return "status-risk";
 }
 
 export function getTicketSla(ticket: SupportTicketLike, now = new Date()) {
   const targetHours = prioritySlaHours[ticket.priority];
-  const start = new Date(ticket.status === "open" ? ticket.created_at : ticket.updated_at);
-  const elapsedHours = Math.max(0, (now.getTime() - start.getTime()) / 36e5);
-  const remainingHours = Math.ceil(targetHours - elapsedHours);
 
   if (ticket.status === "resolved" || ticket.status === "closed") {
     return {
@@ -132,10 +141,15 @@ export function getTicketSla(ticket: SupportTicketLike, now = new Date()) {
       className: "sla-waiting",
       label: "Com o usuário",
       meta: "Aguardando retorno do solicitante",
-      remainingHours,
+      remainingHours: targetHours,
       targetHours
     };
   }
+
+  const dueAt = new Date(
+    ticket.next_response_due_at ?? ticket.first_response_due_at ?? getTicketDueAt(ticket.created_at, ticket.priority)
+  );
+  const remainingHours = Math.ceil((dueAt.getTime() - now.getTime()) / 36e5);
 
   if (remainingHours <= 0) {
     return {
@@ -166,12 +180,42 @@ export function getTicketSla(ticket: SupportTicketLike, now = new Date()) {
   };
 }
 
+export function getPrioritySlaHours(priority: TicketPriority) {
+  return prioritySlaHours[priority];
+}
+
+export function getTicketDueAt(fromIso: string, priority: TicketPriority) {
+  const dueAt = new Date(fromIso);
+  dueAt.setHours(dueAt.getHours() + prioritySlaHours[priority]);
+  return dueAt.toISOString();
+}
+
+export function getTicketOperationalNextStep(ticket: SupportTicketLike) {
+  if (ticket.status === "closed") {
+    return "Atendimento fechado.";
+  }
+
+  if (ticket.status === "resolved") {
+    return "Aguardando confirmacao final ou fechamento.";
+  }
+
+  if (ticket.status === "waiting") {
+    return "Aguardando retorno do solicitante.";
+  }
+
+  if (ticket.status === "in_progress") {
+    return "Time de suporte em análise.";
+  }
+
+  return "Precisa de primeira resposta do suporte.";
+}
+
 export function sortTicketsByAttention<T extends SupportTicketLike>(tickets: T[]) {
   return [...tickets].sort((a, b) => {
     const aSla = getTicketSla(a);
     const bSla = getTicketSla(b);
-    const aOverdue = aSla.remainingHours <= 0 && a.status === "open" ? 1 : 0;
-    const bOverdue = bSla.remainingHours <= 0 && b.status === "open" ? 1 : 0;
+    const aOverdue = aSla.remainingHours <= 0 && (a.status === "open" || a.status === "in_progress") ? 1 : 0;
+    const bOverdue = bSla.remainingHours <= 0 && (b.status === "open" || b.status === "in_progress") ? 1 : 0;
 
     if (aOverdue !== bOverdue) {
       return bOverdue - aOverdue;
