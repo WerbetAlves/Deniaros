@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./styles/core.css";
 @import "./styles/home.css";
+@import "./styles/landing.css";
 @import "./styles/auth-transactions.css";
 @import "./styles/accounts-agenda.css";
 @import "./styles/admin-support.css";

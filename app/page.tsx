@@ -14,6 +14,7 @@ import { FinancialTrajectoryPanel } from "@/components/financial-trajectory-pane
 import { HighlightsGrid } from "@/components/highlights-grid";
 import { HomeSecondaryTabs } from "@/components/home-secondary-tabs";
 import { ImpactEvolution } from "@/components/impact-evolution";
+import { MarketingLanding } from "@/components/marketing-landing";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { RecentActivities } from "@/components/recent-activities";
 import { RecentTransactions } from "@/components/recent-transactions";
@@ -22,7 +23,6 @@ import { getFinancialData } from "@/lib/financial-data";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   buildForecastProjection,
   formatCurrency,
@@ -45,7 +45,7 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    return <MarketingLanding />;
   }
 
   const { accounts, categories, fallbackReason, payees, scheduledItems, source, transactions, workspace } =
