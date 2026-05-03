@@ -43,7 +43,27 @@ export function formatShortDate(value: string, locale: LocaleCode = "pt-BR") {
     shortDateFormatters.set(locale, formatter);
   }
 
-  return formatter.format(new Date(`${value}T12:00:00`));
+  const date = parseDisplayDate(value);
+
+  if (!date) {
+    return "Data indisponivel";
+  }
+
+  return formatter.format(date);
+}
+
+function parseDisplayDate(value: string) {
+  const normalizedValue = String(value ?? "").trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const date = new Date(
+    normalizedValue.includes("T") ? normalizedValue : `${normalizedValue}T12:00:00`
+  );
+
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export function getAccountBalances(

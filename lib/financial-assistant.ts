@@ -1,4 +1,4 @@
-import type { FinancialData } from "@/lib/financial-data";
+import type { FinancialData } from "./financial-data.ts";
 import {
   buildForecastProjection,
   formatCurrency,
@@ -6,7 +6,7 @@ import {
   getPostedExpenses,
   getPostedIncome,
   getTotalBalance
-} from "@/lib/finance";
+} from "./finance.ts";
 
 type AssistantMessage = {
   role: "assistant" | "user";
@@ -73,82 +73,44 @@ export async function getFinancialAssistantReply({
     });
   }
 
-  const model = process.env.GEMINI_TEXT_MODEL ?? "gemini-2.5-flash";
+  const modelCandidates = getGeminiModelCandidates();
+  const prompt = buildFinancialAssistantPrompt({
+    allowFinancialContext,
+    context,
+    history,
+    message
+  });
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: buildFinancialAssistantPrompt({
-                    allowFinancialContext,
-                    context,
-                    history,
-                    message
-                  })
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.45
-          }
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        method: "POST"
+    let lastFallbackReason = "empty_response";
+
+    for (const model of modelCandidates) {
+      const result = await requestGeminiText({
+        apiKey,
+        model,
+        prompt
+      });
+
+      if (result.answer) {
+        return {
+          answer: result.answer,
+          source: "gemini"
+        } satisfies AssistantReply;
       }
-    );
 
-    if (!response.ok) {
-      console.warn("[assistant-ai] Gemini fallback", {
-        reason: "gemini_http_error",
-        status: response.status
-      });
+      lastFallbackReason = result.reason;
 
-      return buildFinancialAssistantFallback({
-        allowFinancialContext,
-        diagnosis,
-        message,
-        reason: `gemini_http_${response.status}`
-      });
+      if (result.reason !== "gemini_http_400") {
+        break;
+      }
     }
 
-    const payload = (await response.json()) as {
-      candidates?: Array<{
-        content?: {
-          parts?: Array<{
-            text?: string;
-          }>;
-        };
-      }>;
-    };
-    const answer = payload.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-    if (!answer) {
-      console.warn("[assistant-ai] Gemini fallback", {
-        reason: "empty_response"
-      });
-
-      return buildFinancialAssistantFallback({
-        allowFinancialContext,
-        diagnosis,
-        message,
-        reason: "empty_response"
-      });
-    }
-
-    return {
-      answer,
-      source: "gemini"
-    } satisfies AssistantReply;
+    return buildFinancialAssistantFallback({
+      allowFinancialContext,
+      diagnosis,
+      message,
+      reason: lastFallbackReason
+    });
   } catch (error) {
     console.warn("[assistant-ai] Gemini fallback", {
       message: error instanceof Error ? error.message : "unknown_error",
@@ -162,6 +124,93 @@ export async function getFinancialAssistantReply({
       reason: "exception"
     });
   }
+}
+
+async function requestGeminiText({
+  apiKey,
+  model,
+  prompt
+}: {
+  apiKey: string;
+  model: string;
+  prompt: string;
+}): Promise<{ answer?: string; reason: string }> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+      model
+    )}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ],
+            role: "user"
+          }
+        ],
+        generationConfig: {
+          maxOutputTokens: 900,
+          temperature: 0.45
+        }
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST"
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text().catch(() => "");
+
+    console.warn("[assistant-ai] Gemini fallback", {
+      details: details.slice(0, 240),
+      model,
+      reason: "gemini_http_error",
+      status: response.status
+    });
+
+    return {
+      reason: `gemini_http_${response.status}`
+    };
+  }
+
+  const payload = (await response.json()) as {
+    candidates?: Array<{
+      content?: {
+        parts?: Array<{
+          text?: string;
+        }>;
+      };
+    }>;
+  };
+  const answer = payload.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+  if (!answer) {
+    console.warn("[assistant-ai] Gemini fallback", {
+      model,
+      reason: "empty_response"
+    });
+  }
+
+  return {
+    answer,
+    reason: answer ? "ok" : "empty_response"
+  };
+}
+
+function getGeminiModelCandidates() {
+  const configuredModel = process.env.GEMINI_TEXT_MODEL?.trim();
+
+  return [
+    configuredModel,
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash"
+  ].filter((model, index, models): model is string => Boolean(model && models.indexOf(model) === index));
 }
 
 export function buildFinancialAssistantContext(

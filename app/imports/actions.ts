@@ -544,6 +544,127 @@ export async function deleteImportedTransactions(formData: FormData) {
   redirect(`/imports?success=${encodeURIComponent(`${transactionIds.length} movimento(s) removido(s).`)}`);
 }
 
+export async function cancelLatestImportBatch(formData: FormData) {
+  const { supabase, user, workspaceId } = await getWorkspaceContext();
+  const batchId = String(formData.get("batchId") ?? "").trim();
+
+  if (!batchId) {
+    redirect("/imports?error=Lote de importacao invalido para cancelamento.");
+  }
+
+  const { data: latestBatch, error: latestBatchError } = await supabase
+    .from("import_batches")
+    .select("id,status,original_filename")
+    .eq("workspace_id", workspaceId)
+    .neq("status", "cancelled")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ id: string; original_filename: string | null; status: string }>();
+
+  if (latestBatchError) {
+    if (latestBatchError.code === "42703" || latestBatchError.code === "42P01") {
+      redirect(
+        "/imports?error=Execute%20a%20migration%200037_cancel_import_batches.sql%20antes%20de%20cancelar%20importacoes."
+      );
+    }
+
+    redirect(`/imports?error=${encodeURIComponent(latestBatchError.message)}`);
+  }
+
+  if (!latestBatch || latestBatch.id !== batchId) {
+    redirect("/imports?error=Somente a ultima importacao ativa pode ser cancelada.");
+  }
+
+  const { data: transactions, error: fetchError } = await supabase
+    .from("transactions")
+    .select("id,status,description,amount,occurred_on,import_batch_id,import_rule_id,import_signature")
+    .eq("workspace_id", workspaceId)
+    .eq("source", "imported")
+    .eq("import_batch_id", batchId)
+    .returns<ImportedTransactionAuditRow[]>();
+
+  if (fetchError) {
+    redirect(`/imports?error=${encodeURIComponent(fetchError.message)}`);
+  }
+
+  if (!transactions?.length) {
+    const { error: batchUpdateError } = await supabase
+      .from("import_batches")
+      .update({
+        status: "cancelled",
+        summary: "Importacao cancelada. Nenhum movimento ativo foi encontrado para remover."
+      })
+      .eq("id", batchId)
+      .eq("workspace_id", workspaceId);
+
+    if (batchUpdateError) {
+      redirect(`/imports?error=${encodeURIComponent(batchUpdateError.message)}`);
+    }
+
+    redirect("/imports?success=Ultima importacao marcada como cancelada.");
+  }
+
+  const { error: deleteError } = await supabase
+    .from("transactions")
+    .delete()
+    .eq("workspace_id", workspaceId)
+    .eq("source", "imported")
+    .eq("import_batch_id", batchId);
+
+  if (deleteError) {
+    redirect(`/imports?error=${encodeURIComponent(deleteError.message)}`);
+  }
+
+  const auditRows = transactions.map((transaction) => ({
+    workspace_id: workspaceId,
+    transaction_id: null,
+    actor_id: user.id,
+    event_type: "imported_deleted",
+    source: "imports",
+    before_status: transaction.status,
+    after_status: null,
+    note: "Movimento removido pelo cancelamento da ultima importacao.",
+    metadata: {
+      amount: transaction.amount,
+      description: transaction.description,
+      import_batch_id: transaction.import_batch_id,
+      import_rule_id: transaction.import_rule_id,
+      import_signature: transaction.import_signature,
+      occurred_on: transaction.occurred_on,
+      removed_transaction_id: transaction.id
+    }
+  }));
+
+  if (auditRows.length) {
+    const { error: auditError } = await supabase
+      .from("transaction_audit_events")
+      .insert(auditRows);
+
+    if (auditError) {
+      redirect(`/imports?error=${encodeURIComponent(auditError.message)}`);
+    }
+  }
+
+  const { error: batchUpdateError } = await supabase
+    .from("import_batches")
+    .update({
+      status: "cancelled",
+      summary: `${transactions.length} movimento(s) removido(s) no cancelamento desta importacao.`
+    })
+    .eq("id", batchId)
+    .eq("workspace_id", workspaceId);
+
+  if (batchUpdateError) {
+    redirect(`/imports?error=${encodeURIComponent(batchUpdateError.message)}`);
+  }
+
+  redirect(
+    `/imports?success=${encodeURIComponent(
+      `${transactions.length} movimento(s) da ultima importacao foram estornados.`
+    )}`
+  );
+}
+
 function parseSelectedIds(rawValues: FormDataEntryValue[]) {
   const values = rawValues
     .map((value) => String(value ?? "").trim())

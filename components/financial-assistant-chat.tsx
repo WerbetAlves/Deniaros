@@ -58,11 +58,9 @@ function translateContextSource(source: AssistantResponse["contextSource"]) {
 
 export function FinancialAssistantChat({
   hasGeminiKey,
-  initialAllowFinancialContext = false,
   initialQuestion = ""
 }: {
   hasGeminiKey: boolean;
-  initialAllowFinancialContext?: boolean;
   initialQuestion?: string;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -74,7 +72,6 @@ export function FinancialAssistantChat({
     }
   ]);
   const [input, setInput] = useState(initialQuestion);
-  const [allowFinancialContext, setAllowFinancialContext] = useState(initialAllowFinancialContext);
   const [assistantSource, setAssistantSource] = useState<AssistantResponse["assistantSource"]>();
   const [contextSource, setContextSource] = useState<AssistantResponse["contextSource"]>();
   const [fallbackReason, setFallbackReason] = useState("");
@@ -114,7 +111,6 @@ export function FinancialAssistantChat({
       try {
         const response = await fetch("/api/assistant/chat", {
           body: JSON.stringify({
-            allowFinancialContext,
             history,
             message: cleanMessage
           }),
@@ -133,7 +129,6 @@ export function FinancialAssistantChat({
         setAssistantSource(payload.assistantSource);
         setContextSource(payload.contextSource);
         setFallbackReason(payload.fallbackReason ?? "");
-        setAllowFinancialContext(Boolean(payload.usedFinancialContext));
         setMessages((current) => [
           ...current,
           {
@@ -191,21 +186,6 @@ export function FinancialAssistantChat({
           ) : null}
         </div>
       </div>
-
-      <label className="assistant-context-toggle">
-        <input
-          checked={allowFinancialContext}
-          onChange={(event) => setAllowFinancialContext(event.target.checked)}
-          type="checkbox"
-        />
-        <span>
-          Usar resumo financeiro do meu Deniaros nesta conversa
-          <small>
-            Requer consentimento ativo em Privacidade. Se estiver desligado la, esta conversa
-            continua generica mesmo com o controle marcado.
-          </small>
-        </span>
-      </label>
 
       <div className="assistant-chat-body">
         {messages.map((message) => (

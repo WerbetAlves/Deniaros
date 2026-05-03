@@ -496,12 +496,18 @@ function readNumber(value: unknown) {
 }
 
 function formatAuditDateTime(value: string, locale: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Data indisponivel";
+  }
+
   return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
     month: "short"
-  }).format(new Date(value));
+  }).format(date);
 }
 
 function getTransactionsLoadErrorMessage(error: { code?: string; message?: string }) {

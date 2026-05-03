@@ -1770,6 +1770,12 @@
   box-shadow: 0 10px 24px rgba(24, 59, 45, 0.14), var(--shadow-inset);
 }
 
+.record-inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
 .admin-workspace {
   gap: 18px;
 }

@@ -12,6 +12,7 @@ import {
 } from "@/lib/imports";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 import {
+  cancelLatestImportBatch,
   createImportRule,
   deleteImportRule,
   deleteImportedTransactions,
@@ -51,7 +52,7 @@ type ImportBatchRow = {
   original_filename: string | null;
   row_count: number;
   rule_match_count: number;
-  status: "completed" | "failed" | "partial";
+  status: "cancelled" | "completed" | "failed" | "partial";
   summary: string | null;
 };
 
@@ -194,6 +195,7 @@ export default async function ImportsPage({
   const ruleStatusLabels = new Map(
     importRuleStatusOptions.map((option) => [option.id, option.label])
   );
+  const latestCancelableBatch = importBatches.find((batch) => batch.status !== "cancelled");
   const pendingImported = importedTransactions.filter(
     (transaction) => transaction.status === "pending"
   );
@@ -353,13 +355,21 @@ export default async function ImportsPage({
                         </p>
                       </div>
                       <div className="record-badge-row">
-                        <span className="status-chip">{batch.status}</span>
+                        <span className="status-chip">{getImportBatchStatusLabel(batch.status)}</span>
                         <span className="status-chip">{batch.imported_count} importado(s)</span>
                         <span className="status-chip">{batch.duplicate_count} duplicado(s)</span>
                         <span className="status-chip">{batch.rule_match_count} por regra</span>
                       </div>
                     </div>
                     {batch.summary ? <p className="micro-copy">{batch.summary}</p> : null}
+                    {latestCancelableBatch?.id === batch.id ? (
+                      <form action={cancelLatestImportBatch} className="record-inline-actions">
+                        <input name="batchId" type="hidden" value={batch.id} />
+                        <button className="ghost-button danger-button" type="submit">
+                          Cancelar ultima importacao
+                        </button>
+                      </form>
+                    ) : null}
                   </article>
                 );
               })}
@@ -851,4 +861,15 @@ function buildCategoryLabel(
 
   const parent = categoryById.get(category.parentId);
   return parent ? `${parent.name} / ${category.name}` : category.name;
+}
+
+function getImportBatchStatusLabel(status: ImportBatchRow["status"]) {
+  const labels: Record<ImportBatchRow["status"], string> = {
+    cancelled: "Cancelada",
+    completed: "Concluida",
+    failed: "Falhou",
+    partial: "Parcial"
+  };
+
+  return labels[status] ?? status;
 }

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { FinancialAssistantChat } from "@/components/financial-assistant-chat";
-import { getPrivacyPreferences } from "@/lib/privacy";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
 export default async function AssistantPage({
@@ -9,11 +8,10 @@ export default async function AssistantPage({
 }: {
   searchParams: Promise<{ question?: string }>;
 }) {
-  const { supabase, user, workspaceId } = await getWorkspaceContext();
+  const { user, workspaceId } = await getWorkspaceContext();
   const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY?.trim());
   const params = await searchParams;
   const initialQuestion = String(params.question ?? "").trim();
-  const privacyPreferences = await getPrivacyPreferences(supabase, user.id, workspaceId);
 
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
@@ -29,14 +27,13 @@ export default async function AssistantPage({
           </div>
           <div className="profile-badges">
             <span className="status-chip">{hasGeminiKey ? "Gemini conectado" : "Fallback ativo"}</span>
-            <span className="status-chip">Contexto controlado</span>
+            <span className="status-chip">Contexto automatico</span>
           </div>
         </div>
 
         <div className="assistant-layout">
           <FinancialAssistantChat
             hasGeminiKey={hasGeminiKey}
-            initialAllowFinancialContext={privacyPreferences.allowAiFinancialContext}
             initialQuestion={initialQuestion}
           />
 
@@ -58,8 +55,8 @@ export default async function AssistantPage({
                 Ajustar privacidade
               </Link>
               <p>
-                O chat usa contexto financeiro apenas com consentimento global ativo em
-                Privacidade e com o controle da conversa ligado.
+                Ao entrar no Deniaros, o Consultor IA passa a usar um resumo financeiro
+                seguro do seu workspace para responder com contexto real.
               </p>
             </section>
 

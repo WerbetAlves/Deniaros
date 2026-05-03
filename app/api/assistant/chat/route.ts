@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getFinancialAssistantReply } from "@/lib/financial-assistant";
-import { getFinancialData, type FinancialData } from "@/lib/financial-data";
-import { getPrivacyPreferences, recordDataAccessEvent } from "@/lib/privacy";
+import { getFinancialData } from "@/lib/financial-data";
+import { recordDataAccessEvent } from "@/lib/privacy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureDefaultWorkspace } from "@/lib/workspace-bootstrap";
 
@@ -23,9 +23,7 @@ export async function POST(request: Request) {
   }
 
   const workspaceId = await ensureDefaultWorkspace(supabase, user);
-  const privacyPreferences = await getPrivacyPreferences(supabase, user.id, workspaceId);
   const body = (await request.json().catch(() => null)) as {
-    allowFinancialContext?: unknown;
     history?: unknown;
     message?: unknown;
   } | null;
@@ -38,31 +36,25 @@ export async function POST(request: Request) {
     );
   }
 
-  const requestedFinancialContext = body?.allowFinancialContext === true;
-  const effectiveFinancialContext =
-    requestedFinancialContext && privacyPreferences.allowAiFinancialContext;
-  const data = effectiveFinancialContext
-    ? await getFinancialData({
-        supabase,
-        user,
-        workspaceId
-      })
-    : buildPrivacyRestrictedFinancialData(workspaceId);
+  const data = await getFinancialData({
+    supabase,
+    user,
+    workspaceId
+  });
 
-  if (effectiveFinancialContext) {
-    await recordDataAccessEvent(supabase, {
-      accessReason: "Contexto financeiro enviado ao Consultor IA por consentimento do usuario.",
-      accessScope: "financial_context_ai",
-      metadata: {
-        messageLength: message.length
-      },
-      user,
-      workspaceId
-    });
-  }
+  await recordDataAccessEvent(supabase, {
+    accessReason: "Contexto financeiro enviado automaticamente ao Consultor IA em sessao autenticada.",
+    accessScope: "financial_context_ai",
+    metadata: {
+      contextSource: data.source,
+      messageLength: message.length
+    },
+    user,
+    workspaceId
+  });
 
   const reply = await getFinancialAssistantReply({
-    allowFinancialContext: effectiveFinancialContext,
+    allowFinancialContext: true,
     data,
     history: normalizeHistory(body?.history),
     message
@@ -73,28 +65,8 @@ export async function POST(request: Request) {
     assistantSource: reply.source,
     contextSource: data.source,
     fallbackReason: reply.fallbackReason,
-    usedFinancialContext: effectiveFinancialContext
+    usedFinancialContext: data.source !== "unavailable"
   });
-}
-
-function buildPrivacyRestrictedFinancialData(workspaceId: string): FinancialData {
-  return {
-    accounts: [],
-    categories: [],
-    payees: [],
-    scheduledItems: [],
-    source: "unavailable",
-    transactions: [],
-    workspace: {
-      baseCurrency: "BRL",
-      countryCode: "BR",
-      id: workspaceId,
-      locale: "pt-BR",
-      name: "Meu Deniaros",
-      timeZone: "America/Fortaleza",
-      type: "personal"
-    }
-  };
 }
 
 function normalizeHistory(value: unknown): ChatMessage[] {

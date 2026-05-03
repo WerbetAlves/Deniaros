@@ -33,8 +33,8 @@ const accessMatrix = [
   },
   {
     label: "IA do Deniaros",
-    permission: "Somente com consentimento",
-    detail: "Usa sintese financeira apenas quando a permissao global e o toggle da conversa estiverem ativos."
+    permission: "Sessao autenticada",
+    detail: "Usa sintese financeira segura quando o usuario esta logado no proprio workspace."
   },
   {
     label: "Suporte",
@@ -117,7 +117,7 @@ export default async function PrivacySettingsPage({
             <h3>Dados financeiros sao sensiveis por padrao</h3>
             <p>
               O Deniaros separa operacao, cobranca, suporte e leitura financeira. A IA tambem
-              precisa de consentimento explicito para usar saldos, agenda, categorias e movimentos.
+              registra auditoria quando usa saldos, agenda, categorias e movimentos em sessao autenticada.
             </p>
           </div>
           <div className="settings-command-actions">
@@ -251,18 +251,12 @@ export default async function PrivacySettingsPage({
           <article className="panel settings-card">
             <div className="settings-card-head">
               <span className="settings-area-dot finance" />
-              <span className="status-chip">
-                {preferences.allowAiFinancialContext ? "Permitido" : "Bloqueado"}
-              </span>
+              <span className="status-chip">Ativo</span>
             </div>
             <div>
               <p className="section-label">IA financeira</p>
               <h3>Contexto sensivel</h3>
-              <p>
-                {preferences.allowAiFinancialContext
-                  ? "A IA pode usar sintese financeira quando a conversa tambem autorizar."
-                  : "A IA nao recebe saldos, agenda ou movimentos reais enquanto este consentimento estiver desligado."}
-              </p>
+              <p>A IA pode usar sintese financeira em conversas autenticadas, com registro de auditoria.</p>
             </div>
           </article>
         </section>
@@ -295,20 +289,16 @@ export default async function PrivacySettingsPage({
           </div>
 
           <form action={updatePrivacyPreferences} className="settings-search-form">
-            <label className="assistant-context-toggle">
-              <input
-                defaultChecked={preferences.allowAiFinancialContext}
-                name="allowAiFinancialContext"
-                type="checkbox"
-              />
+            <input name="allowAiFinancialContext" type="hidden" value="on" />
+            <div className="assistant-context-toggle" role="note">
               <span>
-                Permitir contexto financeiro no Consultor IA
+                Contexto financeiro do Consultor IA ativo
                 <small>
-                  Quando ligado, a IA pode receber uma sintese de saldos, contas, agenda e
-                  movimentos recentes. Cada conversa ainda tem controle proprio.
+                  O contexto financeiro fica ativo por padrao para usuarios autenticados e cada uso
+                  sensivel entra no log de auditoria.
                 </small>
               </span>
-            </label>
+            </div>
 
             <label className="assistant-context-toggle">
               <input

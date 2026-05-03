@@ -32,7 +32,7 @@ type PrivacyPreferencesRow = {
 };
 
 export const defaultPrivacyPreferences: PrivacyPreferences = {
-  allowAiFinancialContext: false,
+  allowAiFinancialContext: true,
   allowProductAnalytics: false,
   dataRetentionMode: "standard",
   deleteRequestedAt: null,
