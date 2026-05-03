@@ -1,31 +1,7 @@
 import { ensureDefaultWorkspace } from "@/lib/workspace-bootstrap";
+import { buildWorkspaceBackupFileName, workspaceScopedBackupTables } from "@/lib/backup";
 import { recordDataAccessEvent } from "@/lib/privacy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-const workspaceScopedTables = [
-  "accounts",
-  "categories",
-  "payees",
-  "transactions",
-  "scheduled_items",
-  "exchange_rates",
-  "personal_profiles",
-  "home_inventory_items",
-  "tax_categories",
-  "financial_goals",
-  "category_budgets",
-  "import_rules",
-  "debt_reduction_debts",
-  "import_batches",
-  "transaction_audit_events",
-  "account_reconciliation_checks",
-  "saas_support_tickets",
-  "saas_support_ticket_messages",
-  "saas_subscriptions",
-  "system_preferences",
-  "privacy_preferences",
-  "data_access_events"
-] as const;
 
 type ExportTableResult = {
   data: unknown[];
@@ -68,7 +44,7 @@ export async function GET() {
 
   const tables: Record<string, ExportTableResult> = {};
 
-  for (const table of workspaceScopedTables) {
+  for (const table of workspaceScopedBackupTables) {
     tables[table] = await loadWorkspaceTable(supabase, table, workspaceId);
   }
 
@@ -90,17 +66,11 @@ export async function GET() {
     userProfile,
     tables
   };
-  const fileDate = exportedAt.slice(0, 10);
-  const safeWorkspaceName = String(workspace.name ?? "workspace")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
+  const fileName = buildWorkspaceBackupFileName(workspace.name, exportedAt);
 
   return new Response(JSON.stringify(payload, null, 2), {
     headers: {
-      "Content-Disposition": `attachment; filename="deniaros-${safeWorkspaceName || "workspace"}-${fileDate}.json"`,
+      "Content-Disposition": `attachment; filename="${fileName}"`,
       "Content-Type": "application/json; charset=utf-8",
       "Cache-Control": "no-store"
     }
