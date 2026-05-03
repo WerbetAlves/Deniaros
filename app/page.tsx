@@ -148,6 +148,19 @@ export default async function HomePage() {
     scheduledCount: dashboard.scheduledCount,
     unclassifiedTransactionCount
   });
+  const nextBestAction = buildHomeNextBestAction({
+    baseCurrency: workspace.baseCurrency,
+    dueSoonScheduleCount,
+    hasAtLeastOneAccount,
+    hasAtLeastOneTransaction,
+    hasOpenSchedule,
+    hasPersonalProfile,
+    locale: workspace.locale,
+    overdueScheduleCount,
+    pendingTransactionCount,
+    projection: forecastProjection,
+    unclassifiedTransactionCount
+  });
 
   return (
     <AppShell user={user} userEmail={user?.email} workspaceId={workspace.id}>
@@ -159,6 +172,7 @@ export default async function HomePage() {
       <div className="dashboard-grid gap-6 md:gap-8">
         <DataSourceBanner fallbackReason={fallbackReason} source={source} />
         <HeroPanel dashboard={dashboard} projection={forecastProjection} />
+        <HomeNextBestAction action={nextBestAction} />
         <HomeCommandActions actions={homeCommandActions} />
         <HomeSecondaryTabs
           tabs={[
@@ -284,6 +298,35 @@ type HomeCommandAction = {
   value: string;
 };
 
+type HomeNextBestAction = {
+  actionLabel: string;
+  description: string;
+  href: string;
+  metric: string;
+  reason: string;
+  title: string;
+  tone: "stable" | "attention" | "danger";
+};
+
+function HomeNextBestAction({ action }: { action: HomeNextBestAction }) {
+  return (
+    <section className={`home-next-action home-next-action-${action.tone}`}>
+      <div className="home-next-action-copy">
+        <p className="section-label">Próxima melhor ação</p>
+        <h3>{action.title}</h3>
+        <p>{action.description}</p>
+      </div>
+      <div className="home-next-action-result">
+        <span>{action.reason}</span>
+        <strong>{action.metric}</strong>
+      </div>
+      <Link className={action.tone === "danger" ? "primary-button" : "ghost-button"} href={action.href}>
+        {action.actionLabel}
+      </Link>
+    </section>
+  );
+}
+
 function HomeCommandActions({ actions }: { actions: HomeCommandAction[] }) {
   return (
     <section className="home-command-actions" aria-label="Acoes recomendadas de hoje">
@@ -304,6 +347,165 @@ function HomeCommandActions({ actions }: { actions: HomeCommandAction[] }) {
       ))}
     </section>
   );
+}
+
+function buildHomeNextBestAction({
+  baseCurrency,
+  dueSoonScheduleCount,
+  hasAtLeastOneAccount,
+  hasAtLeastOneTransaction,
+  hasOpenSchedule,
+  hasPersonalProfile,
+  locale,
+  overdueScheduleCount,
+  pendingTransactionCount,
+  projection,
+  unclassifiedTransactionCount
+}: {
+  baseCurrency: string;
+  dueSoonScheduleCount: number;
+  hasAtLeastOneAccount: boolean;
+  hasAtLeastOneTransaction: boolean;
+  hasOpenSchedule: boolean;
+  hasPersonalProfile: boolean;
+  locale: string;
+  overdueScheduleCount: number;
+  pendingTransactionCount: number;
+  projection: ReturnType<typeof buildForecastProjection>;
+  unclassifiedTransactionCount: number;
+}): HomeNextBestAction {
+  if (!hasPersonalProfile) {
+    return {
+      actionLabel: "Completar perfil",
+      description: "Defina seu momento financeiro para o Deniaros priorizar metas, alertas e linguagem com mais precisão.",
+      href: "/personal-profile",
+      metric: "1 passo",
+      reason: "Personalização pendente",
+      title: "Comece pelo seu contexto.",
+      tone: "attention"
+    };
+  }
+
+  if (!hasAtLeastOneAccount) {
+    return {
+      actionLabel: "Criar carteira",
+      description: "Sem uma carteira ou conta, o saldo não tem origem confiável e a previsão perde força.",
+      href: "/accounts",
+      metric: "0 contas",
+      reason: "Base financeira ausente",
+      title: "Conecte a base do seu dinheiro.",
+      tone: "attention"
+    };
+  }
+
+  if (!hasAtLeastOneTransaction) {
+    return {
+      actionLabel: "Registrar movimento",
+      description: "O primeiro lançamento dá histórico ao sistema para começar a enxergar padrões reais.",
+      href: "/transactions/new",
+      metric: "0 movimentos",
+      reason: "Histórico vazio",
+      title: "Alimente o passado para projetar o futuro.",
+      tone: "attention"
+    };
+  }
+
+  if (!hasOpenSchedule) {
+    return {
+      actionLabel: "Montar agenda",
+      description: "Cadastre contas, depósitos e lembretes para o saldo deixar de ser fotografia e virar previsão.",
+      href: "/financial-agenda",
+      metric: "0 compromissos",
+      reason: "Previsão incompleta",
+      title: "Transforme saldo em agenda.",
+      tone: "attention"
+    };
+  }
+
+  if (overdueScheduleCount > 0) {
+    return {
+      actionLabel: "Resolver agora",
+      description: "Compromissos vencidos contaminam saldo, relatórios e decisões. Baixe, reagende ou ajuste antes de qualquer análise.",
+      href: "/financial-agenda",
+      metric: String(overdueScheduleCount),
+      reason: "Atraso aberto",
+      title: "Corrija os vencidos primeiro.",
+      tone: "danger"
+    };
+  }
+
+  if (projection.summary.riskLevel === "danger") {
+    return {
+      actionLabel: "Simular decisão",
+      description: "A projeção aponta risco de saldo negativo. Teste cortes, antecipações ou mudança de data antes do aperto.",
+      href: "/decisions",
+      metric: formatShortDate(
+        projection.summary.firstNegativeDate ?? projection.summary.lowestDate,
+        locale
+      ),
+      reason: "Primeiro ponto crítico",
+      title: "O futuro acendeu alerta.",
+      tone: "danger"
+    };
+  }
+
+  if (pendingTransactionCount > 0) {
+    return {
+      actionLabel: "Conferir pendências",
+      description: "Movimentos pendentes reduzem a confiança do saldo. Finalize a conferência para limpar a mesa de decisão.",
+      href: "/transactions?status=pending",
+      metric: String(pendingTransactionCount),
+      reason: "Movimentos pendentes",
+      title: "Deixe o saldo pronto para decisão.",
+      tone: "attention"
+    };
+  }
+
+  if (unclassifiedTransactionCount > 0) {
+    return {
+      actionLabel: "Classificar",
+      description: "Categorias revelam onde o dinheiro escapa. Sem elas, relatórios e IA perdem contexto.",
+      href: "/transactions",
+      metric: String(unclassifiedTransactionCount),
+      reason: "Sem categoria",
+      title: "Dê contexto ao seu histórico.",
+      tone: "attention"
+    };
+  }
+
+  if (dueSoonScheduleCount > 0) {
+    return {
+      actionLabel: "Ver vencimentos",
+      description: "Há compromissos próximos. Antecipe o impacto no caixa antes de assumir novos gastos.",
+      href: "/financial-agenda",
+      metric: String(dueSoonScheduleCount),
+      reason: "Próximos dias",
+      title: "Antecipe o que está chegando.",
+      tone: "attention"
+    };
+  }
+
+  if (projection.summary.riskLevel === "attention") {
+    return {
+      actionLabel: "Ajustar plano",
+      description: "O menor saldo previsto pede cautela. Reorganize uma conta, meta ou despesa antes de perder margem.",
+      href: "/decisions",
+      metric: formatCurrency(projection.summary.lowestBalance, baseCurrency, locale),
+      reason: "Menor saldo previsto",
+      title: "Ainda dá para agir com calma.",
+      tone: "attention"
+    };
+  }
+
+  return {
+    actionLabel: "Pedir diagnóstico",
+    description: "Com a base saudável, use a IA para escolher a próxima melhoria: reserva, dívida, orçamento ou meta.",
+    href: "/assistant?question=Me%20de%20a%20proxima%20melhor%20acao%20para%20evoluir%20minha%20vida%20financeira",
+    metric: formatCurrency(projection.summary.lowestBalance, baseCurrency, locale),
+    reason: "Margem prevista",
+    title: "Aproveite a zona boa para evoluir.",
+    tone: "stable"
+  };
 }
 
 function buildHomeCommandActions({
