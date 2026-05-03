@@ -3,6 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { hasAdminPermission } from "@/lib/admin-permissions";
 import { formatCurrency } from "@/lib/finance";
+import { recordDataAccessEvent } from "@/lib/privacy";
 import { resolvePlanVisualTier } from "@/lib/saas-plans";
 import {
   getTicketSla,
@@ -337,6 +338,24 @@ export default async function SubscriberDetailPage({
     scheduledCountResult.error,
     importCountResult.error
   ].filter(Boolean);
+  const canReadSensitiveFinancialData = access.role === "founder" || access.role === "admin";
+
+  if (canReadSensitiveFinancialData) {
+    await recordDataAccessEvent(supabase, {
+      accessReason: "Detalhe financeiro do assinante aberto no painel administrativo.",
+      accessScope: "admin_financial_review",
+      actorRole: access.role,
+      metadata: {
+        accounts: accounts.length,
+        recentTransactions: recentTransactions.length,
+        scheduledItems: upcomingItems.length,
+        targetWorkspaceId: workspace.id
+      },
+      user,
+      workspaceId: workspace.id
+    });
+  }
+
   const activeFlags = flags.filter((flag) => {
     if (!flag.is_enabled) {
       return false;

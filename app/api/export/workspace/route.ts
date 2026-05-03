@@ -1,4 +1,5 @@
 import { ensureDefaultWorkspace } from "@/lib/workspace-bootstrap";
+import { recordDataAccessEvent } from "@/lib/privacy";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const workspaceScopedTables = [
@@ -20,7 +21,9 @@ const workspaceScopedTables = [
   "account_reconciliation_checks",
   "saas_support_tickets",
   "saas_support_ticket_messages",
-  "saas_subscriptions"
+  "saas_subscriptions",
+  "privacy_preferences",
+  "data_access_events"
 ] as const;
 
 type ExportTableResult = {
@@ -51,6 +54,16 @@ export async function GET() {
       { status: 404 }
     );
   }
+
+  await recordDataAccessEvent(supabase, {
+    accessReason: "Backup completo exportado pelo usuario.",
+    accessScope: "backup_export",
+    metadata: {
+      exportVersion: 1
+    },
+    user,
+    workspaceId
+  });
 
   const tables: Record<string, ExportTableResult> = {};
 

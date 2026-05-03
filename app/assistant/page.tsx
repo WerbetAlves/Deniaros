@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { FinancialAssistantChat } from "@/components/financial-assistant-chat";
+import { getPrivacyPreferences } from "@/lib/privacy";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
 export default async function AssistantPage({
@@ -8,10 +9,11 @@ export default async function AssistantPage({
 }: {
   searchParams: Promise<{ question?: string }>;
 }) {
-  const { user, workspaceId } = await getWorkspaceContext();
+  const { supabase, user, workspaceId } = await getWorkspaceContext();
   const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY?.trim());
   const params = await searchParams;
   const initialQuestion = String(params.question ?? "").trim();
+  const privacyPreferences = await getPrivacyPreferences(supabase, user.id, workspaceId);
 
   return (
     <AppShell user={user} userEmail={user.email} workspaceId={workspaceId}>
@@ -32,7 +34,11 @@ export default async function AssistantPage({
         </div>
 
         <div className="assistant-layout">
-          <FinancialAssistantChat hasGeminiKey={hasGeminiKey} initialQuestion={initialQuestion} />
+          <FinancialAssistantChat
+            hasGeminiKey={hasGeminiKey}
+            initialAllowFinancialContext={privacyPreferences.allowAiFinancialContext}
+            initialQuestion={initialQuestion}
+          />
 
           <aside className="assistant-side-panel">
             <section className="panel assistant-guidance-card">
@@ -48,9 +54,12 @@ export default async function AssistantPage({
             <section className="panel assistant-guidance-card">
               <p className="section-label">Privacidade</p>
               <h3>Você controla o contexto</h3>
+              <Link className="ghost-button" href="/settings/privacy">
+                Ajustar privacidade
+              </Link>
               <p>
-                O chat usa uma síntese financeira, não uma exportação completa. Desligue o
-                contexto quando quiser conversar de forma genérica.
+                O chat usa contexto financeiro apenas com consentimento global ativo em
+                Privacidade e com o controle da conversa ligado.
               </p>
             </section>
 

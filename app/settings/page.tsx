@@ -106,9 +106,10 @@ const settingsItems: SettingsItem[] = [
     id: "privacy",
     area: "security",
     title: "Privacidade e acesso",
-    description: "Sessões, permissões, autenticação e proteção de dados sensíveis.",
-    status: "Planejado",
-    action: "Em breve"
+    description: "LGPD, consentimento da IA, exportação, exclusão e logs de acesso.",
+    href: "/settings/privacy",
+    status: "Disponível",
+    action: "Abrir privacidade"
   },
   {
     id: "backup",
