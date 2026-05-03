@@ -1,0 +1,309 @@
+.assistant-workspace {
+  gap: 22px;
+}
+
+.assistant-hero {
+  border-top: 3px solid var(--accent);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(184, 137, 56, 0.18), transparent 20rem),
+    linear-gradient(135deg, rgba(255, 253, 247, 0.98), rgba(241, 232, 213, 0.9));
+}
+
+.assistant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.3fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.assistant-chat-shell {
+  display: grid;
+  gap: 16px;
+  min-height: min(76vh, 760px);
+  border-top: 3px solid rgba(40, 90, 67, 0.58);
+  padding: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.98), rgba(247, 239, 222, 0.92)),
+    var(--surface);
+}
+
+.assistant-chat-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+  padding: 22px 22px 0;
+}
+
+.assistant-chat-head h3 {
+  margin: 6px 0 8px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 0.95;
+}
+
+.assistant-chat-head p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.assistant-chat-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.assistant-chat-body {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 360px;
+  max-height: 52vh;
+  margin: 0 22px;
+  padding: 18px;
+  overflow-y: auto;
+  border: 1px solid rgba(82, 58, 32, 0.1);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(40, 90, 67, 0.08), transparent 16rem),
+    rgba(255, 250, 239, 0.78);
+  box-shadow: var(--shadow-inset);
+}
+
+.assistant-message {
+  display: grid;
+  gap: 7px;
+  width: min(82%, 720px);
+  border: 1px solid rgba(82, 58, 32, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 253, 247, 0.94);
+  box-shadow: 0 10px 24px rgba(51, 36, 17, 0.05);
+}
+
+.assistant-message.user {
+  justify-self: end;
+  color: #fff8e8;
+  border-color: rgba(40, 90, 67, 0.22);
+  background: linear-gradient(135deg, #285a43, #143c31);
+}
+
+.assistant-message.assistant {
+  justify-self: start;
+}
+
+.assistant-message span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.assistant-message.user span {
+  color: rgba(255, 248, 232, 0.68);
+}
+
+.assistant-message p {
+  margin: 0;
+  line-height: 1.58;
+}
+
+.assistant-message.assistant p {
+  color: var(--text);
+}
+
+.assistant-message.user p {
+  color: #fff8e8;
+}
+
+.assistant-thinking {
+  opacity: 0.78;
+}
+
+.assistant-starter-row {
+  display: flex;
+  gap: 10px;
+  margin: 0 22px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.assistant-starter-row button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  border: 1px solid rgba(82, 58, 32, 0.12);
+  border-radius: 999px;
+  padding: 0 13px;
+  color: var(--accent-deep);
+  background: rgba(255, 253, 247, 0.86);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.assistant-starter-row button:hover {
+  border-color: rgba(40, 90, 67, 0.26);
+  background: rgba(40, 90, 67, 0.08);
+}
+
+.assistant-compose {
+  display: grid;
+  gap: 12px;
+  padding: 0 22px 22px;
+}
+
+.assistant-context-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin: 0 22px;
+  border: 1px solid rgba(82, 58, 32, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--text);
+  background: rgba(255, 253, 247, 0.7);
+  font-weight: 900;
+}
+
+.assistant-context-toggle input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.assistant-context-toggle small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.assistant-context-toggle span strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.assistant-context-toggle span em {
+  padding: 3px 7px;
+  border: 1px solid rgba(82, 58, 32, 0.1);
+  border-radius: 999px;
+  color: rgba(82, 58, 32, 0.62);
+  background: rgba(244, 238, 225, 0.72);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.assistant-context-toggle.roadmap-toggle {
+  opacity: 0.62;
+  background: rgba(244, 238, 225, 0.42);
+}
+
+.assistant-context-toggle.roadmap-toggle input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.assistant-compose-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.assistant-compose-row textarea {
+  width: 100%;
+  min-height: 62px;
+  max-height: 170px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: rgba(255, 253, 247, 0.94);
+  resize: vertical;
+  box-shadow: var(--shadow-inset);
+}
+
+.assistant-compose-row .primary-button {
+  min-height: 52px;
+}
+
+.assistant-side-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.assistant-guidance-card {
+  border-top: 3px solid rgba(184, 137, 56, 0.42);
+}
+
+.assistant-guidance-card h3 {
+  margin: 6px 0 8px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.assistant-guidance-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.assistant-link-stack {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 980px) {
+  .assistant-layout,
+  .assistant-chat-head,
+  .assistant-compose-row {
+    grid-template-columns: 1fr;
+  }
+
+  .assistant-chat-status {
+    justify-content: flex-start;
+  }
+
+  .assistant-chat-body {
+    min-height: 330px;
+    max-height: 58vh;
+    margin-inline: 14px;
+    padding: 14px;
+  }
+
+  .assistant-chat-head,
+  .assistant-compose {
+    padding-inline: 14px;
+  }
+
+  .assistant-starter-row {
+    margin-inline: 14px;
+  }
+
+  .assistant-context-toggle {
+    margin-inline: 14px;
+  }
+
+  .assistant-message {
+    width: 92%;
+  }
+
+  .assistant-compose-row .primary-button {
+    width: 100%;
+  }
+}
