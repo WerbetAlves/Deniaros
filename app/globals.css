@@ -9697,11 +9697,19 @@ textarea {
 }
 
 .topbar-notice-link {
+  border: 0;
+  padding: 0;
   display: inline-flex;
   margin-top: 8px;
   color: var(--accent);
+  background: transparent;
+  cursor: pointer;
   font-size: 0.82rem;
   font-weight: 900;
+}
+
+.topbar-notice form {
+  margin: 0;
 }
 
 .topbar-profile-link {

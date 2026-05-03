@@ -4,6 +4,7 @@ import { FloatingQuickActions } from "@/components/floating-quick-actions";
 import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar, type TopbarNotice, type TopbarPlanTier } from "@/components/topbar";
+import { syncActiveFinancialAlerts } from "@/lib/active-financial-alerts";
 import { getAdminAccess } from "@/lib/admin-auth";
 import { getFallbackProfile, getUserProfile } from "@/lib/profile";
 import { getPlanDisplayNameFromId, resolvePlanVisualTier } from "@/lib/saas-plans";
@@ -25,12 +26,6 @@ type SubscriptionSummaryRow = {
   plan_id: string;
   saas_plans?: { name: string; tier: string } | { name: string; tier: string }[] | null;
   status: "trialing" | "active" | "past_due" | "canceled" | "suspended" | "manual";
-};
-
-type AdvisorTransactionRow = {
-  amount: number | string;
-  status: "posted" | "pending";
-  transfer_account_id: string | null;
 };
 
 export async function AppShell({
@@ -67,9 +62,6 @@ export async function AppShell({
   if (user) {
     try {
       const activeWorkspaceId = workspaceId ?? (await ensureDefaultWorkspace(supabase, user));
-      const today = createLocalIsoDate();
-      const nextWeek = createLocalIsoDate(7);
-      const monthStart = createMonthStartIsoDate();
 
       const [
         workspaceResult,
@@ -77,10 +69,7 @@ export async function AppShell({
         systemPreferencesResult,
         accountsCountResult,
         transactionsCountResult,
-        subscriptionResult,
-        overdueScheduleResult,
-        dueSoonScheduleResult,
-        advisorTransactionsResult
+        subscriptionResult
       ] =
         await Promise.all([
           supabase
@@ -107,30 +96,16 @@ export async function AppShell({
             .from("saas_subscriptions")
             .select("plan_id,status,saas_plans(name,tier)")
             .eq("workspace_id", activeWorkspaceId)
-            .maybeSingle<SubscriptionSummaryRow>(),
-          supabase
-            .from("scheduled_items")
-            .select("id", { count: "exact", head: true })
-            .eq("workspace_id", activeWorkspaceId)
-            .neq("status", "paid")
-            .lt("due_on", today),
-          supabase
-            .from("scheduled_items")
-            .select("id", { count: "exact", head: true })
-            .eq("workspace_id", activeWorkspaceId)
-            .neq("status", "paid")
-            .gte("due_on", today)
-            .lte("due_on", nextWeek),
-          supabase
-            .from("transactions")
-            .select("amount,status,transfer_account_id")
-            .eq("workspace_id", activeWorkspaceId)
-            .gte("occurred_on", monthStart)
-            .lte("occurred_on", today)
-            .returns<AdvisorTransactionRow[]>()
+            .maybeSingle<SubscriptionSummaryRow>()
         ]);
 
       systemPreferences = systemPreferencesResult;
+      const activeFinancialAlerts = await syncActiveFinancialAlerts({
+        locale: systemPreferences.language,
+        preferences: systemPreferences,
+        supabase,
+        workspaceId: activeWorkspaceId
+      });
 
       if (subscriptionResult.data && subscriptionResult.data.status !== "canceled") {
         const linkedPlan = Array.isArray(subscriptionResult.data.saas_plans)
@@ -157,12 +132,20 @@ export async function AppShell({
         personalProfileResult.error ||
         accountsCountResult.error ||
         transactionsCountResult.error ||
-        subscriptionResult.error ||
-        overdueScheduleResult.error ||
-        dueSoonScheduleResult.error ||
-        advisorTransactionsResult.error
+        subscriptionResult.error
       ) {
         connectionStatus = connectionStatus === "disconnected" ? "disconnected" : "attention";
+      }
+
+      for (const alert of activeFinancialAlerts) {
+        notices.push({
+          description: alert.body,
+          dismissId: alert.id,
+          href: alert.href ?? undefined,
+          id: `financial-alert-${alert.id}`,
+          title: alert.title,
+          tone: alert.severity
+        });
       }
 
       if (systemPreferences.inAppNotificationsEnabled && !personalProfileResult.data) {
@@ -193,57 +176,6 @@ export async function AppShell({
           title: "Registre seu primeiro movimento.",
           description: "Seu painel ganha previsão assim que os primeiros lançamentos entram.",
           href: "/transactions/new"
-        });
-      }
-
-      const overdueScheduleCount = overdueScheduleResult.count ?? 0;
-      const dueSoonScheduleCount = dueSoonScheduleResult.count ?? 0;
-
-      if (systemPreferences.inAppNotificationsEnabled && systemPreferences.dueBillAlertsEnabled && overdueScheduleCount > 0) {
-        notices.push({
-          id: "advisor-overdue-schedule",
-          tone: "danger",
-          title: `${overdueScheduleCount} compromisso${overdueScheduleCount === 1 ? "" : "s"} em atraso.`,
-          description: "Revise a agenda financeira antes que o atraso distorça sua previsão de caixa.",
-          href: "/financial-agenda"
-        });
-      } else if (systemPreferences.inAppNotificationsEnabled && systemPreferences.dueBillAlertsEnabled && dueSoonScheduleCount > 0) {
-        notices.push({
-          id: "advisor-due-soon-schedule",
-          tone: "warning",
-          title: `${dueSoonScheduleCount} compromisso${dueSoonScheduleCount === 1 ? "" : "s"} nos próximos 7 dias.`,
-          description: "Confira contas, depósitos e reservas antes do vencimento.",
-          href: "/financial-agenda"
-        });
-      }
-
-      const monthlyPosition = summarizeAdvisorTransactions(advisorTransactionsResult.data ?? []);
-
-      if (
-        systemPreferences.inAppNotificationsEnabled &&
-        systemPreferences.budgetRiskAlertsEnabled &&
-        monthlyPosition.expenses > monthlyPosition.income &&
-        monthlyPosition.expenses > 0
-      ) {
-        notices.push({
-          id: "advisor-monthly-negative",
-          tone: "warning",
-          title: "Despesas do mês acima das receitas.",
-          description: "O Consultor financeiro recomenda revisar categorias e próximos vencimentos.",
-          href: "/reports?section=habits&report=income-vs-expenses&period=year"
-        });
-      } else if (
-        systemPreferences.inAppNotificationsEnabled &&
-        systemPreferences.budgetRiskAlertsEnabled &&
-        monthlyPosition.income > 0 &&
-        monthlyPosition.expenses / monthlyPosition.income >= 0.85
-      ) {
-        notices.push({
-          id: "advisor-monthly-tight",
-          tone: "info",
-          title: "Margem mensal ficando curta.",
-          description: "Suas despesas já passaram de 85% das receitas lançadas neste mês.",
-          href: "/reports?section=habits&report=income-vs-expenses&period=year"
         });
       }
     } catch {
@@ -291,52 +223,6 @@ export async function AppShell({
       <ConnectionLamp status={connectionStatus} />
     </div>
   );
-}
-
-function summarizeAdvisorTransactions(transactions: AdvisorTransactionRow[]) {
-  return transactions.reduce(
-    (summary, transaction) => {
-      if (transaction.status !== "posted" || transaction.transfer_account_id) {
-        return summary;
-      }
-
-      const amount = Number(transaction.amount);
-
-      if (!Number.isFinite(amount)) {
-        return summary;
-      }
-
-      if (amount >= 0) {
-        summary.income += amount;
-      } else {
-        summary.expenses += Math.abs(amount);
-      }
-
-      return summary;
-    },
-    {
-      expenses: 0,
-      income: 0
-    }
-  );
-}
-
-function createLocalIsoDate(daysToAdd = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() + daysToAdd);
-  return toIsoDate(date);
-}
-
-function createMonthStartIsoDate() {
-  const date = new Date();
-  return toIsoDate(new Date(date.getFullYear(), date.getMonth(), 1, 12, 0, 0));
-}
-
-function toIsoDate(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}-${month}-${day}`;
 }
 
 function resolveActivePlanTier(user: User | null | undefined): TopbarPlanTier {

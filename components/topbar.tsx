@@ -11,6 +11,7 @@ export type TopbarNotice = {
   id: string;
   title: string;
   description: string;
+  dismissId?: string;
   href?: string;
   tone: TopbarNoticeTone;
 };
@@ -73,6 +74,15 @@ export function Topbar({
                     <Link className="topbar-notice-link" href={notice.href}>
                       Abrir
                     </Link>
+                  ) : null}
+                  {notice.dismissId ? (
+                    <form action="/api/financial-alerts/dismiss" method="post">
+                      <input name="alertId" type="hidden" value={notice.dismissId} />
+                      <input name="returnTo" type="hidden" value={pathname} />
+                      <button className="topbar-notice-link" type="submit">
+                        Dispensar
+                      </button>
+                    </form>
                   ) : null}
                 </article>
               ))}
