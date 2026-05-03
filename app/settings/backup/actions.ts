@@ -11,6 +11,11 @@ type RestoreResult = {
   restoredCounts?: Record<string, number>;
 };
 
+type DeleteSystemDataResult = {
+  deletedCounts?: Record<string, number>;
+  totalDeleted?: number;
+};
+
 export async function restoreWorkspaceBackup(formData: FormData) {
   const { supabase, user, workspaceId } = await getWorkspaceContext();
   const confirmation = String(formData.get("confirmation") ?? "").trim();
@@ -61,6 +66,45 @@ export async function restoreWorkspaceBackup(formData: FormData) {
   redirect(
     `${backupPath}?restore_success=${encodeURIComponent(
       `Backup restaurado. ${totalRestored} registro(s) foram aplicados ao workspace.`
+    )}`
+  );
+}
+
+export async function deleteWorkspaceSystemData(formData: FormData) {
+  const { supabase, workspaceId } = await getWorkspaceContext();
+  const primaryConfirmation = String(formData.get("primaryConfirmation") ?? "").trim();
+  const backupConfirmation = String(formData.get("backupConfirmation") ?? "").trim();
+
+  if (primaryConfirmation !== "APAGAR DADOS DO SISTEMA") {
+    redirect(
+      `${backupPath}?delete_error=${encodeURIComponent(
+        "Primeira confirmacao invalida. Digite exatamente APAGAR DADOS DO SISTEMA."
+      )}`
+    );
+  }
+
+  if (backupConfirmation !== "CONFIRMO QUE TENHO BACKUP") {
+    redirect(
+      `${backupPath}?delete_error=${encodeURIComponent(
+        "Segunda confirmacao invalida. Baixe um backup e digite exatamente CONFIRMO QUE TENHO BACKUP."
+      )}`
+    );
+  }
+
+  const { data, error } = await supabase.rpc("delete_workspace_system_data", {
+    target_workspace_id: workspaceId
+  });
+
+  if (error) {
+    redirect(`${backupPath}?delete_error=${encodeURIComponent(error.message)}`);
+  }
+
+  const result = data as DeleteSystemDataResult | null;
+  const totalDeleted = Number(result?.totalDeleted ?? 0);
+
+  redirect(
+    `${backupPath}?delete_success=${encodeURIComponent(
+      `Dados apagados com seguranca. ${totalDeleted} registro(s) foram removidos e a auditoria foi preservada.`
     )}`
   );
 }

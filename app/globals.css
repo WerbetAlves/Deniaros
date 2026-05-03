@@ -14904,13 +14904,15 @@ textarea {
     var(--surface);
 }
 
-.backup-restore-form {
+.backup-restore-form,
+.backup-delete-form {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(220px, 0.7fr);
   gap: 12px;
 }
 
-.backup-restore-form label {
+.backup-restore-form label,
+.backup-delete-form label {
   display: grid;
   gap: 7px;
   color: var(--muted);
@@ -14920,7 +14922,8 @@ textarea {
   text-transform: uppercase;
 }
 
-.backup-restore-form input {
+.backup-restore-form input,
+.backup-delete-form input {
   min-height: 42px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
@@ -14949,6 +14952,13 @@ textarea {
   line-height: 1.45;
 }
 
+.danger-summary {
+  margin-top: 14px;
+  border-color: rgba(156, 63, 41, 0.28);
+  background: rgba(255, 245, 240, 0.86);
+}
+
+.backup-delete-form .form-actions,
 .backup-restore-form .form-actions {
   grid-column: 1 / -1;
 }
@@ -14961,6 +14971,7 @@ textarea {
   .planner-choice-grid,
   .planner-guidance-grid,
   .backup-readiness-grid,
+  .backup-delete-form,
   .backup-restore-form,
   .backup-danger-panel {
     grid-template-columns: 1fr;

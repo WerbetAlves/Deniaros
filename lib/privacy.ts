@@ -16,6 +16,7 @@ export type DataAccessScope =
   | "backup_export"
   | "backup_restore"
   | "delete_request"
+  | "system_data_delete"
   | "support_review"
   | "admin_financial_review"
   | "admin_operational_review";
