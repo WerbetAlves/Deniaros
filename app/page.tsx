@@ -50,13 +50,28 @@ export default async function HomePage() {
 
   const { accounts, categories, fallbackReason, payees, scheduledItems, source, transactions, workspace } =
     await getFinancialData({ supabase, user });
-  const { data: personalProfileRow } = user
-    ? await supabase
-        .from("personal_profiles")
-        .select("workspace_id")
-        .eq("workspace_id", workspace.id)
-        .maybeSingle<Pick<PersonalProfileRow, "workspace_id">>()
-    : { data: null };
+  const [personalProfileResult, budgetCountResult, debtCountResult] = user
+    ? await Promise.all([
+        supabase
+          .from("personal_profiles")
+          .select("workspace_id")
+          .eq("workspace_id", workspace.id)
+          .maybeSingle<Pick<PersonalProfileRow, "workspace_id">>(),
+        supabase
+          .from("category_budgets")
+          .select("id", { count: "exact", head: true })
+          .eq("workspace_id", workspace.id),
+        supabase
+          .from("debt_reduction_debts")
+          .select("id", { count: "exact", head: true })
+          .eq("workspace_id", workspace.id)
+          .eq("included_in_plan", true)
+      ])
+    : [
+        { data: null, error: null, count: 0 },
+        { data: null, error: null, count: 0 },
+        { data: null, error: null, count: 0 }
+      ];
   const accountBalances = getAccountBalances(accounts, transactions);
   const totalBalance = getTotalBalance(accountBalances);
   const forecastProjection = buildForecastProjection({
@@ -75,7 +90,9 @@ export default async function HomePage() {
   const importedCount = transactions.filter(
     (transaction) => transaction.source === "imported" || transaction.source === "openfinance"
   ).length;
-  const hasPersonalProfile = Boolean(personalProfileRow);
+  const hasPersonalProfile = Boolean(personalProfileResult.data);
+  const budgetCount = budgetCountResult.error ? 0 : budgetCountResult.count ?? 0;
+  const debtCount = debtCountResult.error ? 0 : debtCountResult.count ?? 0;
   const hasAtLeastOneAccount = accounts.length > 0;
   const hasAtLeastOneTransaction = transactions.length > 0;
   const hasOpenSchedule = openScheduledItems.length > 0;
@@ -247,10 +264,17 @@ export default async function HomePage() {
         />
         <FinancialRoutinePanel
           accountCount={dashboard.accountCount}
+          budgetCount={budgetCount}
+          dueSoonScheduleCount={dueSoonScheduleCount}
+          forecastRiskLevel={forecastProjection.summary.riskLevel}
           hasPersonalProfile={hasPersonalProfile}
           importedCount={importedCount}
+          includedDebtCount={debtCount}
           openScheduledCount={dashboard.scheduledCount}
+          overdueScheduleCount={overdueScheduleCount}
+          pendingTransactionCount={pendingTransactionCount}
           transactionCount={dashboard.transactionCount}
+          unclassifiedTransactionCount={unclassifiedTransactionCount}
           workspaceName={workspace.name}
         />
         <FinancialHomePersonalizer
