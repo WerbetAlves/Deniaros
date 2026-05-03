@@ -1,3 +1,4 @@
+import { ContextualHelp } from "@/components/contextual-help";
 import Link from "next/link";
 
 type QuickStartStep = {
@@ -32,8 +33,13 @@ export function QuickStartGuide({
       <div className="quickstart-head">
         <div>
           <p className="section-label">Guia de início rápido</p>
-          <h3>{title}</h3>
-          <p className="supporting-copy">{subtitle}</p>
+          <div className="quickstart-title-row">
+            <h3>{title}</h3>
+            <ContextualHelp
+              aiPrompt="Me ajude a completar a base inicial do Deniaros na ordem correta."
+              tooltip={subtitle}
+            />
+          </div>
         </div>
         <div className="quickstart-progress">
           <p className="section-label">Checklist</p>
@@ -50,8 +56,13 @@ export function QuickStartGuide({
         <article className="quickstart-next-step">
           <div>
             <p className="section-label">Proxima acao recomendada</p>
-            <h4>{nextStep.title}</h4>
-            <p>{nextStep.description}</p>
+            <div className="quickstart-title-row compact">
+              <h4>{nextStep.title}</h4>
+              <ContextualHelp
+                aiPrompt={`Me explique como concluir esta etapa no Deniaros: ${nextStep.title}.`}
+                tooltip={nextStep.description}
+              />
+            </div>
           </div>
           <Link className="primary-button" href={nextStep.href}>
             {nextStep.actionLabel}
@@ -67,8 +78,10 @@ export function QuickStartGuide({
             </div>
 
             <div className="quickstart-check-copy">
-              <strong>{step.title}</strong>
-              <p>{step.description}</p>
+              <span>
+                <strong>{step.title}</strong>
+                <ContextualHelp tooltip={step.description} />
+              </span>
             </div>
 
             <Link className={step.done ? "ghost-button" : "primary-button"} href={step.href}>

@@ -1,3 +1,4 @@
+import { ContextualHelp } from "@/components/contextual-help";
 import Link from "next/link";
 
 type RoutineReadiness = "ready" | "attention" | "quiet";
@@ -108,19 +109,23 @@ export function FinancialRoutinePanel({
       <div className="routine-hero">
         <div>
           <p className="section-label">Primeiros passos contínuos</p>
-          <h3 id="financial-routine-title">Seu ritmo financeiro no Deniaros</h3>
-          <p className="supporting-copy">
-            No Money 99 isso era uma lista de tarefas. Aqui vira um ciclo de uso:
-            registrar o presente, revisar a semana, fechar o mês e preparar o ano.
-          </p>
+          <div className="routine-title-row">
+            <h3 id="financial-routine-title">Seu ritmo financeiro no Deniaros</h3>
+            <ContextualHelp
+              aiPrompt="Explique minha rotina financeira ideal no Deniaros com base nos meus dados."
+              tooltip="Ciclo de uso recomendado: registrar o presente, revisar a semana, fechar o mês e preparar o ano sem transformar a gestão financeira em burocracia."
+            />
+          </div>
         </div>
         <article className="routine-file-card">
-          <p className="section-label">Arquivo financeiro</p>
+          <div className="routine-file-head">
+            <p className="section-label">Arquivo financeiro</p>
+            <ContextualHelp
+              aiPrompt="O que devo revisar no meu workspace financeiro agora?"
+              tooltip="Workspace é o arquivo financeiro do Deniaros: ele concentra contas, categorias, movimentos, relatórios e previsões no mesmo contexto."
+            />
+          </div>
           <strong>{workspaceName}</strong>
-          <p>
-            Pense no workspace como o antigo arquivo do Money: ele guarda contas,
-            categorias, movimentos, relatórios e previsões em um só contexto.
-          </p>
           <Link className="ghost-button" href="/settings/workspace">
             Ajustar workspace
           </Link>
@@ -131,8 +136,13 @@ export function FinancialRoutinePanel({
         {routines.map((routine) => (
           <article className={`routine-card ${routine.readiness}`} key={routine.cadence}>
             <span>{routine.cadence}</span>
-            <h4>{routine.title}</h4>
-            <p>{routine.description}</p>
+            <div className="routine-card-head">
+              <h4>{routine.title}</h4>
+              <ContextualHelp
+                aiPrompt={`Me oriente sobre esta rotina no Deniaros: ${routine.title}.`}
+                tooltip={routine.description}
+              />
+            </div>
             <Link className={routine.readiness === "attention" ? "primary-button" : "ghost-button"} href={routine.href}>
               {routine.action}
             </Link>
@@ -144,11 +154,13 @@ export function FinancialRoutinePanel({
         <div className="weekly-review-head">
           <div>
             <p className="section-label">Rotina semanal guiada</p>
-            <h4 id="weekly-review-title">Feche a semana antes que ela feche você.</h4>
-            <p>
-              Uma passada rápida nos cinco pontos que sustentam o Deniaros: saldo,
-              vencimentos, importados, orçamento e dívidas.
-            </p>
+            <div className="routine-title-row">
+              <h4 id="weekly-review-title">Feche a semana antes que ela feche você.</h4>
+              <ContextualHelp
+                aiPrompt="Conduza minha revisão semanal do Deniaros em cinco passos."
+                tooltip="Revisão semanal: saldo, vencimentos, movimentos importados, orçamento e dívidas. A ideia é decidir a semana antes que urgências decidam por você."
+              />
+            </div>
           </div>
           <div className="weekly-review-score">
             <span>{weeklyDoneCount}/5 prontos</span>

@@ -1006,6 +1006,37 @@ textarea {
   transform: translateY(0);
 }
 
+.contextual-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+}
+
+.contextual-help-ai {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgba(184, 137, 56, 0.24);
+  border-radius: 999px;
+  color: var(--accent);
+  background: rgba(255, 250, 239, 0.86);
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.contextual-help-ai:hover {
+  border-color: rgba(184, 137, 56, 0.45);
+  color: var(--accent-deep);
+  background: rgba(255, 242, 203, 0.82);
+  transform: translateY(-1px);
+}
+
 .widget-wrapper-body {
   min-width: 0;
 }
@@ -1457,6 +1488,25 @@ textarea {
   letter-spacing: -0.04em;
 }
 
+.quickstart-title-row,
+.routine-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.quickstart-title-row h3,
+.quickstart-title-row h4,
+.routine-title-row h3,
+.routine-title-row h4 {
+  margin-right: 0;
+}
+
+.quickstart-title-row.compact {
+  gap: 8px;
+}
+
 .financial-home-panel {
   display: grid;
   gap: 12px;
@@ -1853,6 +1903,19 @@ textarea {
   box-shadow: var(--shadow-inset);
 }
 
+.routine-file-head,
+.routine-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.routine-file-head .section-label {
+  margin-top: 5px;
+}
+
 .routine-file-card strong {
   color: var(--accent-deep);
   font-family: var(--font-heading);
@@ -1921,6 +1984,10 @@ textarea {
   font-family: var(--font-heading);
   font-size: 1.35rem;
   line-height: 1.08;
+}
+
+.routine-card-head h4 {
+  min-width: 0;
 }
 
 .routine-card p {
@@ -10151,14 +10218,13 @@ textarea {
 }
 
 .quickstart-check-copy strong {
-  display: block;
-  margin-bottom: 4px;
+  display: inline;
 }
 
-.quickstart-check-copy p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.5;
+.quickstart-check-copy > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .floating-quick-actions {
