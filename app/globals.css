@@ -6997,6 +6997,150 @@ textarea {
   line-height: 1.55;
 }
 
+.admin-observability-panel {
+  overflow: hidden;
+}
+
+.admin-observability-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-observability-kpis article,
+.admin-observability-card {
+  border: 1px solid rgba(82, 58, 32, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.66);
+}
+
+.admin-observability-kpis article {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.admin-observability-kpis span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-observability-kpis strong {
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 0.95;
+}
+
+.admin-observability-kpis .risk strong {
+  color: var(--danger);
+}
+
+.admin-observability-kpis .stable strong {
+  color: var(--accent);
+}
+
+.admin-observability-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.75fr) minmax(280px, 0.85fr);
+  gap: 14px;
+}
+
+.admin-observability-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 14px;
+}
+
+.admin-funnel-list,
+.admin-route-list,
+.admin-error-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-funnel-list span,
+.admin-route-list span,
+.admin-error-list span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.admin-funnel-list span strong,
+.admin-route-list span strong {
+  color: var(--accent-deep);
+}
+
+.admin-funnel-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(82, 58, 32, 0.1);
+}
+
+.admin-funnel-meter i {
+  display: block;
+  min-width: 4px;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+.admin-route-list code {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-error-list span {
+  display: grid;
+  justify-content: stretch;
+  border-left: 3px solid rgba(156, 63, 41, 0.42);
+  padding-left: 10px;
+}
+
+.admin-error-list strong {
+  color: var(--danger);
+  font-size: 0.88rem;
+}
+
+.admin-error-list small {
+  color: var(--muted);
+}
+
+.error-boundary-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(184, 137, 56, 0.12), transparent 22rem),
+    var(--bg);
+}
+
+.error-boundary-card {
+  max-width: 560px;
+}
+
+.error-boundary-card h1 {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: 0.96;
+}
+
 .admin-insight-strip {
   display: flex;
   flex-wrap: wrap;
@@ -10042,6 +10186,7 @@ textarea {
   .admin-permission-role-grid,
   .admin-subscriber-health-grid,
   .admin-kpi-grid,
+  .admin-observability-grid,
   .admin-detail-kpis,
   .admin-detail-grid,
   .admin-ops-grid {
@@ -10077,6 +10222,10 @@ textarea {
 
   .admin-ticket-list {
     grid-template-columns: 1fr;
+  }
+
+  .admin-observability-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .auth-layout {
@@ -10293,6 +10442,8 @@ textarea {
   .admin-filter-form,
   .admin-inline-form,
   .admin-permission-inline-form,
+  .admin-observability-kpis,
+  .admin-observability-grid,
   .admin-plan-grid {
     grid-template-columns: 1fr;
   }

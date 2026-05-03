@@ -1,6 +1,7 @@
 import { ActionFeedbackToast } from "@/components/action-feedback-toast";
 import { ConnectionLamp, type ConnectionStatus } from "@/components/connection-lamp";
 import { FloatingQuickActions } from "@/components/floating-quick-actions";
+import { ObservabilityTracker } from "@/components/observability-tracker";
 import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar, type TopbarNotice, type TopbarPlanTier } from "@/components/topbar";
@@ -58,10 +59,12 @@ export async function AppShell({
   const notices: TopbarNotice[] = [];
   let connectionStatus: ConnectionStatus = "disconnected";
   let systemPreferences = defaultSystemPreferences;
+  let activeWorkspaceIdForObservability = workspaceId;
 
   if (user) {
     try {
       const activeWorkspaceId = workspaceId ?? (await ensureDefaultWorkspace(supabase, user));
+      activeWorkspaceIdForObservability = activeWorkspaceId;
 
       const [
         workspaceResult,
@@ -221,6 +224,10 @@ export async function AppShell({
 
       <FloatingQuickActions />
       <ConnectionLamp status={connectionStatus} />
+      <ObservabilityTracker
+        enabled={Boolean(user)}
+        workspaceId={activeWorkspaceIdForObservability}
+      />
     </div>
   );
 }

@@ -4,6 +4,10 @@ import { getAdminAccess } from "@/lib/admin-auth";
 import { getAdminRoleLabel, hasAdminPermission } from "@/lib/admin-permissions";
 import { formatCurrency } from "@/lib/finance";
 import {
+  buildObservabilitySummary,
+  type ObservabilityEventRow
+} from "@/lib/observability";
+import {
   getTicketSla,
   getTicketStatusClass,
   parseSupportDescription,
@@ -148,7 +152,8 @@ export default async function AdminPage({
     subscriptionsResult,
     flagsResult,
     ticketsResult,
-    adminAuditResult
+    adminAuditResult,
+    observabilityResult
   ] = await Promise.all([
       supabase
         .from("workspaces")
@@ -186,7 +191,14 @@ export default async function AdminPage({
         .select("id,workspace_id,target_type,action,actor_role,created_at")
         .order("created_at", { ascending: false })
         .limit(8)
-        .returns<AdminAuditEventRow[]>()
+        .returns<AdminAuditEventRow[]>(),
+      supabase
+        .from("app_observability_events")
+        .select("created_at,event_name,event_type,severity,source,route,user_id,workspace_id,properties")
+        .gte("created_at", new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1500)
+        .returns<ObservabilityEventRow[]>()
     ]);
 
   const workspaceRows = workspacesResult.data ?? [];
@@ -195,6 +207,7 @@ export default async function AdminPage({
   const flags = flagsResult.data ?? [];
   const tickets = ticketsResult.data ?? [];
   const adminAuditEvents = adminAuditResult.data ?? [];
+  const observabilityEvents = observabilityResult.data ?? [];
   const rawSubscriptionByWorkspaceId = new Map(
     subscriptions
       .filter((subscription) => subscription.workspace_id)
@@ -220,7 +233,8 @@ export default async function AdminPage({
     subscriptionsResult.error ||
     flagsResult.error ||
     ticketsResult.error ||
-    adminAuditResult.error;
+    adminAuditResult.error ||
+    observabilityResult.error;
   const profileByUserId = new Map(profiles.map((profile) => [profile.user_id, profile]));
   const subscriptionByWorkspaceId = rawSubscriptionByWorkspaceId;
   const planById = new Map(plans.map((plan) => [plan.id, plan]));
@@ -288,6 +302,7 @@ export default async function AdminPage({
   const customerHealth = subscriptions.length
     ? Math.round((activeSubscriptionCount / subscriptions.length) * 100)
     : 0;
+  const observabilitySummary = buildObservabilitySummary(observabilityEvents);
   const normalizedQuery = query.toLowerCase();
   const filteredWorkspaces = workspaces.filter((workspace) => {
     const profile = profileByUserId.get(workspace.owner_id);
@@ -349,6 +364,14 @@ export default async function AdminPage({
       status: "Últimas ações",
       text: "Revise mudanças críticas de assinatura, suporte e flags.",
       tone: "neutral"
+    },
+    {
+      href: "#admin-observability",
+      label: "Observabilidade",
+      metric: observabilitySummary.criticalErrors,
+      status: `${observabilitySummary.activationScore}% ativação`,
+      text: "Veja funil, erros de produção e rotas que indicam tração real.",
+      tone: observabilitySummary.criticalErrors ? "risk" : "stable"
     },
     {
       href: "/admin/permissions",
@@ -785,6 +808,105 @@ export default async function AdminPage({
                 <p>Quando o suporte persistente for conectado, os tickets entrarão nesta fila.</p>
               </article>
             )}
+          </div>
+        </section>
+
+        <section className="panel admin-observability-panel" id="admin-observability">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Observabilidade</p>
+              <h3>Funil, erros e ativação</h3>
+            </div>
+            <span className="status-chip">
+              {observabilitySummary.eventsLast24Hours} evento(s) em 24h
+            </span>
+          </div>
+
+          <div className="admin-observability-kpis">
+            <article>
+              <span>Ativação média</span>
+              <strong>{observabilitySummary.activationScore}%</strong>
+            </article>
+            <article>
+              <span>Usuários ativos em 7 dias</span>
+              <strong>{observabilitySummary.uniqueUsers7Days}</strong>
+            </article>
+            <article>
+              <span>Workspaces ativos em 7 dias</span>
+              <strong>{observabilitySummary.uniqueWorkspaces7Days}</strong>
+            </article>
+            <article className={observabilitySummary.criticalErrors ? "risk" : "stable"}>
+              <span>Erros de produção</span>
+              <strong>{observabilitySummary.criticalErrors}</strong>
+            </article>
+          </div>
+
+          <div className="admin-observability-grid">
+            <article className="admin-observability-card">
+              <div className="record-headline">
+                <div>
+                  <strong>Funil de ativação</strong>
+                  <p className="micro-copy">Baseado em navegação autenticada dos últimos 7 dias.</p>
+                </div>
+              </div>
+              <div className="admin-funnel-list">
+                {observabilitySummary.funnel.map((step) => (
+                  <div key={step.key}>
+                    <span>
+                      {step.label}
+                      <strong>{step.count}</strong>
+                    </span>
+                    <div className="admin-funnel-meter" aria-hidden="true">
+                      <i style={{ width: `${step.percentage}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+
+            <article className="admin-observability-card">
+              <div className="record-headline">
+                <div>
+                  <strong>Rotas mais acessadas</strong>
+                  <p className="micro-copy">Ajuda a enxergar onde o produto cria hábito.</p>
+                </div>
+              </div>
+              <div className="admin-route-list">
+                {observabilitySummary.topRoutes.length ? (
+                  observabilitySummary.topRoutes.map((route) => (
+                    <span key={route.route}>
+                      <code>{route.route}</code>
+                      <strong>{route.count}</strong>
+                    </span>
+                  ))
+                ) : (
+                  <p className="micro-copy">Sem navegação registrada ainda.</p>
+                )}
+              </div>
+            </article>
+
+            <article className="admin-observability-card">
+              <div className="record-headline">
+                <div>
+                  <strong>Últimos erros</strong>
+                  <p className="micro-copy">Falhas capturadas por navegador e error boundary.</p>
+                </div>
+              </div>
+              <div className="admin-error-list">
+                {observabilitySummary.latestErrors.length ? (
+                  observabilitySummary.latestErrors.map((event) => (
+                    <span key={`${event.created_at}-${event.event_name}-${event.route ?? "sem-rota"}`}>
+                      <strong>{event.event_name}</strong>
+                      <small>
+                        {formatDate(event.created_at)} · {event.route ?? "sem rota"} · {event.severity}
+                      </small>
+                    </span>
+                  ))
+                ) : (
+                  <p className="micro-copy">Nenhum erro capturado nos últimos 14 dias.</p>
+                )}
+              </div>
+            </article>
           </div>
         </section>
 
