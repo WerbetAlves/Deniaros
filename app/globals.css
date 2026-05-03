@@ -14579,7 +14579,9 @@ textarea {
   text-transform: uppercase;
 }
 
+.settings-preference-grid input,
 .settings-preference-grid select,
+.settings-preference-panel input,
 .settings-preference-panel select {
   min-height: 42px;
   border: 1px solid var(--line-strong);

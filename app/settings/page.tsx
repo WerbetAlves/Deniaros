@@ -100,8 +100,9 @@ const settingsItems: SettingsItem[] = [
     area: "system",
     title: "Workspace",
     description: "Nome do arquivo financeiro, país, fuso horário e perfil de uso.",
-    status: "Roadmap",
-    action: "Em breve"
+    href: "/settings/workspace",
+    status: "Disponivel",
+    action: "Abrir workspace"
   },
   {
     id: "privacy",
