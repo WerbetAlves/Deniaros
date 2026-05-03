@@ -8,6 +8,7 @@ import { getAdminAccess } from "@/lib/admin-auth";
 import { getFallbackProfile, getUserProfile } from "@/lib/profile";
 import { getPlanDisplayNameFromId, resolvePlanVisualTier } from "@/lib/saas-plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { defaultSystemPreferences, getSystemPreferences } from "@/lib/system-preferences";
 import { ensureDefaultWorkspace } from "@/lib/workspace-bootstrap";
 import type { User } from "@supabase/supabase-js";
 
@@ -61,6 +62,7 @@ export async function AppShell({
 
   const notices: TopbarNotice[] = [];
   let connectionStatus: ConnectionStatus = "disconnected";
+  let systemPreferences = defaultSystemPreferences;
 
   if (user) {
     try {
@@ -72,6 +74,7 @@ export async function AppShell({
       const [
         workspaceResult,
         personalProfileResult,
+        systemPreferencesResult,
         accountsCountResult,
         transactionsCountResult,
         subscriptionResult,
@@ -90,6 +93,7 @@ export async function AppShell({
             .select("workspace_id")
             .eq("workspace_id", activeWorkspaceId)
             .maybeSingle<PersonalProfileSummaryRow>(),
+          getSystemPreferences(supabase, user.id, activeWorkspaceId),
           supabase
             .from("accounts")
             .select("id", { count: "exact", head: true })
@@ -127,6 +131,8 @@ export async function AppShell({
             .returns<AdvisorTransactionRow[]>()
         ]);
 
+      systemPreferences = systemPreferencesResult;
+
       if (subscriptionResult.data && subscriptionResult.data.status !== "canceled") {
         const linkedPlan = Array.isArray(subscriptionResult.data.saas_plans)
           ? subscriptionResult.data.saas_plans[0]
@@ -160,7 +166,7 @@ export async function AppShell({
         connectionStatus = connectionStatus === "disconnected" ? "disconnected" : "attention";
       }
 
-      if (!personalProfileResult.data) {
+      if (systemPreferences.inAppNotificationsEnabled && !personalProfileResult.data) {
         notices.push({
           id: "profile-recommended",
           tone: "warning",
@@ -171,7 +177,7 @@ export async function AppShell({
         });
       }
 
-      if ((accountsCountResult.count ?? 0) === 0) {
+      if (systemPreferences.inAppNotificationsEnabled && (accountsCountResult.count ?? 0) === 0) {
         notices.push({
           id: "first-wallet",
           tone: "warning",
@@ -181,7 +187,7 @@ export async function AppShell({
         });
       }
 
-      if ((transactionsCountResult.count ?? 0) === 0) {
+      if (systemPreferences.inAppNotificationsEnabled && (transactionsCountResult.count ?? 0) === 0) {
         notices.push({
           id: "first-transaction",
           tone: "info",
@@ -194,7 +200,7 @@ export async function AppShell({
       const overdueScheduleCount = overdueScheduleResult.count ?? 0;
       const dueSoonScheduleCount = dueSoonScheduleResult.count ?? 0;
 
-      if (overdueScheduleCount > 0) {
+      if (systemPreferences.inAppNotificationsEnabled && systemPreferences.dueBillAlertsEnabled && overdueScheduleCount > 0) {
         notices.push({
           id: "advisor-overdue-schedule",
           tone: "danger",
@@ -202,7 +208,7 @@ export async function AppShell({
           description: "Revise a agenda financeira antes que o atraso distorça sua previsão de caixa.",
           href: "/financial-agenda"
         });
-      } else if (dueSoonScheduleCount > 0) {
+      } else if (systemPreferences.inAppNotificationsEnabled && systemPreferences.dueBillAlertsEnabled && dueSoonScheduleCount > 0) {
         notices.push({
           id: "advisor-due-soon-schedule",
           tone: "warning",
@@ -214,7 +220,12 @@ export async function AppShell({
 
       const monthlyPosition = summarizeAdvisorTransactions(advisorTransactionsResult.data ?? []);
 
-      if (monthlyPosition.expenses > monthlyPosition.income && monthlyPosition.expenses > 0) {
+      if (
+        systemPreferences.inAppNotificationsEnabled &&
+        systemPreferences.budgetRiskAlertsEnabled &&
+        monthlyPosition.expenses > monthlyPosition.income &&
+        monthlyPosition.expenses > 0
+      ) {
         notices.push({
           id: "advisor-monthly-negative",
           tone: "warning",
@@ -223,6 +234,8 @@ export async function AppShell({
           href: "/reports?section=habits&report=income-vs-expenses&period=year"
         });
       } else if (
+        systemPreferences.inAppNotificationsEnabled &&
+        systemPreferences.budgetRiskAlertsEnabled &&
         monthlyPosition.income > 0 &&
         monthlyPosition.expenses / monthlyPosition.income >= 0.85
       ) {
@@ -252,7 +265,7 @@ export async function AppShell({
     });
   }
 
-  if (!notices.length) {
+  if (!notices.length && systemPreferences.inAppNotificationsEnabled) {
     notices.push({
       id: "all-good",
       tone: "success",

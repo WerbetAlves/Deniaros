@@ -22,6 +22,7 @@ const workspaceScopedTables = [
   "saas_support_tickets",
   "saas_support_ticket_messages",
   "saas_subscriptions",
+  "system_preferences",
   "privacy_preferences",
   "data_access_events"
 ] as const;

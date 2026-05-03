@@ -91,8 +91,9 @@ const settingsItems: SettingsItem[] = [
     area: "system",
     title: "Preferências do sistema",
     description: "Idioma, moeda base, atalhos, notificações e comportamento padrão.",
-    status: "Parcial",
-    action: "Em breve"
+    href: "/settings/preferences",
+    status: "Disponivel",
+    action: "Abrir preferencias"
   },
   {
     id: "workspace",
