@@ -60,6 +60,15 @@ const settingsItems: SettingsItem[] = [
     action: "Abrir assinatura"
   },
   {
+    id: "family",
+    area: "account",
+    title: "Plano Família",
+    description: "Convite, membro adicional, permissões e visão consolidada do workspace familiar.",
+    href: "/settings/family",
+    status: "Disponível",
+    action: "Gerenciar família"
+  },
+  {
     id: "categories",
     area: "finance",
     title: "Categorias",

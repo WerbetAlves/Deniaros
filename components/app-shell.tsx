@@ -107,7 +107,6 @@ export async function AppShell({
             .from("saas_subscriptions")
             .select("plan_id,status,saas_plans(name,tier)")
             .eq("workspace_id", activeWorkspaceId)
-            .eq("user_id", user.id)
             .maybeSingle<SubscriptionSummaryRow>(),
           supabase
             .from("scheduled_items")

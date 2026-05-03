@@ -206,6 +206,9 @@ export default async function BillingPage({
                 </p>
               </div>
               <strong>{formatPlanPrice(familyPlan)}</strong>
+              <Link className="ghost-button" href="/settings/family">
+                Gerenciar familia
+              </Link>
             </article>
           ) : null}
           <div className="billing-plan-grid">

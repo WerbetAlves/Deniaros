@@ -54,6 +54,12 @@ export async function ensureDefaultWorkspace(
   supabase: SupabaseClient,
   user: User
 ) {
+  const sharedWorkspaceId = await getPrimarySharedWorkspaceId(supabase, user.id);
+
+  if (sharedWorkspaceId) {
+    return sharedWorkspaceId;
+  }
+
   const { data: existingWorkspace } = await supabase
     .from("workspaces")
     .select("id")
@@ -109,6 +115,27 @@ export async function ensureDefaultWorkspace(
   await seedDefaultWorkspaceData(supabase, workspace.id);
 
   return workspace.id;
+}
+
+async function getPrimarySharedWorkspaceId(
+  supabase: SupabaseClient,
+  userId: string
+) {
+  const { data, error } = await supabase
+    .from("workspace_members")
+    .select("workspace_id")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .eq("is_primary", true)
+    .order("accepted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<{ workspace_id: string }>();
+
+  if (error) {
+    return null;
+  }
+
+  return data?.workspace_id ?? null;
 }
 
 async function seedDefaultWorkspaceData(
