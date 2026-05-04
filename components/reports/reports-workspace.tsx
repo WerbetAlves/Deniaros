@@ -807,15 +807,15 @@ function ReportTable({ columns, rows }: { columns: string[]; rows: string[][] })
         <tbody>
           {rows.length ? (
             rows.map((row, index) => (
-              <tr key={`${row.join("-")}-${index}`}>
+              <tr key={`row-${index}`} className="hover:bg-stone-50 transition-colors">
                 {row.map((cell, cellIndex) => (
-                  <td key={`${cell}-${cellIndex}`}>{cell}</td>
+                  <td key={`cell-${index}-${cellIndex}`} className="p-2 border-b border-stone-100">{cell}</td>
                 ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length}>Sem dados suficientes para este relatório.</td>
+              <td colSpan={columns.length} className="p-8 text-center text-stone-400 italic">Sem dados suficientes para este relatório.</td>
             </tr>
           )}
         </tbody>
