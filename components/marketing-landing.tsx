@@ -61,10 +61,10 @@ const quickResults = [
 ];
 
 const proofPoints = [
-  "Construído sobre Supabase para autenticação e dados seguros.",
-  "Preparado para Stripe, planos e gestão SaaS.",
-  "Open Finance no roadmap para conexão bancária real.",
-  "IA contextual com controle de privacidade."
+  "Seus dados protegidos por criptografia de nível bancário.",
+  "Pagamentos processados com segurança mundial (padrão Stripe).",
+  "Privacidade total: você no controle do que a IA acessa.",
+  "Infraestrutura robusta que garante que seus dados nunca se percam."
 ];
 
 const faqs = [
@@ -130,14 +130,17 @@ export function MarketingLanding() {
           </p>
           <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mês.</h1>
           <p className="marketing-hero-lead">
-            Veja quanto você pode gastar hoje, o que vai acontecer com seu saldo e o que
-            ajustar antes do problema chegar.
+            O único sistema que não foca apenas no que você gastou, mas no que vai 
+            acontecer com seu saldo nos próximos 90 dias. Tome decisões sem ansiedade.
           </p>
           <div className="marketing-hero-actions">
-            <Link className="marketing-primary marketing-primary-large marketing-hero-primary" href="/login?mode=signup">
-              Começar grátis agora
-              <ArrowRight aria-hidden="true" size={18} />
-            </Link>
+            <div className="marketing-hero-cta-wrapper">
+              <Link className="marketing-primary marketing-primary-large marketing-hero-primary" href="/login?mode=signup">
+                Começar grátis agora
+                <ArrowRight aria-hidden="true" size={18} />
+              </Link>
+              <small className="marketing-cta-note">✓ Não precisa de cartão de crédito</small>
+            </div>
             <Link className="marketing-secondary" href="#como-funciona">
               Ver como funciona
             </Link>
@@ -238,6 +241,38 @@ export function MarketingLanding() {
           </h2>
         </div>
         <p>Aqui você não só organiza. Você decide antes do problema acontecer.</p>
+      </section>
+
+      <section className="marketing-ai-advisor" aria-labelledby="ai-advisor-title">
+        <div className="marketing-ai-advisor-head">
+          <p className="marketing-section-label">Inteligência que orienta</p>
+          <h2 id="ai-advisor-title">Um consultor financeiro 24h à sua disposição.</h2>
+          <p>
+            Pergunte em linguagem natural e receba insights baseados na sua realidade,
+            não em fórmulas genéricas.
+          </p>
+        </div>
+        <div className="marketing-ai-sim">
+          <div className="marketing-ai-chat-box">
+            <div className="marketing-ai-msg user">
+              <p>Deniaros, posso trocar de carro no mês que vem?</p>
+            </div>
+            <div className="marketing-ai-msg assistant">
+              <div className="marketing-ai-thinking">
+                <Sparkles aria-hidden="true" size={14} className="pulse" />
+                Analisando sua projeção de 90 dias...
+              </div>
+              <div className="marketing-ai-answer">
+                <p>
+                  <strong>Não recomendo agora.</strong> Seu menor saldo previsto será de <strong>R$ 840,00</strong> no dia 15 devido ao IPVA e seguro. 
+                </p>
+                <p>
+                  Se você adiar a troca para <strong>abril</strong>, terá uma margem de segurança de R$ 3.200,00.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="marketing-weekly-ritual">
