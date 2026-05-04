@@ -17,7 +17,7 @@ export async function loginWithEmail(page: Page) {
 
   try {
     await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 20_000 });
-  } catch (error) {
+  } catch {
     const visibleError = await page
       .locator(".auth-toast, .form-error, [role='alert']")
       .first()
@@ -29,12 +29,36 @@ export async function loginWithEmail(page: Page) {
     );
   }
 
-  await skipPersonalProfileGate(page);
+  await dismissPersonalProfileGate(page);
+}
+
+export async function gotoAuthenticatedPage(page: Page, path: string) {
+  await page.goto(path, { waitUntil: "domcontentloaded" });
+  const dismissed = await dismissPersonalProfileGate(page);
+
+  if (dismissed && !samePath(page, path)) {
+    await page.goto(path, { waitUntil: "domcontentloaded" });
+    await dismissPersonalProfileGate(page);
+  }
+}
+
+export async function dismissPersonalProfileGate(page: Page) {
+  const skipButton = page.getByRole("button", { name: "Pular por enquanto" });
+  const isProfileGate = page.url().includes("/personal-profile");
+  const hasSkipButton = await skipButton.isVisible().catch(() => false);
+
+  if (!isProfileGate && !hasSkipButton) {
+    return false;
+  }
+
+  await skipButton.click();
+  await expect(page).not.toHaveURL(/\/personal-profile(?:\?|$)/, { timeout: 15_000 });
+  return true;
 }
 
 export function skipAuthenticatedFlowWhenNeeded(testInfo: TestInfo) {
   if (testInfo.project.name !== "chromium-desktop") {
-    return "Fluxo autenticado completo roda no desktop para evitar duplicar mutacoes.";
+    return "Fluxo autenticado completo roda no desktop para evitar duplicar mutações.";
   }
 
   if (!hasE2eCredentials) {
@@ -54,17 +78,10 @@ export function futureIsoDate(daysFromNow: number) {
   return date.toISOString().slice(0, 10);
 }
 
-async function skipPersonalProfileGate(page: Page) {
-  if (!page.url().includes("/personal-profile")) {
-    return;
-  }
-
-  const skipButton = page.getByRole("button", { name: "Pular por enquanto" });
-
-  if (await skipButton.isVisible().catch(() => false)) {
-    await skipButton.click();
-    await expect(page).not.toHaveURL(/\/personal-profile(?:\?|$)/, { timeout: 15_000 });
-  }
+function samePath(page: Page, path: string) {
+  const expectedPath = path.startsWith("/") ? path : `/${path}`;
+  const current = new URL(page.url());
+  return current.pathname === expectedPath.split("?")[0];
 }
 
 function isPlaceholderEmail(email: string) {

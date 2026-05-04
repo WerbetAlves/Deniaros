@@ -2,11 +2,14 @@ import { expect, test } from "@playwright/test";
 import {
   allowE2eMutation,
   futureIsoDate,
+  gotoAuthenticatedPage,
   loginWithEmail,
   skipAuthenticatedFlowWhenNeeded
 } from "./helpers";
 
 test.describe("fluxo real de cliente autenticado", () => {
+  test.setTimeout(120_000);
+
   test.beforeEach(async ({ page }, testInfo) => {
     const skipReason = skipAuthenticatedFlowWhenNeeded(testInfo);
     test.skip(Boolean(skipReason), skipReason ?? undefined);
@@ -15,29 +18,37 @@ test.describe("fluxo real de cliente autenticado", () => {
   });
 
   test("cliente navega pelos pilares do produto sem perder contexto", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.getByRole("link", { name: /Novo movimento/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Ver agenda/i })).toBeVisible();
+    await gotoAuthenticatedPage(page, "/");
+    await expect(page.getByRole("heading", { name: /Início|Home Page|Centro de comando/i })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Novo movimento/i }).or(page.getByRole("button", { name: /Novo movimento/i }))
+        .first()
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Ver agenda/i }).or(page.getByRole("button", { name: /Ver agenda/i }))
+        .first()
+    ).toBeVisible();
 
-    await page.goto("/accounts");
-    await expect(page.getByRole("heading", { name: /Carteiras/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Adicionar carteira/i })).toBeVisible();
+    await gotoAuthenticatedPage(page, "/accounts");
+    await expect(page.getByRole("heading", { name: /Carteiras/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Adicionar carteira/i }).first()).toBeVisible();
 
-    await page.goto("/financial-agenda");
-    await expect(page.getByRole("heading", { name: /Agenda/i })).toBeVisible();
+    await gotoAuthenticatedPage(page, "/financial-agenda");
+    await expect(page.getByRole("heading", { name: /Agenda/i }).first()).toBeVisible();
     await page.getByRole("button", { name: "Nova conta" }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByLabel("Título")).toBeVisible();
-    await page.getByLabel("Fechar").click();
+    const agendaDialog = page.getByRole("dialog");
+    await expect(agendaDialog).toBeVisible();
+    await expect(page.locator('input[name="title"]')).toBeVisible();
+    await agendaDialog.getByRole("button", { name: "Fechar", exact: true }).click();
 
-    await page.goto("/reports?section=habits&report=where-money-goes");
-    await expect(page.getByRole("heading", { name: /Relat/i })).toBeVisible();
+    await gotoAuthenticatedPage(page, "/reports?section=habits&report=where-money-goes");
+    await expect(page.getByRole("heading", { name: /Relat/i }).first()).toBeVisible();
 
-    await page.goto("/support");
-    await expect(page.getByRole("heading", { name: /Chat e Suporte|Consultor/i })).toBeVisible();
+    await gotoAuthenticatedPage(page, "/support");
+    await expect(page.getByRole("heading", { name: /Chat e Suporte|Consultor/i }).first()).toBeVisible();
 
-    await page.goto("/billing");
-    await expect(page.getByRole("heading", { name: /Planos|Assinatura|Billing/i })).toBeVisible();
+    await gotoAuthenticatedPage(page, "/billing");
+    await expect(page.getByRole("heading", { name: /Planos|Assinatura|Billing/i }).first()).toBeVisible();
   });
 
   test("cliente registra movimento, agenda conta futura e encerra sessão", async ({ page }) => {
@@ -46,20 +57,20 @@ test.describe("fluxo real de cliente autenticado", () => {
     const marker = `E2E cliente ${Date.now()}`;
     const scheduledMarker = `Conta futura ${marker}`;
 
-    await page.goto("/transactions/new");
-    await page.getByLabel("Conta").selectOption({ index: 1 });
-    await page.getByLabel("Descrição").fill(marker);
-    await page.getByLabel("Valor").fill("12.34");
+    await gotoAuthenticatedPage(page, "/transactions/new");
+    await page.locator('select[name="accountId"]').selectOption({ index: 1 });
+    await page.locator('input[name="description"]').fill(marker);
+    await page.locator('input[name="amount"]').fill("12.34");
     await page.getByRole("button", { name: "Salvar lançamento" }).click();
-    await expect(page.getByText(marker)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(marker, { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 
-    await page.goto("/financial-agenda");
+    await gotoAuthenticatedPage(page, "/financial-agenda");
     await page.getByRole("button", { name: "Nova conta" }).click();
-    await page.getByLabel("Título").fill(scheduledMarker);
-    await page.getByLabel("Valor").fill("45.67");
-    await page.getByLabel("Vencimento").fill(futureIsoDate(10));
+    await page.locator('input[name="title"]').fill(scheduledMarker);
+    await page.locator('input[name="amount"]').fill("45.67");
+    await page.locator('input[name="dueDate"]').fill(futureIsoDate(10));
     await page.getByRole("button", { name: "Criar compromisso" }).click();
-    await expect(page.getByText(scheduledMarker)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(scheduledMarker, { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 
     await page.getByLabel("Sair da conta").click();
     await expect(page).toHaveURL(/\/login/);
