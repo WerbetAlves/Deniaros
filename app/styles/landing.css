@@ -23,10 +23,15 @@
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.58), transparent 88%);
 }
 
+.marketing-mobile-sticky-cta {
+  display: none;
+}
+
 .marketing-nav,
 .marketing-hero,
 .marketing-quick-results,
 .marketing-problem,
+.marketing-turning-point,
 .marketing-weekly-ritual,
 .marketing-section,
 .marketing-outcomes,
@@ -424,7 +429,7 @@
 
 .marketing-quick-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -490,9 +495,41 @@
   color: var(--gold);
 }
 
+.marketing-turning-point {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.5fr);
+  align-items: end;
+  gap: 26px;
+  margin-top: 70px;
+  padding: 30px;
+  border: 1px solid rgba(82, 58, 32, 0.14);
+  border-left: 4px solid rgba(184, 137, 56, 0.78);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 90% 8%, rgba(184, 137, 56, 0.16), transparent 18rem),
+    rgba(255, 253, 247, 0.76);
+  box-shadow: var(--shadow-inset);
+}
+
+.marketing-turning-point h2 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: clamp(2.05rem, 4.4vw, 4.2rem);
+  line-height: 0.98;
+}
+
+.marketing-turning-point p:not(.marketing-section-label) {
+  margin: 0;
+  color: var(--accent-deep);
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+  font-weight: 950;
+  line-height: 1.35;
+}
+
 .marketing-weekly-ritual {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(260px, 0.68fr) auto;
+  grid-template-columns: minmax(0, 0.92fr) minmax(260px, 0.68fr);
   align-items: center;
   gap: 24px;
   margin-top: 70px;
@@ -694,6 +731,7 @@
   .marketing-hero,
   .marketing-quick-results,
   .marketing-problem,
+  .marketing-turning-point,
   .marketing-weekly-ritual,
   .marketing-section-head,
   .marketing-outcomes,
@@ -721,6 +759,7 @@
   .marketing-hero,
   .marketing-quick-results,
   .marketing-problem,
+  .marketing-turning-point,
   .marketing-weekly-ritual,
   .marketing-section,
   .marketing-outcomes,
@@ -735,13 +774,40 @@
 
   .marketing-nav-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     width: 100%;
   }
 
-  .marketing-ghost,
-  .marketing-primary {
+  .marketing-nav-actions a.marketing-primary {
+    display: none !important;
+  }
+
+  .marketing-hero-primary,
+  .marketing-final-primary {
+    display: none !important;
+  }
+
+  .marketing-ghost {
     width: 100%;
+  }
+
+  a.marketing-mobile-sticky-cta {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    z-index: 30;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    border: 1px solid rgba(255, 246, 223, 0.24);
+    border-radius: 8px;
+    color: #fff8e9;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    box-shadow: 0 18px 38px rgba(24, 59, 45, 0.34);
+    font-weight: 950;
   }
 
   .marketing-hero {
@@ -773,13 +839,14 @@
 
   .marketing-problem,
   .marketing-quick-results,
+  .marketing-turning-point,
   .marketing-weekly-ritual,
   .marketing-outcomes,
   .marketing-feature-band {
     padding: 20px;
   }
 
-  .marketing-weekly-ritual .marketing-primary {
-    width: 100%;
+  .marketing-final-cta {
+    margin-bottom: 86px;
   }
 }

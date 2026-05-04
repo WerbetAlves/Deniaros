@@ -1,12 +1,10 @@
 import {
   ArrowRight,
   Brain,
-  CalendarClock,
   CheckCircle2,
   LineChart,
   ShieldCheck,
   Sparkles,
-  Target,
   TrendingUp,
   WalletCards
 } from "lucide-react";
@@ -14,75 +12,61 @@ import Image from "next/image";
 import Link from "next/link";
 
 const painPoints = [
-  "Voce so percebe quando o dinheiro ja apertou.",
+  "O dinheiro acaba e voce nao viu chegando.",
   "Voce registra gastos, mas nao enxerga o futuro.",
-  "Suas contas estao espalhadas e sem direcao."
-];
-
-const pillars = [
-  {
-    icon: WalletCards,
-    title: "Seu dinheiro em um so mapa",
-    description:
-      "Carteiras, contas, compromissos, importacoes, categorias e historico organizados para decisao diaria."
-  },
-  {
-    icon: CalendarClock,
-    title: "Previsao antes do aperto",
-    description:
-      "O Deniaros transforma contas futuras, depositos e recorrencias em uma agenda viva de saldo projetado."
-  },
-  {
-    icon: Brain,
-    title: "Consultor IA com contexto",
-    description:
-      "Pergunte como voce falaria com alguem de confianca. A IA entende seu resumo financeiro e sugere proximas acoes."
-  }
+  "As contas ficam espalhadas e sem direcao.",
+  "Voce vive apagando incendio."
 ];
 
 const outcomes = [
   "Voce sabe exatamente quanto pode gastar.",
   "Voce ve o problema antes dele acontecer.",
   "Voce toma decisoes sem ansiedade.",
-  "Voce para de apagar incendio."
+  "Voce para de apagar incendio.",
+  "Voce comeca a ter controle real."
 ];
 
 const journey = [
   {
     step: "01",
-    title: "Entenda para onde seu dinheiro esta indo",
-    description: "Importe ou registre movimentos para revelar padroes, vazamentos e contas que pesam."
+    title: "Organize sua base",
+    description: "Registre ou importe seus dados rapidamente."
   },
   {
     step: "02",
-    title: "Veja o que vai acontecer antes de acontecer",
-    description: "Monte sua agenda para antecipar saldo, vencimentos e riscos antes do aperto."
+    title: "Veja sua previsao",
+    description: "O sistema mostra o que vai acontecer com seu dinheiro."
   },
   {
     step: "03",
-    title: "Saiba exatamente o que fazer agora",
-    description: "Use relatorios, planejadores e IA para escolher a proxima acao com mais seguranca."
+    title: "Tome decisoes claras",
+    description: "Voce sabe exatamente o que fazer agora."
   }
 ];
 
 const features = [
   "Dashboard de decisao",
   "Agenda financeira com previsao",
-  "Planejador de dividas",
-  "Orcamento com leitura anual",
-  "Consultor IA com contexto",
-  "Backup, auditoria e privacidade"
+  "Planejamento de dividas",
+  "Orcamento com visao futura",
+  "Relatorios inteligentes",
+  "IA para orientacao"
 ];
 
 const quickResults = [
-  "Quanto pode gastar hoje",
+  "Quanto voce pode gastar hoje",
   "Se vai faltar dinheiro no mes",
-  "O que precisa ajustar agora"
+  "Onde esta o risco antes dele acontecer",
+  "O que fazer agora"
 ];
 
 export function MarketingLanding() {
   return (
     <main className="marketing-page">
+      <Link className="marketing-mobile-sticky-cta" href="/login?mode=signup">
+        Comecar gratis agora
+        <ArrowRight aria-hidden="true" size={16} />
+      </Link>
       <nav className="marketing-nav" aria-label="Principal">
         <Link className="marketing-brand" href="/">
           <Image
@@ -102,14 +86,8 @@ export function MarketingLanding() {
           <Link className="marketing-nav-link" href="#como-funciona">
             Como funciona
           </Link>
-          <Link className="marketing-nav-link" href="#diferenciais">
-            Diferenciais
-          </Link>
           <Link className="marketing-ghost" href="/login">
             Entrar
-          </Link>
-          <Link className="marketing-primary" href="/login?mode=signup">
-            Comecar gratis agora
           </Link>
         </div>
       </nav>
@@ -122,10 +100,11 @@ export function MarketingLanding() {
           </p>
           <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mes.</h1>
           <p className="marketing-hero-lead">
-            Veja quanto voce pode gastar HOJE sem comprometer seu futuro.
+            Veja quanto voce pode gastar hoje, o que vai acontecer com seu saldo e o que
+            ajustar antes do problema chegar.
           </p>
           <div className="marketing-hero-actions">
-            <Link className="marketing-primary marketing-primary-large" href="/login?mode=signup">
+            <Link className="marketing-primary marketing-primary-large marketing-hero-primary" href="/login?mode=signup">
               Comecar gratis agora
               <ArrowRight aria-hidden="true" size={18} />
             </Link>
@@ -135,16 +114,16 @@ export function MarketingLanding() {
           </div>
           <div className="marketing-trust-row" aria-label="Compromissos do Deniaros">
             <span>
-              <ShieldCheck aria-hidden="true" size={16} />
-              Privacidade e auditoria
+              <LineChart aria-hidden="true" size={16} />
+              Previsao em minutos
             </span>
             <span>
-              <LineChart aria-hidden="true" size={16} />
-              Previsao de caixa
+              <WalletCards aria-hidden="true" size={16} />
+              Base organizada
             </span>
             <span>
               <Brain aria-hidden="true" size={16} />
-              IA contextual
+              Proxima acao clara
             </span>
           </div>
         </div>
@@ -219,24 +198,16 @@ export function MarketingLanding() {
         </div>
       </section>
 
-      <section className="marketing-section" id="diferenciais">
-        <div className="marketing-section-head">
-          <p className="marketing-section-label">Por que o Deniaros converte controle em evolucao</p>
-          <h2>Ele nao nasceu para enfeitar lancamentos. Nasceu para orientar decisao.</h2>
+      <section className="marketing-turning-point">
+        <div>
+          <p className="marketing-section-label">Virada de chave</p>
+          <h2>
+            A maioria dos apps mostra o passado.
+            <br />
+            O Deniaros te mostra o que vem pela frente.
+          </h2>
         </div>
-        <div className="marketing-pillar-grid">
-          {pillars.map((pillar) => {
-            const Icon = pillar.icon;
-
-            return (
-              <article className="marketing-pillar" key={pillar.title}>
-                <Icon aria-hidden="true" size={24} />
-                <h3>{pillar.title}</h3>
-                <p>{pillar.description}</p>
-              </article>
-            );
-          })}
-        </div>
+        <p>Aqui voce nao so organiza. Voce decide antes do problema acontecer.</p>
       </section>
 
       <section className="marketing-weekly-ritual">
@@ -245,19 +216,14 @@ export function MarketingLanding() {
           <h2>Feche a semana antes que ela feche voce.</h2>
         </div>
         <p>
-          O Deniaros te guia semanalmente para revisar saldo, vencimentos, gastos, dividas e
-          proximas decisoes antes que a rotina vire surpresa.
+          O Deniaros te guia semanalmente para manter controle, prever riscos e agir com clareza.
         </p>
-        <Link className="marketing-primary" href="/login?mode=signup">
-          Comecar gratis agora
-          <ArrowRight aria-hidden="true" size={18} />
-        </Link>
       </section>
 
       <section className="marketing-outcomes">
         <div className="marketing-outcome-card">
-          <Target aria-hidden="true" size={26} />
-          <h2>O que muda na sua vida em 7 dias</h2>
+          <ShieldCheck aria-hidden="true" size={26} />
+          <h2>O que muda na sua vida em poucos dias</h2>
           <p>
             Mais clareza para gastar, pagar, ajustar e decidir sem esperar o susto chegar.
           </p>
@@ -274,8 +240,8 @@ export function MarketingLanding() {
 
       <section className="marketing-section" id="como-funciona">
         <div className="marketing-section-head marketing-section-head-narrow">
-          <p className="marketing-section-label">Metodo Deniaros</p>
-          <h2>Olhar o passado para projetar o futuro.</h2>
+          <p className="marketing-section-label">Como funciona</p>
+          <h2>Simples. Rapido. Direto.</h2>
         </div>
         <div className="marketing-journey">
           {journey.map((item) => (
@@ -291,7 +257,8 @@ export function MarketingLanding() {
       <section className="marketing-feature-band">
         <div>
           <p className="marketing-section-label">Direcao financeira</p>
-          <h2>Voce nao precisa de mais um app. Precisa de direcao.</h2>
+          <h2>Voce nao precisa de mais um app financeiro.</h2>
+          <p>Voce precisa de direcao.</p>
         </div>
         <div className="marketing-feature-grid">
           {features.map((feature) => (
@@ -310,7 +277,7 @@ export function MarketingLanding() {
         <p>
           Crie sua conta gratuita e veja sua previsao em minutos.
         </p>
-        <Link className="marketing-primary marketing-primary-large" href="/login?mode=signup">
+        <Link className="marketing-primary marketing-primary-large marketing-final-primary" href="/login?mode=signup">
           Comecar gratis agora
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
