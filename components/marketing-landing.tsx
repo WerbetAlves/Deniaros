@@ -243,34 +243,46 @@ export function MarketingLanding() {
         <p>Aqui você não só organiza. Você decide antes do problema acontecer.</p>
       </section>
 
-      <section className="marketing-ai-advisor" aria-labelledby="ai-advisor-title">
-        <div className="marketing-ai-advisor-head">
+      <section className="marketing-section" aria-labelledby="ai-advisor-title">
+        <div className="marketing-section-head marketing-section-head-narrow">
           <p className="marketing-section-label">Inteligência que orienta</p>
           <h2 id="ai-advisor-title">Um consultor financeiro 24h à sua disposição.</h2>
           <p>
-            Pergunte em linguagem natural e receba insights baseados na sua realidade,
-            não em fórmulas genéricas.
+            Pergunte em linguagem natural e receba respostas baseadas na sua projeção real,
+            não em dicas genéricas de internet.
           </p>
         </div>
-        <div className="marketing-ai-sim">
-          <div className="marketing-ai-chat-box">
-            <div className="marketing-ai-msg user">
-              <p>Deniaros, posso trocar de carro no mês que vem?</p>
-            </div>
-            <div className="marketing-ai-msg assistant">
-              <div className="marketing-ai-thinking">
-                <Sparkles aria-hidden="true" size={14} className="pulse" />
-                Analisando sua projeção de 90 dias...
-              </div>
-              <div className="marketing-ai-answer">
-                <p>
-                  <strong>Não recomendo agora.</strong> Seu menor saldo previsto será de <strong>R$ 840,00</strong> no dia 15 devido ao IPVA e seguro. 
-                </p>
-                <p>
-                  Se você adiar a troca para <strong>abril</strong>, terá uma margem de segurança de R$ 3.200,00.
-                </p>
-              </div>
-            </div>
+
+        <div className="marketing-decision-board" aria-label="Simulação do Consultor IA">
+          <p className="marketing-board-kicker">
+            <Sparkles aria-hidden="true" size={14} style={{ display: "inline", marginBottom: "-2px", marginRight: "4px" }} />
+            O que a IA do Deniaros faria:
+          </p>
+          <div className="marketing-board-header">
+            <span>Você perguntou:</span>
+            <strong>"Posso trocar de carro no mês que vem?"</strong>
+          </div>
+          <div className="marketing-balance-card">
+            <span>Análise da IA (Projeção de 90 dias)</span>
+            <strong>Não recomendo agora.</strong>
+            <small>Seu menor saldo previsto será de R$ 840,00 no dia 15 devido ao IPVA e seguro.</small>
+          </div>
+          <div className="marketing-board-grid">
+            <article>
+              <span>Ação sugerida</span>
+              <strong>Adiar para abril</strong>
+              <small>A margem sobe para R$ 3.200</small>
+            </article>
+            <article>
+              <span>Impacto</span>
+              <strong>Risco evitado</strong>
+              <small>Uso do cheque especial</small>
+            </article>
+            <article>
+              <span>Decisão</span>
+              <strong>Segura</strong>
+              <small>Baseada nos seus dados</small>
+            </article>
           </div>
         </div>
       </section>
