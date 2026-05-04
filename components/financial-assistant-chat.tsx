@@ -191,8 +191,8 @@ export function FinancialAssistantChat({
         {messages.map((message) => (
           <article className={`assistant-message ${message.role}`} key={message.id}>
             <span>{message.role === "user" ? "Você" : "Deniaros"}</span>
-            {message.content.split("\n\n").map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
+            {message.content.split("\n\n").map((paragraph, idx) => (
+              <p key={`${message.id}-p-${idx}`}>{paragraph}</p>
             ))}
           </article>
         ))}

@@ -797,25 +797,37 @@ function ReportTable({ columns, rows }: { columns: string[]; rows: string[][] })
   return (
     <div className="money-report-table-shell">
       <table>
-        <thead>
+        <thead className="bg-stone-50 border-b border-stone-200">
           <tr>
             {columns.map((column) => (
-              <th key={column}>{column}</th>
+              <th 
+                key={column} 
+                className="p-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wider"
+              >
+                {column}
+              </th>
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-stone-100 bg-white">
           {rows.length ? (
             rows.map((row, index) => (
-              <tr key={`row-${index}`} className="hover:bg-stone-50 transition-colors">
+              <tr key={`report-row-${index}`} className="hover:bg-stone-50/50 transition-colors">
                 {row.map((cell, cellIndex) => (
-                  <td key={`cell-${index}-${cellIndex}`} className="p-2 border-b border-stone-100">{cell}</td>
+                  <td 
+                    key={`cell-${index}-${cellIndex}`} 
+                    className={`p-3 text-sm text-stone-600 ${
+                      cell.includes("R$") || /^-?\d+/.test(cell) ? "text-right font-mono" : "text-left"
+                    }`}
+                  >
+                    {cell}
+                  </td>
                 ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={columns.length} className="p-8 text-center text-stone-400 italic">Sem dados suficientes para este relatório.</td>
+              <td colSpan={columns.length} className="p-12 text-center text-stone-400 italic text-sm">Sem dados suficientes para este relatório.</td>
             </tr>
           )}
         </tbody>
