@@ -12,18 +12,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 const painPoints = [
-  "O dinheiro acaba e voce nao viu chegando.",
-  "Voce registra gastos, mas nao enxerga o futuro.",
-  "As contas ficam espalhadas e sem direcao.",
-  "Voce vive apagando incendio."
+  "O dinheiro acaba e você não viu chegando.",
+  "Você registra gastos, mas não enxerga o futuro.",
+  "As contas ficam espalhadas e sem direção.",
+  "Você vive apagando incêndio."
 ];
 
 const outcomes = [
-  "Voce sabe exatamente quanto pode gastar.",
-  "Voce ve o problema antes dele acontecer.",
-  "Voce toma decisoes sem ansiedade.",
-  "Voce para de apagar incendio.",
-  "Voce comeca a ter controle real."
+  "Você sabe exatamente quanto pode gastar.",
+  "Você vê o problema antes dele acontecer.",
+  "Você toma decisões sem ansiedade.",
+  "Você para de apagar incêndio.",
+  "Você começa a ter controle real."
 ];
 
 const journey = [
@@ -34,36 +34,36 @@ const journey = [
   },
   {
     step: "02",
-    title: "Veja sua previsao",
+    title: "Veja sua previsão",
     description: "O sistema mostra o que vai acontecer com seu dinheiro."
   },
   {
     step: "03",
-    title: "Tome decisoes claras",
-    description: "Voce sabe exatamente o que fazer agora."
+    title: "Tome decisões claras",
+    description: "Você sabe exatamente o que fazer agora."
   }
 ];
 
 const features = [
-  "Dashboard de decisao",
-  "Agenda financeira com previsao",
-  "Planejamento de dividas",
-  "Orcamento com visao futura",
-  "Relatorios inteligentes",
-  "IA para orientacao"
+  "Dashboard de decisão",
+  "Agenda financeira com previsão",
+  "Planejamento de dívidas",
+  "Orçamento com visão futura",
+  "Relatórios inteligentes",
+  "IA para orientação"
 ];
 
 const quickResults = [
-  "Quanto voce pode gastar hoje",
-  "Se vai faltar dinheiro no mes",
-  "Onde esta o risco antes dele acontecer",
+  "Quanto você pode gastar hoje",
+  "Se vai faltar dinheiro no mês",
+  "Onde está o risco antes dele acontecer",
   "O que fazer agora"
 ];
 
 const proofPoints = [
-  "Construido sobre Supabase para autenticacao e dados seguros.",
-  "Preparado para Stripe, planos e gestao SaaS.",
-  "Open Finance no roadmap para conexao bancaria real.",
+  "Construído sobre Supabase para autenticação e dados seguros.",
+  "Preparado para Stripe, planos e gestão SaaS.",
+  "Open Finance no roadmap para conexão bancária real.",
   "IA contextual com controle de privacidade."
 ];
 
@@ -71,22 +71,22 @@ const faqs = [
   {
     question: "Meus dados financeiros ficam seguros?",
     answer:
-      "Sim. O Deniaros foi desenhado com autenticacao, permissoes, auditoria, backup e controles de privacidade para proteger o workspace financeiro."
+      "Sim. O Deniaros foi desenhado com autenticação, permissões, auditoria, backup e controles de privacidade para proteger o workspace financeiro."
   },
   {
     question: "Preciso conectar banco para usar?",
     answer:
-      "Nao. Voce pode comecar registrando ou importando dados manualmente. A conexao Open Finance entra como evolucao para automatizar ainda mais a rotina."
+      "Não. Você pode começar registrando ou importando dados manualmente. A conexão Open Finance entra como evolução para automatizar ainda mais a rotina."
   },
   {
-    question: "A IA ve todos os meus dados?",
+    question: "A IA vê todos os meus dados?",
     answer:
-      "A IA usa apenas o contexto financeiro necessario para orientar sua decisao dentro do Deniaros, com foco em saldo, agenda, riscos e proximas acoes."
+      "A IA usa apenas o contexto financeiro necessário para orientar sua decisão dentro do Deniaros, com foco em saldo, agenda, riscos e próximas ações."
   },
   {
     question: "Consigo testar antes de pagar?",
     answer:
-      "Sim. A proposta e permitir que voce veja sua previsao em minutos e entenda se o Deniaros resolve sua rotina antes de assumir um plano pago."
+      "Sim. A proposta é permitir que você veja sua previsão em minutos e entenda se o Deniaros resolve sua rotina antes de assumir um plano pago."
   }
 ];
 
@@ -94,7 +94,7 @@ export function MarketingLanding() {
   return (
     <main className="marketing-page">
       <Link className="marketing-mobile-sticky-cta" href="/login?mode=signup">
-        Comecar gratis agora
+        Começar grátis agora
         <ArrowRight aria-hidden="true" size={16} />
       </Link>
       <nav className="marketing-nav" aria-label="Principal">
@@ -109,7 +109,7 @@ export function MarketingLanding() {
           />
           <span>
             <strong>Deniaros</strong>
-            <small>Controle com previsao</small>
+            <small>Controle com previsão</small>
           </span>
         </Link>
         <div className="marketing-nav-actions">
@@ -126,16 +126,16 @@ export function MarketingLanding() {
         <div className="marketing-hero-copy">
           <p className="marketing-eyebrow">
             <Sparkles aria-hidden="true" size={16} />
-            Gestao financeira que olha para frente
+            Gestão financeira que olha para frente
           </p>
-          <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mes.</h1>
+          <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mês.</h1>
           <p className="marketing-hero-lead">
-            Veja quanto voce pode gastar hoje, o que vai acontecer com seu saldo e o que
+            Veja quanto você pode gastar hoje, o que vai acontecer com seu saldo e o que
             ajustar antes do problema chegar.
           </p>
           <div className="marketing-hero-actions">
             <Link className="marketing-primary marketing-primary-large marketing-hero-primary" href="/login?mode=signup">
-              Comecar gratis agora
+              Começar grátis agora
               <ArrowRight aria-hidden="true" size={18} />
             </Link>
             <Link className="marketing-secondary" href="#como-funciona">
@@ -145,7 +145,7 @@ export function MarketingLanding() {
           <div className="marketing-trust-row" aria-label="Compromissos do Deniaros">
             <span>
               <LineChart aria-hidden="true" size={16} />
-              Previsao em minutos
+              Previsão em minutos
             </span>
             <span>
               <WalletCards aria-hidden="true" size={16} />
@@ -153,21 +153,21 @@ export function MarketingLanding() {
             </span>
             <span>
               <Brain aria-hidden="true" size={16} />
-              Proxima acao clara
+              Próxima ação clara
             </span>
           </div>
         </div>
 
-        <div className="marketing-decision-board" aria-label="Exemplo de mesa de decisao Deniaros">
-          <p className="marketing-board-kicker">Veja sua previsao antes do problema acontecer</p>
+        <div className="marketing-decision-board" aria-label="Exemplo de mesa de decisão Deniaros">
+          <p className="marketing-board-kicker">Veja sua previsão antes do problema acontecer</p>
           <div className="marketing-board-header">
-            <span>Mesa de decisao</span>
-            <strong>Proximos 30 dias</strong>
+            <span>Mesa de decisão</span>
+            <strong>Próximos 30 dias</strong>
           </div>
           <div className="marketing-balance-card">
             <span>Saldo projetado</span>
             <strong>R$ 5.086,32</strong>
-            <small>Seu caixa previsto esta sob controle, sem surpresas no fim do mes.</small>
+            <small>Seu caixa previsto está sob controle, sem surpresas no fim do mês.</small>
           </div>
           <div className="marketing-board-grid">
             <article>
@@ -178,10 +178,10 @@ export function MarketingLanding() {
             <article>
               <span>Menor saldo</span>
               <strong>R$ 2.814</strong>
-              <small>ponto sensivel</small>
+              <small>ponto sensível</small>
             </article>
             <article>
-              <span>Acao</span>
+              <span>Ação</span>
               <strong>Priorizar</strong>
               <small>energia e mercado</small>
             </article>
@@ -200,8 +200,8 @@ export function MarketingLanding() {
 
       <section className="marketing-quick-results" aria-labelledby="quick-results-title">
         <div>
-          <p className="marketing-section-label">Resultado rapido</p>
-          <h2 id="quick-results-title">Em 2 minutos voce ja sabe:</h2>
+          <p className="marketing-section-label">Resultado rápido</p>
+          <h2 id="quick-results-title">Em 2 minutos você já sabe:</h2>
         </div>
         <div className="marketing-quick-grid">
           {quickResults.map((result) => (
@@ -216,7 +216,7 @@ export function MarketingLanding() {
       <section className="marketing-problem" aria-labelledby="problema-title">
         <div>
           <p className="marketing-section-label">O problema real</p>
-          <h2 id="problema-title">Voce so descobre o problema quando ja e tarde.</h2>
+          <h2 id="problema-title">Você só descobre o problema quando já é tarde.</h2>
         </div>
         <div className="marketing-pain-list">
           {painPoints.map((pain) => (
@@ -237,13 +237,13 @@ export function MarketingLanding() {
             O Deniaros te mostra o que vem pela frente.
           </h2>
         </div>
-        <p>Aqui voce nao so organiza. Voce decide antes do problema acontecer.</p>
+        <p>Aqui você não só organiza. Você decide antes do problema acontecer.</p>
       </section>
 
       <section className="marketing-weekly-ritual">
         <div>
           <p className="marketing-section-label">Rotina de controle</p>
-          <h2>Feche a semana antes que ela feche voce.</h2>
+          <h2>Feche a semana antes que ela feche você.</h2>
         </div>
         <p>
           O Deniaros te guia semanalmente para manter controle, prever riscos e agir com clareza.
@@ -271,7 +271,7 @@ export function MarketingLanding() {
       <section className="marketing-section" id="como-funciona">
         <div className="marketing-section-head marketing-section-head-narrow">
           <p className="marketing-section-label">Como funciona</p>
-          <h2>Simples. Rapido. Direto.</h2>
+          <h2>Simples. Rápido. Direto.</h2>
         </div>
         <div className="marketing-journey">
           {journey.map((item) => (
@@ -286,9 +286,9 @@ export function MarketingLanding() {
 
       <section className="marketing-feature-band">
         <div>
-          <p className="marketing-section-label">Direcao financeira</p>
-          <h2>Voce nao precisa de mais um app financeiro.</h2>
-          <p>Voce precisa de direcao.</p>
+          <p className="marketing-section-label">Direção financeira</p>
+          <h2>Você não precisa de mais um app financeiro.</h2>
+          <p>Você precisa de direção.</p>
         </div>
         <div className="marketing-feature-grid">
           {features.map((feature) => (
@@ -302,8 +302,8 @@ export function MarketingLanding() {
 
       <section className="marketing-proof" aria-labelledby="prova-social-title">
         <div>
-          <p className="marketing-section-label">Confianca para operar dinheiro real</p>
-          <h2 id="prova-social-title">Base moderna, experiencia classica e foco em decisao.</h2>
+          <p className="marketing-section-label">Confiança para operar dinheiro real</p>
+          <h2 id="prova-social-title">Base moderna, experiência clássica e foco em decisão.</h2>
         </div>
         <div className="marketing-proof-grid">
           {proofPoints.map((proof) => (
@@ -332,13 +332,13 @@ export function MarketingLanding() {
 
       <section className="marketing-final-cta">
         <TrendingUp aria-hidden="true" size={32} />
-        <p className="marketing-section-label">Controle com previsao</p>
+        <p className="marketing-section-label">Controle com previsão</p>
         <h2>Pare de adivinhar. Comece a decidir.</h2>
         <p>
-          Crie sua conta gratuita e veja sua previsao em minutos.
+          Crie sua conta gratuita e veja sua previsão em minutos.
         </p>
         <Link className="marketing-primary marketing-primary-large marketing-final-primary" href="/login?mode=signup">
-          Comecar gratis agora
+          Começar grátis agora
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
       </section>
