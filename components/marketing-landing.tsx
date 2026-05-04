@@ -60,6 +60,36 @@ const quickResults = [
   "O que fazer agora"
 ];
 
+const proofPoints = [
+  "Construido sobre Supabase para autenticacao e dados seguros.",
+  "Preparado para Stripe, planos e gestao SaaS.",
+  "Open Finance no roadmap para conexao bancaria real.",
+  "IA contextual com controle de privacidade."
+];
+
+const faqs = [
+  {
+    question: "Meus dados financeiros ficam seguros?",
+    answer:
+      "Sim. O Deniaros foi desenhado com autenticacao, permissoes, auditoria, backup e controles de privacidade para proteger o workspace financeiro."
+  },
+  {
+    question: "Preciso conectar banco para usar?",
+    answer:
+      "Nao. Voce pode comecar registrando ou importando dados manualmente. A conexao Open Finance entra como evolucao para automatizar ainda mais a rotina."
+  },
+  {
+    question: "A IA ve todos os meus dados?",
+    answer:
+      "A IA usa apenas o contexto financeiro necessario para orientar sua decisao dentro do Deniaros, com foco em saldo, agenda, riscos e proximas acoes."
+  },
+  {
+    question: "Consigo testar antes de pagar?",
+    answer:
+      "Sim. A proposta e permitir que voce veja sua previsao em minutos e entenda se o Deniaros resolve sua rotina antes de assumir um plano pago."
+  }
+];
+
 export function MarketingLanding() {
   return (
     <main className="marketing-page">
@@ -266,6 +296,36 @@ export function MarketingLanding() {
               <CheckCircle2 aria-hidden="true" size={16} />
               {feature}
             </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="marketing-proof" aria-labelledby="prova-social-title">
+        <div>
+          <p className="marketing-section-label">Confianca para operar dinheiro real</p>
+          <h2 id="prova-social-title">Base moderna, experiencia classica e foco em decisao.</h2>
+        </div>
+        <div className="marketing-proof-grid">
+          {proofPoints.map((proof) => (
+            <p key={proof}>
+              <ShieldCheck aria-hidden="true" size={17} />
+              {proof}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      <section className="marketing-faq" aria-labelledby="faq-title">
+        <div className="marketing-section-head marketing-section-head-narrow">
+          <p className="marketing-section-label">Perguntas frequentes</p>
+          <h2 id="faq-title">Antes de colocar sua vida financeira aqui.</h2>
+        </div>
+        <div className="marketing-faq-list">
+          {faqs.map((faq) => (
+            <details key={faq.question}>
+              <summary>{faq.question}</summary>
+              <p>{faq.answer}</p>
+            </details>
           ))}
         </div>
       </section>

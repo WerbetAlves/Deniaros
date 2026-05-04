@@ -36,6 +36,8 @@
 .marketing-section,
 .marketing-outcomes,
 .marketing-feature-band,
+.marketing-proof,
+.marketing-faq,
 .marketing-final-cta {
   position: relative;
   z-index: 1;
@@ -400,6 +402,7 @@
 .marketing-weekly-ritual,
 .marketing-outcomes,
 .marketing-feature-band,
+.marketing-proof,
 .marketing-final-cta {
   border: 1px solid rgba(82, 58, 32, 0.14);
   border-radius: 10px;
@@ -465,6 +468,7 @@
 .marketing-section h2,
 .marketing-outcomes h2,
 .marketing-feature-band h2,
+.marketing-proof h2,
 .marketing-final-cta h2 {
   font-size: clamp(2rem, 4vw, 3.5rem);
   line-height: 0.98;
@@ -686,6 +690,97 @@
   font-weight: 900;
 }
 
+.marketing-proof {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  gap: 26px;
+  margin-top: 70px;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 6% 0%, rgba(184, 137, 56, 0.14), transparent 15rem),
+    rgba(255, 253, 247, 0.76);
+}
+
+.marketing-proof h2 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-heading);
+  letter-spacing: 0;
+}
+
+.marketing-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.marketing-proof-grid p {
+  display: flex;
+  gap: 9px;
+  min-height: 58px;
+  margin: 0;
+  border: 1px solid rgba(45, 104, 75, 0.16);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--accent-deep);
+  background: rgba(237, 247, 232, 0.56);
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.marketing-proof-grid svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--gold);
+}
+
+.marketing-faq {
+  padding: 70px 0 0;
+}
+
+.marketing-faq-list {
+  display: grid;
+  gap: 10px;
+}
+
+.marketing-faq-list details {
+  border: 1px solid rgba(82, 58, 32, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 253, 247, 0.72);
+  box-shadow: var(--shadow-inset);
+}
+
+.marketing-faq-list summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 16px 18px;
+  color: var(--accent-deep);
+  font-weight: 950;
+}
+
+.marketing-faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.marketing-faq-list summary::after {
+  content: "+";
+  float: right;
+  color: var(--gold);
+  font-weight: 950;
+}
+
+.marketing-faq-list details[open] summary::after {
+  content: "-";
+}
+
+.marketing-faq-list p {
+  margin: 0;
+  border-top: 1px solid rgba(82, 58, 32, 0.1);
+  padding: 0 18px 16px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
 .marketing-final-cta {
   display: grid;
   justify-items: center;
@@ -735,7 +830,8 @@
   .marketing-weekly-ritual,
   .marketing-section-head,
   .marketing-outcomes,
-  .marketing-feature-band {
+  .marketing-feature-band,
+  .marketing-proof {
     grid-template-columns: 1fr;
   }
 
@@ -749,7 +845,8 @@
 
   .marketing-pillar-grid,
   .marketing-journey,
-  .marketing-quick-grid {
+  .marketing-quick-grid,
+  .marketing-proof-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -764,6 +861,8 @@
   .marketing-section,
   .marketing-outcomes,
   .marketing-feature-band,
+  .marketing-proof,
+  .marketing-faq,
   .marketing-final-cta {
     width: min(100% - 24px, 1160px);
   }
@@ -842,7 +941,8 @@
   .marketing-turning-point,
   .marketing-weekly-ritual,
   .marketing-outcomes,
-  .marketing-feature-band {
+  .marketing-feature-band,
+  .marketing-proof {
     padding: 20px;
   }
 
