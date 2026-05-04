@@ -14,9 +14,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 const painPoints = [
-  "Voce descobre o problema quando o dinheiro ja apertou.",
-  "Registra gastos, mas nao enxerga o que vem pela frente.",
-  "As contas, dividas e metas ficam espalhadas em lugares diferentes."
+  "Voce so percebe quando o dinheiro ja apertou.",
+  "Voce registra gastos, mas nao enxerga o futuro.",
+  "Suas contas estao espalhadas e sem direcao."
 ];
 
 const pillars = [
@@ -41,27 +41,27 @@ const pillars = [
 ];
 
 const outcomes = [
-  "Saber se o caixa aguenta os proximos 7, 30 e 90 dias.",
-  "Priorizar dividas, vencimentos e decisoes sem achismo.",
-  "Separar rotina, familia, metas e riscos em uma visao unica.",
-  "Trocar planilhas e apps bonitos por uma mesa de decisao real."
+  "Voce sabe exatamente quanto pode gastar.",
+  "Voce ve o problema antes dele acontecer.",
+  "Voce toma decisoes sem ansiedade.",
+  "Voce para de apagar incendio."
 ];
 
 const journey = [
   {
     step: "01",
-    title: "Olhe para o passado",
-    description: "Importe ou registre movimentos para revelar padroes, vazamentos e categorias criticas."
+    title: "Entenda para onde seu dinheiro esta indo",
+    description: "Importe ou registre movimentos para revelar padroes, vazamentos e contas que pesam."
   },
   {
     step: "02",
-    title: "Projete o futuro",
-    description: "Monte sua agenda de contas, depositos e compromissos para antecipar saldo e riscos."
+    title: "Veja o que vai acontecer antes de acontecer",
+    description: "Monte sua agenda para antecipar saldo, vencimentos e riscos antes do aperto."
   },
   {
     step: "03",
-    title: "Decida com clareza",
-    description: "Use relatorios, planejadores e IA para escolher o proximo passo com menos ansiedade."
+    title: "Saiba exatamente o que fazer agora",
+    description: "Use relatorios, planejadores e IA para escolher a proxima acao com mais seguranca."
   }
 ];
 
@@ -70,10 +70,14 @@ const features = [
   "Agenda financeira com previsao",
   "Planejador de dividas",
   "Orcamento com leitura anual",
-  "Relatorios por habito, categoria e favorecido",
-  "Plano Familia e visao consolidada",
-  "Backup, auditoria e privacidade",
-  "Suporte operacional com IA"
+  "Consultor IA com contexto",
+  "Backup, auditoria e privacidade"
+];
+
+const quickResults = [
+  "Quanto pode gastar hoje",
+  "Se vai faltar dinheiro no mes",
+  "O que precisa ajustar agora"
 ];
 
 export function MarketingLanding() {
@@ -105,7 +109,7 @@ export function MarketingLanding() {
             Entrar
           </Link>
           <Link className="marketing-primary" href="/login?mode=signup">
-            Comecar agora
+            Comecar gratis agora
           </Link>
         </div>
       </nav>
@@ -116,19 +120,17 @@ export function MarketingLanding() {
             <Sparkles aria-hidden="true" size={16} />
             Gestao financeira que olha para frente
           </p>
-          <h1>Seu dinheiro nao precisa ser uma surpresa no fim do mes.</h1>
+          <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mes.</h1>
           <p className="marketing-hero-lead">
-            O Deniaros une controle financeiro, agenda de compromissos, previsao de saldo,
-            planejadores e IA para ajudar voce a sair do modo apagar incendio e tomar decisoes
-            antes do aperto chegar.
+            Veja quanto voce pode gastar HOJE sem comprometer seu futuro.
           </p>
           <div className="marketing-hero-actions">
             <Link className="marketing-primary marketing-primary-large" href="/login?mode=signup">
-              Criar minha conta
+              Comecar gratis agora
               <ArrowRight aria-hidden="true" size={18} />
             </Link>
-            <Link className="marketing-secondary" href="#diferenciais">
-              Ver por que e diferente
+            <Link className="marketing-secondary" href="#como-funciona">
+              Ver como funciona
             </Link>
           </div>
           <div className="marketing-trust-row" aria-label="Compromissos do Deniaros">
@@ -148,6 +150,7 @@ export function MarketingLanding() {
         </div>
 
         <div className="marketing-decision-board" aria-label="Exemplo de mesa de decisao Deniaros">
+          <p className="marketing-board-kicker">Veja sua previsao antes do problema acontecer</p>
           <div className="marketing-board-header">
             <span>Mesa de decisao</span>
             <strong>Proximos 30 dias</strong>
@@ -155,7 +158,7 @@ export function MarketingLanding() {
           <div className="marketing-balance-card">
             <span>Saldo projetado</span>
             <strong>R$ 5.086,32</strong>
-            <small>Seu caixa previsto esta sob controle.</small>
+            <small>Seu caixa previsto esta sob controle, sem surpresas no fim do mes.</small>
           </div>
           <div className="marketing-board-grid">
             <article>
@@ -186,10 +189,25 @@ export function MarketingLanding() {
         </div>
       </section>
 
+      <section className="marketing-quick-results" aria-labelledby="quick-results-title">
+        <div>
+          <p className="marketing-section-label">Resultado rapido</p>
+          <h2 id="quick-results-title">Em 2 minutos voce ja sabe:</h2>
+        </div>
+        <div className="marketing-quick-grid">
+          {quickResults.map((result) => (
+            <p key={result}>
+              <CheckCircle2 aria-hidden="true" size={18} />
+              {result}
+            </p>
+          ))}
+        </div>
+      </section>
+
       <section className="marketing-problem" aria-labelledby="problema-title">
         <div>
           <p className="marketing-section-label">O problema real</p>
-          <h2 id="problema-title">A maioria dos apps mostra o gasto depois que ele ja aconteceu.</h2>
+          <h2 id="problema-title">Voce so descobre o problema quando ja e tarde.</h2>
         </div>
         <div className="marketing-pain-list">
           {painPoints.map((pain) => (
@@ -221,13 +239,27 @@ export function MarketingLanding() {
         </div>
       </section>
 
+      <section className="marketing-weekly-ritual">
+        <div>
+          <p className="marketing-section-label">Rotina de controle</p>
+          <h2>Feche a semana antes que ela feche voce.</h2>
+        </div>
+        <p>
+          O Deniaros te guia semanalmente para revisar saldo, vencimentos, gastos, dividas e
+          proximas decisoes antes que a rotina vire surpresa.
+        </p>
+        <Link className="marketing-primary" href="/login?mode=signup">
+          Comecar gratis agora
+          <ArrowRight aria-hidden="true" size={18} />
+        </Link>
+      </section>
+
       <section className="marketing-outcomes">
         <div className="marketing-outcome-card">
           <Target aria-hidden="true" size={26} />
-          <h2>O que o usuario ganha na pratica</h2>
+          <h2>O que muda na sua vida em 7 dias</h2>
           <p>
-            Menos ansiedade financeira, mais previsibilidade e uma rotina clara para enfrentar
-            contas, dividas, metas e escolhas do dia a dia.
+            Mais clareza para gastar, pagar, ajustar e decidir sem esperar o susto chegar.
           </p>
         </div>
         <div className="marketing-outcome-list">
@@ -258,8 +290,8 @@ export function MarketingLanding() {
 
       <section className="marketing-feature-band">
         <div>
-          <p className="marketing-section-label">Sistema completo</p>
-          <h2>Uma estrutura para a vida financeira inteira, nao so para anotar gastos.</h2>
+          <p className="marketing-section-label">Direcao financeira</p>
+          <h2>Voce nao precisa de mais um app. Precisa de direcao.</h2>
         </div>
         <div className="marketing-feature-grid">
           {features.map((feature) => (
@@ -274,13 +306,12 @@ export function MarketingLanding() {
       <section className="marketing-final-cta">
         <TrendingUp aria-hidden="true" size={32} />
         <p className="marketing-section-label">Controle com previsao</p>
-        <h2>Comece hoje a tomar decisoes com o dinheiro que voce tem e com o futuro que esta chegando.</h2>
+        <h2>Pare de adivinhar. Comece a decidir.</h2>
         <p>
-          O primeiro passo e simples: criar sua conta, registrar sua base e deixar o Deniaros
-          transformar informacao em direcao.
+          Crie sua conta gratuita e veja sua previsao em minutos.
         </p>
         <Link className="marketing-primary marketing-primary-large" href="/login?mode=signup">
-          Criar minha conta no Deniaros
+          Comecar gratis agora
           <ArrowRight aria-hidden="true" size={18} />
         </Link>
       </section>
