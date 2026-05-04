@@ -43,17 +43,24 @@ npm.cmd run quality
 
 ### E2E de cliente real
 
-Os testes Playwright rodam smoke público em desktop e celular. O fluxo autenticado real fica pronto para
-homologação com um usuário limpo quando estas variáveis forem informadas:
+Os testes Playwright rodam smoke público em desktop e celular. O fluxo autenticado real carrega
+automaticamente `.env.e2e.local`, que deve ser criado a partir de `.env.e2e.example`.
+
+```bash
+copy .env.e2e.example .env.e2e.local
+```
+
+Preencha as credenciais de um usuário limpo criado no Supabase Auth:
 
 ```bash
 E2E_USER_EMAIL=cliente.teste@exemplo.com
 E2E_USER_PASSWORD=senha-segura
 E2E_ALLOW_MUTATION=1
-npm.cmd run test:e2e
+npm.cmd run test:e2e:auth
 ```
 
 Sem `E2E_ALLOW_MUTATION=1`, o teste não cria lançamento nem compromisso financeiro.
+Use `npm.cmd run test:e2e` para rodar também os testes públicos e mobile.
 
 ## Beta com clientes reais
 
