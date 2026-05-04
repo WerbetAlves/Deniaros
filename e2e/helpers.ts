@@ -14,7 +14,22 @@ export async function loginWithEmail(page: Page) {
   await page.getByLabel("E-mail").fill(e2eCredentials.email);
   await page.locator('input[name="password"]').fill(e2eCredentials.password);
   await page.getByRole("button", { name: "Entrar" }).click();
-  await expect(page).not.toHaveURL(/\/login(?:\?|$)/, { timeout: 20_000 });
+
+  try {
+    await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 20_000 });
+  } catch (error) {
+    const visibleError = await page
+      .locator(".auth-toast, .form-error, [role='alert']")
+      .first()
+      .textContent()
+      .catch(() => null);
+
+    throw new Error(
+      `Login E2E não saiu da tela de login. Verifique E2E_USER_EMAIL, E2E_USER_PASSWORD e confirmação do usuário no Supabase.${visibleError ? ` Mensagem visível: ${visibleError.trim()}` : ""}`
+    );
+  }
+
+  await skipPersonalProfileGate(page);
 }
 
 export function skipAuthenticatedFlowWhenNeeded(testInfo: TestInfo) {
@@ -26,6 +41,10 @@ export function skipAuthenticatedFlowWhenNeeded(testInfo: TestInfo) {
     return "Defina E2E_USER_EMAIL e E2E_USER_PASSWORD para rodar o fluxo autenticado real.";
   }
 
+  if (isPlaceholderEmail(e2eCredentials.email)) {
+    return "Troque E2E_USER_EMAIL por um usuário real de teste. O valor atual ainda parece placeholder.";
+  }
+
   return null;
 }
 
@@ -33,4 +52,21 @@ export function futureIsoDate(daysFromNow: number) {
   const date = new Date();
   date.setDate(date.getDate() + daysFromNow);
   return date.toISOString().slice(0, 10);
+}
+
+async function skipPersonalProfileGate(page: Page) {
+  if (!page.url().includes("/personal-profile")) {
+    return;
+  }
+
+  const skipButton = page.getByRole("button", { name: "Pular por enquanto" });
+
+  if (await skipButton.isVisible().catch(() => false)) {
+    await skipButton.click();
+    await expect(page).not.toHaveURL(/\/personal-profile(?:\?|$)/, { timeout: 15_000 });
+  }
+}
+
+function isPlaceholderEmail(email: string) {
+  return /@(exemplo\.com|example\.com|seudominio\.com)$/i.test(email);
 }
