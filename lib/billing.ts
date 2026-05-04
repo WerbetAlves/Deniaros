@@ -42,3 +42,34 @@ export function getStripeSubscriptionPeriod(subscription: Stripe.Subscription) {
     currentPeriodStart: dateFromStripeTimestamp(item?.current_period_start ?? null)
   };
 }
+
+export function readStripeMetadataValue(
+  metadata: Stripe.Metadata | null | undefined,
+  key: string
+) {
+  const value = metadata?.[key];
+  return value && value.trim() ? value : null;
+}
+
+export function readStripeId(value: string | { id: string } | null) {
+  if (!value) {
+    return "";
+  }
+
+  return typeof value === "string" ? value : value.id;
+}
+
+export function readPositiveInteger(value: string | undefined, fallback: number) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export function readInvoiceSubscriptionId(invoice: Stripe.Invoice) {
+  const parentSubscription = invoice.parent?.subscription_details?.subscription;
+
+  if (parentSubscription) {
+    return readStripeId(parentSubscription);
+  }
+
+  return null;
+}

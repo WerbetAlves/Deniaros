@@ -3,7 +3,11 @@ import type Stripe from "stripe";
 import {
   dateFromStripeTimestamp,
   getStripeSubscriptionPeriod,
-  mapStripeSubscriptionStatus
+  mapStripeSubscriptionStatus,
+  readInvoiceSubscriptionId,
+  readPositiveInteger,
+  readStripeId,
+  readStripeMetadataValue
 } from "@/lib/billing";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
@@ -87,9 +91,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   await syncStripeSubscription(subscription, {
     customerId: session.customer ? readStripeId(session.customer) : null,
-    planId: readMetadataValue(session.metadata, "planId"),
-    userId: readMetadataValue(session.metadata, "userId"),
-    workspaceId: readMetadataValue(session.metadata, "workspaceId")
+    planId: readStripeMetadataValue(session.metadata, "planId"),
+    userId: readStripeMetadataValue(session.metadata, "userId"),
+    workspaceId: readStripeMetadataValue(session.metadata, "workspaceId")
   });
 }
 
@@ -111,14 +115,14 @@ async function syncStripeSubscription(
   const existing = await loadExistingSubscription(subscriptionId);
   const planId =
     override?.planId ??
-    readMetadataValue(subscription.metadata, "planId") ??
+    readStripeMetadataValue(subscription.metadata, "planId") ??
     (priceId || lookupKey ? await loadPlanIdByStripePrice(priceId, lookupKey) : null) ??
     existing?.plan_id;
   const userId =
-    override?.userId ?? readMetadataValue(subscription.metadata, "userId") ?? existing?.user_id;
+    override?.userId ?? readStripeMetadataValue(subscription.metadata, "userId") ?? existing?.user_id;
   const workspaceId =
     override?.workspaceId ??
-    readMetadataValue(subscription.metadata, "workspaceId") ??
+    readStripeMetadataValue(subscription.metadata, "workspaceId") ??
     existing?.workspace_id;
 
   if (!planId || !userId || !workspaceId) {
@@ -209,35 +213,4 @@ async function loadPlanIdByStripePrice(priceId: string | null, lookupKey: string
   }
 
   return data?.id ?? null;
-}
-
-function readMetadataValue(
-  metadata: Stripe.Metadata | null | undefined,
-  key: string
-) {
-  const value = metadata?.[key];
-  return value && value.trim() ? value : null;
-}
-
-function readStripeId(value: string | { id: string } | null) {
-  if (!value) {
-    return "";
-  }
-
-  return typeof value === "string" ? value : value.id;
-}
-
-function readPositiveInteger(value: string | undefined, fallback: number) {
-  const parsed = Number(value);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
-}
-
-function readInvoiceSubscriptionId(invoice: Stripe.Invoice) {
-  const parentSubscription = invoice.parent?.subscription_details?.subscription;
-
-  if (parentSubscription) {
-    return readStripeId(parentSubscription);
-  }
-
-  return null;
 }
