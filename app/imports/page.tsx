@@ -79,7 +79,7 @@ type PreviewTransactionRow = {
 export default async function ImportsPage({
   searchParams
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>;
+  searchParams: Promise<{ error?: string; onboarding?: string; success?: string }>;
 }) {
   const { supabase, user, workspaceId } = await getWorkspaceContext();
   const { accounts, categories, payees, workspace } = await getFinancialData({
@@ -87,7 +87,8 @@ export default async function ImportsPage({
     user,
     workspaceId
   });
-  const { error, success } = await searchParams;
+  const { error, onboarding, success } = await searchParams;
+  const isOnboardingImport = onboarding === "1";
   const [
     importedResult,
     importRulesResult,
@@ -209,21 +210,42 @@ export default async function ImportsPage({
       <section className="module-page">
         <div className="module-hero panel">
           <div>
-            <p className="section-label">Money99 clássico</p>
-            <h2>Importação</h2>
+            <p className="section-label">{isOnboardingImport ? "Começo rápido" : "Money99 clássico"}</p>
+            <h2>{isOnboardingImport ? "Comece importando seu extrato" : "Importação"}</h2>
             <p className="supporting-copy">
-              Traga o extrato para dentro do arquivo com uma porta simples:
-              CSV genérico, QIF legado, deduplicação básica e opção de deixar os
-              movimentos pendentes para revisão.
+              {isOnboardingImport
+                ? "Se você já tem um extrato CSV, use ele como primeira base. Se ainda não criou uma carteira, faça isso antes para o Deniaros saber onde gravar os movimentos."
+                : "Traga o extrato para dentro do arquivo com uma porta simples: CSV genérico, QIF legado, deduplicação básica e opção de deixar os movimentos pendentes para revisão."}
             </p>
           </div>
           <div className="profile-badges">
             <span className="status-chip">{accounts.length} conta(s) elegíveis</span>
-            <Link className="primary-button" href="/transactions?source=imported&status=pending">
-              Revisar registro
+            <Link
+              className="primary-button"
+              href={accounts.length ? "/transactions?source=imported&status=pending" : "/accounts?mode=create&kind=cash&first=1"}
+            >
+              {accounts.length ? "Revisar registro" : "Criar primeira carteira"}
             </Link>
           </div>
         </div>
+
+        {isOnboardingImport ? (
+          <section className="panel import-onboarding-panel">
+            <div>
+              <p className="section-label">Trilho inicial</p>
+              <h3>Importação também começa pela carteira.</h3>
+              <p>
+                O extrato precisa de uma conta de destino. Depois de importar, os movimentos
+                entram pendentes para revisão e a Home começa a calcular sua previsão.
+              </p>
+            </div>
+            <div className="import-onboarding-steps">
+              <span className={accounts.length ? "done" : ""}>1. Criar carteira</span>
+              <span>2. Importar CSV/QIF</span>
+              <span>3. Revisar movimentos</span>
+            </div>
+          </section>
+        ) : null}
 
         {importedResult.error && !traceabilityMigrationMissing ? (
           <section className="source-banner">
@@ -441,13 +463,26 @@ export default async function ImportsPage({
               <span className="status-chip">Legado seguro</span>
             </div>
 
-            <ImportReconciliationForm
-              accounts={accounts}
-              existingTransactions={previewTransactions}
-              importAction={importTransactions}
-              locale={workspace.locale}
-              sampleCsv={sampleCsv}
-            />
+            {accounts.length ? (
+              <ImportReconciliationForm
+                accounts={accounts}
+                existingTransactions={previewTransactions}
+                importAction={importTransactions}
+                locale={workspace.locale}
+                sampleCsv={sampleCsv}
+              />
+            ) : (
+              <article className="empty-state import-empty-onboarding">
+                <strong>Crie uma carteira antes de importar.</strong>
+                <p>
+                  Assim o Deniaros sabe onde colocar cada movimento do extrato e evita
+                  uma base confusa logo no primeiro uso.
+                </p>
+                <Link className="primary-button" href="/accounts?mode=create&kind=cash&first=1">
+                  Criar primeira carteira
+                </Link>
+              </article>
+            )}
           </section>
 
           <aside className="panel module-sidecard">

@@ -136,6 +136,16 @@
     white-space: nowrap;
   }
 
+  .wallet-choice-grid-first,
+  .wallet-modal-form-first,
+  .wallet-advanced-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wallet-modal-card-first {
+    width: min(100%, 520px);
+  }
+
   .sidebar-meta {
     display: none;
   }
@@ -891,6 +901,7 @@
   .debt-planner-grid,
   .debt-strategy-switch,
   .debt-card,
+  .import-onboarding-panel,
   .legacy-migration-grid,
   .budget-hero,
   .budget-planner-grid,

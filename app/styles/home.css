@@ -65,6 +65,9 @@
   display: grid;
   gap: 14px;
   border-left: 4px solid rgba(45, 104, 75, 0.62);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(45, 104, 75, 0.1), transparent 18rem),
+    linear-gradient(135deg, rgba(255, 253, 247, 0.98), rgba(241, 232, 214, 0.76));
 }
 
 .spending-simulator-attention {
@@ -85,15 +88,39 @@
 .spending-simulator-head h3 {
   margin: 4px 0 0;
   font-family: var(--font-heading);
-  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  font-size: clamp(1.85rem, 3vw, 2.6rem);
   line-height: 1;
 }
 
-.spending-simulator-head > span {
+.spending-simulator-head p:not(.section-label) {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.spending-simulator-balance {
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid rgba(45, 104, 75, 0.18);
+  border-radius: 8px;
+  display: grid;
+  justify-items: end;
   color: var(--accent-deep);
-  font-size: 0.95rem;
+  background: rgba(255, 253, 247, 0.76);
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
   font-weight: 900;
+  line-height: 1;
   white-space: nowrap;
+}
+
+.spending-simulator-balance small {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .spending-simulator-grid {
@@ -130,7 +157,7 @@
 .spending-simulator-result {
   border: 1px solid rgba(45, 104, 75, 0.16);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 14px;
   background: rgba(233, 242, 228, 0.72);
 }
 
@@ -148,7 +175,7 @@
   display: block;
   color: var(--accent-deep);
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: clamp(1.8rem, 3vw, 2.55rem);
   line-height: 1;
 }
 
@@ -163,8 +190,56 @@
 }
 
 .spending-simulator-result small {
+  display: grid;
+  gap: 4px;
   color: var(--muted);
   font-weight: 800;
+}
+
+.spending-simulator-decision-badge {
+  width: fit-content;
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 5px 8px;
+  border: 1px solid rgba(45, 104, 75, 0.18);
+  border-radius: 999px;
+  color: var(--accent-deep);
+  background: rgba(255, 253, 247, 0.78);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.spending-simulator-danger .spending-simulator-decision-badge {
+  color: #9d382d;
+  border-color: rgba(157, 56, 45, 0.22);
+}
+
+.spending-simulator-result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.spending-simulator-result-grid small {
+  padding: 9px 10px;
+  border: 1px solid rgba(82, 58, 32, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.64);
+}
+
+.spending-simulator-result-grid small span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.spending-simulator-result-grid small b {
+  color: var(--text);
+  font-size: 1rem;
 }
 
 .emergency-mode-panel {
@@ -198,6 +273,18 @@
   line-height: 1.5;
 }
 
+.emergency-mode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.emergency-mode-actions .primary-button,
+.emergency-mode-actions .ghost-button {
+  min-height: 38px;
+}
+
 .emergency-mode-head article {
   border: 1px solid rgba(157, 56, 45, 0.2);
   border-radius: 8px;
@@ -221,6 +308,12 @@
   font-family: var(--font-heading);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   line-height: 1;
+}
+
+.emergency-mode-head article small {
+  color: var(--muted);
+  font-weight: 900;
+  line-height: 1.35;
 }
 
 .emergency-mode-grid {
@@ -257,11 +350,26 @@
   border: 1px solid rgba(82, 58, 32, 0.11);
   border-radius: 8px;
   padding: 10px 12px;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   background: rgba(255, 253, 247, 0.78);
+}
+
+.emergency-mode-order li i {
+  width: 76px;
+  padding: 5px 7px;
+  border: 1px solid rgba(157, 56, 45, 0.16);
+  border-radius: 999px;
+  color: #9d382d;
+  background: rgba(255, 237, 229, 0.72);
+  font-size: 0.64rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .emergency-mode-order li span {
@@ -1951,5 +2059,29 @@
 
   .spending-simulator-grid {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .spending-simulator-head,
+  .emergency-mode-head {
+    grid-template-columns: 1fr;
+  }
+
+  .spending-simulator-head {
+    display: grid;
+  }
+
+  .spending-simulator-balance {
+    justify-items: start;
+    white-space: normal;
+  }
+
+  .spending-simulator-result-grid,
+  .emergency-mode-order li {
+    grid-template-columns: 1fr;
+  }
+
+  .emergency-mode-order li i {
+    width: fit-content;
   }
 }

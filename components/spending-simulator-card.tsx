@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccountBalance, ScheduledItem } from "@/lib/domain";
-import { formatCurrency } from "@/lib/finance";
+import { formatCurrency, formatShortDate } from "@/lib/finance";
 import {
   simulateSpendingDecision,
   type SpendingSimulationResult
@@ -52,6 +52,12 @@ export function SpendingSimulatorCard({
   }
 
   const tone = result?.decision === "not_recommended" ? "danger" : result?.decision === "risky" ? "attention" : "stable";
+  const decisionCopy =
+    result?.decision === "not_recommended"
+      ? "Segure esse gasto"
+      : result?.decision === "risky"
+        ? "Confira antes"
+        : "Margem saudável";
 
   return (
     <section className={`panel spending-simulator-panel spending-simulator-${tone}`} id="posso-gastar">
@@ -59,8 +65,12 @@ export function SpendingSimulatorCard({
         <div>
           <p className="section-label">Decisão rápida</p>
           <h3>Posso gastar?</h3>
+          <p>Teste uma compra antes de assumir o compromisso.</p>
         </div>
-        <span>{formatCurrency(selectedAccount.currentBalance, selectedAccount.currency || baseCurrency, locale)}</span>
+        <span className="spending-simulator-balance">
+          <small>Saldo da carteira</small>
+          {formatCurrency(selectedAccount.currentBalance, selectedAccount.currency || baseCurrency, locale)}
+        </span>
       </div>
 
       <div className="spending-simulator-grid">
@@ -94,12 +104,23 @@ export function SpendingSimulatorCard({
 
       {result ? (
         <article className="spending-simulator-result">
+          <span className="spending-simulator-decision-badge">{decisionCopy}</span>
           <strong>{result.label}</strong>
           <p>{result.message}</p>
-          <small>
-            Menor saldo após o gasto:{" "}
-            {formatCurrency(result.minimumBalance, selectedAccount.currency || baseCurrency, locale)}
-          </small>
+          <div className="spending-simulator-result-grid">
+            <small>
+              <span>Menor saldo</span>
+              <b>{formatCurrency(result.minimumBalance, selectedAccount.currency || baseCurrency, locale)}</b>
+            </small>
+            <small>
+              <span>Compromissos vistos</span>
+              <b>{result.consideredCommitments.length}</b>
+            </small>
+            <small>
+              <span>Data sensível</span>
+              <b>{result.squeezeDate ? formatShortDate(result.squeezeDate, locale) : "Sem aperto"}</b>
+            </small>
+          </div>
         </article>
       ) : null}
     </section>

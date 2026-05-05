@@ -37,6 +37,7 @@ export default async function AccountsPage({
     connection?: string;
     editId?: string;
     error?: string;
+    first?: string;
     kind?: string;
     mode?: string;
     period?: string;
@@ -51,7 +52,8 @@ export default async function AccountsPage({
     user,
     workspaceId
   });
-  const { accountId, connection, editId, error, kind, mode, period, source, status, success } = await searchParams;
+  const { accountId, connection, editId, error, first, kind, mode, period, source, status, success } =
+    await searchParams;
   const { data, error: loadError } = await supabase
     .from("accounts")
     .select("*")
@@ -94,6 +96,8 @@ export default async function AccountsPage({
   const isChooseMode = mode === "choose";
   const isCreateMode = mode === "create";
   const createPreset = resolveAccountCreatePreset(kind, connection);
+  const isFirstAccountFlow =
+    first === "1" || (!activeAccounts.length && (isChooseMode || isCreateMode));
   const selectedEditId =
     editId && accountsWithBalances.some((account) => account.id === editId) ? editId : undefined;
   const accountInEdit = selectedEditId
@@ -165,6 +169,7 @@ export default async function AccountsPage({
       dailyFlow={dailyFlow}
       error={error}
       favoriteAccounts={favoriteAccounts}
+      isFirstAccountFlow={isFirstAccountFlow}
       isChooseMode={isChooseMode}
       isCreateMode={isCreateMode}
       isFormOpen={isFormOpen}

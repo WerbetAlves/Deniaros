@@ -268,6 +268,7 @@ export type AccountsWorkspaceProps = {
   movementFilters: MovementFilters;
   accountInEdit?: AccountWithBalance;
   isFormOpen: boolean;
+  isFirstAccountFlow: boolean;
   isChooseMode: boolean;
   isCreateMode: boolean;
   createPreset: AccountCreatePreset;
@@ -306,6 +307,7 @@ export function AccountsWorkspace({
   movementFilters,
   accountInEdit,
   isFormOpen,
+  isFirstAccountFlow,
   isChooseMode,
   isCreateMode,
   createPreset,
@@ -323,16 +325,113 @@ export function AccountsWorkspace({
   chart,
   currentAccountsPath
 }: AccountsWorkspaceProps) {
+  const firstAccountChoiceIds = new Set(["cash", "manual-bank", "openfinance"]);
+  const visibleAccountChoices = isFirstAccountFlow
+    ? accountCreateChoices.filter((choice) => firstAccountChoiceIds.has(choice.id))
+    : accountCreateChoices;
+  const modalTitle = isChooseMode
+    ? isFirstAccountFlow
+      ? "Como você quer começar?"
+      : "Adicionar carteira"
+    : isCreateMode
+      ? isFirstAccountFlow
+        ? "Crie sua primeira carteira"
+        : createPreset.title
+      : "Editar carteira";
+  const firstAccountPrimaryCopy =
+    createPreset.connectionMode === "openfinance"
+      ? "Comece deixando a conexão como pendente. Se quiser agilidade agora, use a conta bancária manual e conecte o banco depois."
+      : "Preencha só o essencial. O Deniaros precisa dessa base para calcular saldo, previsão e próximos passos.";
+  const renderCreateAdvancedFields = () => (
+    <>
+      <label>
+        Tipo de carteira
+        <select defaultValue={createPreset.type} name="type">
+          {accountTypeOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Grupo financeiro
+        <select defaultValue={createPreset.accountGroup} name="accountGroup">
+          {accountGroupOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Moeda
+        <input defaultValue={workspace.baseCurrency} maxLength={3} name="currency" placeholder="BRL" />
+      </label>
+
+      <label>
+        Banco/provedor
+        <input name="openFinanceProvider" placeholder={createPreset.providerPlaceholder} />
+      </label>
+
+      <label>
+        Conexão
+        <select defaultValue={createPreset.connectionMode} name="connectionMode">
+          {accountConnectionModeOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Código de referência
+        <input name="externalAccountRef" placeholder="Ex.: ID externo da conta" />
+      </label>
+
+      <label>
+        Cor da carteira
+        <select defaultValue={createPreset.color} name="color">
+          {accountColorOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Status Open Finance
+        <select defaultValue={createPreset.openFinanceStatus} name="openFinanceStatus">
+          {openFinanceStatusOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="wallet-checkbox-label">
+        <input name="isFavorite" type="checkbox" />
+        Mostrar como conta favorita na Home e nos resumos
+      </label>
+    </>
+  );
+
   return (
     <AppShell userEmail={userEmail ?? undefined}>
       <section className="module-page">
         <div className="module-hero panel">
           <div>
-            <p className="section-label">Gestão de carteiras</p>
-            <h2>Carteiras</h2>
+            <p className="section-label">{isFirstAccountFlow ? "Primeiro passo" : "Gestão de carteiras"}</p>
+            <h2>{isFirstAccountFlow ? "Crie sua primeira carteira" : "Carteiras"}</h2>
             <p className="supporting-copy">
-              Painel executivo para gerenciar contas, carteiras, cartões, ativos, dívidas e
-              histórico financeiro sem perder a fluidez do dia a dia.
+              {isFirstAccountFlow
+                ? "Antes de prever o futuro, o Deniaros precisa saber onde seu dinheiro começa. Leva menos de um minuto."
+                : "Painel executivo para gerenciar contas, carteiras, cartões, ativos, dívidas e histórico financeiro sem perder a fluidez do dia a dia."}
             </p>
           </div>
           <div className="profile-badges">
@@ -895,59 +994,67 @@ export function AccountsWorkspace({
       {isFormOpen ? (
         <section className="wallet-modal-overlay" role="dialog" aria-modal="true">
           <div className="wallet-modal-backdrop" />
-          <article className="wallet-modal-card">
+          <article className={`wallet-modal-card${isFirstAccountFlow ? " wallet-modal-card-first" : ""}`}>
             <header className="wallet-modal-head">
-              <h3>{isChooseMode ? "Adicionar carteira" : isCreateMode ? createPreset.title : "Editar carteira"}</h3>
+              <h3>{modalTitle}</h3>
               <Link className="wallet-modal-close" href="/accounts">
                 x
               </Link>
             </header>
 
             {isChooseMode ? (
-              <div className="wallet-choice-grid">
-                {accountCreateChoices.map((choice) => (
-                  <Link className="wallet-choice-card" href={choice.href} key={choice.id}>
-                    <span>{choice.marker}</span>
-                    <strong>{choice.title}</strong>
-                    <p>{choice.description}</p>
-                  </Link>
-                ))}
-              </div>
+              <>
+                {isFirstAccountFlow ? (
+                  <article className="wallet-first-guidance">
+                    <strong>Escolha a porta mais simples.</strong>
+                    <p>
+                      Para começar rápido, use uma carteira física ou conta bancária manual.
+                      Open Finance fica como evolução quando você quiser automatizar.
+                    </p>
+                    <Link href="/imports?onboarding=1">Prefiro começar importando extrato CSV</Link>
+                  </article>
+                ) : null}
+                <div className={`wallet-choice-grid${isFirstAccountFlow ? " wallet-choice-grid-first" : ""}`}>
+                  {visibleAccountChoices.map((choice) => {
+                    const href = isFirstAccountFlow ? `${choice.href}&first=1` : choice.href;
+
+                    return (
+                      <Link className="wallet-choice-card" href={href} key={choice.id}>
+                        <span>{choice.marker}</span>
+                        <strong>{choice.title}</strong>
+                        <p>{choice.description}</p>
+                      </Link>
+                    );
+                  })}
+                </div>
+                {isFirstAccountFlow ? (
+                  <p className="wallet-first-note">
+                    Cartão, investimentos, empréstimos e aposentadoria podem entrar depois, sem travar seu começo.
+                  </p>
+                ) : null}
+              </>
             ) : isCreateMode ? (
               <>
                 <article className="wallet-modal-openfinance-hero">
-                  <strong>{createPreset.connectionMode === "openfinance" ? "OPEN FINANCE" : "GESTÃO MANUAL"}</strong>
-                  <p>{createPreset.description}</p>
+                  <strong>
+                    {isFirstAccountFlow
+                      ? "BASE FINANCEIRA"
+                      : createPreset.connectionMode === "openfinance"
+                        ? "OPEN FINANCE"
+                        : "GESTÃO MANUAL"}
+                  </strong>
+                  <p>{isFirstAccountFlow ? firstAccountPrimaryCopy : createPreset.description}</p>
                 </article>
 
-              <form action={createAccount} className="wallet-modal-form">
+              <form
+                action={createAccount}
+                className={`wallet-modal-form${isFirstAccountFlow ? " wallet-modal-form-first" : ""}`}
+              >
                 <input name="defaultCurrency" type="hidden" value={workspace.baseCurrency} />
 
                 <label>
                   Nome da carteira
                   <input name="name" placeholder={createPreset.namePlaceholder} required />
-                </label>
-
-                <label>
-                  Tipo de carteira
-                  <select defaultValue={createPreset.type} name="type">
-                    {accountTypeOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  Grupo financeiro
-                  <select defaultValue={createPreset.accountGroup} name="accountGroup">
-                    {accountGroupOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
                 </label>
 
                 <label>
@@ -960,70 +1067,27 @@ export function AccountsWorkspace({
                   <input defaultValue={new Date().toISOString().slice(0, 10)} name="openingBalanceDate" type="date" />
                 </label>
 
-                <label>
-                  Moeda
-                  <input
-                    defaultValue={workspace.baseCurrency}
-                    maxLength={3}
-                    name="currency"
-                    placeholder="BRL"
-                  />
-                </label>
+                {isFirstAccountFlow ? (
+                  <details className="wallet-advanced-fields">
+                    <summary>Configurações avançadas</summary>
+                    <div className="wallet-advanced-grid">{renderCreateAdvancedFields()}</div>
+                  </details>
+                ) : (
+                  renderCreateAdvancedFields()
+                )}
 
-                <label>
-                  Banco/provedor
-                  <input name="openFinanceProvider" placeholder={createPreset.providerPlaceholder} />
-                </label>
-
-                <label>
-                  Conexão
-                  <select defaultValue={createPreset.connectionMode} name="connectionMode">
-                    {accountConnectionModeOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  Código de referência
-                  <input name="externalAccountRef" placeholder="Ex.: ID externo da conta" />
-                </label>
-
-                <label>
-                  Cor da carteira
-                  <select defaultValue={createPreset.color} name="color">
-                    {accountColorOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label>
-                  Status Open Finance
-                  <select defaultValue={createPreset.openFinanceStatus} name="openFinanceStatus">
-                    {openFinanceStatusOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="wallet-checkbox-label">
-                  <input name="isFavorite" type="checkbox" />
-                  Mostrar como conta favorita na Home e nos resumos
-                </label>
+                {isFirstAccountFlow ? (
+                  <p className="wallet-first-next">
+                    Depois disso, você registra um movimento ou importa um extrato para liberar a previsão.
+                  </p>
+                ) : null}
 
                 <div className="wallet-modal-actions">
                   <Link className="ghost-button" href="/accounts">
                     Cancelar
                   </Link>
                   <button className="primary-button" type="submit">
-                    Salvar
+                    {isFirstAccountFlow ? "Criar e continuar" : "Salvar"}
                   </button>
                 </div>
               </form>

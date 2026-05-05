@@ -4,15 +4,20 @@ export const e2eCredentials = {
   email: process.env.E2E_USER_EMAIL ?? "",
   password: process.env.E2E_USER_PASSWORD ?? ""
 };
+export const e2eCleanCredentials = {
+  email: process.env.E2E_CLEAN_USER_EMAIL ?? "",
+  password: process.env.E2E_CLEAN_USER_PASSWORD ?? ""
+};
 
 export const hasE2eCredentials = Boolean(e2eCredentials.email && e2eCredentials.password);
+export const hasE2eCleanCredentials = Boolean(e2eCleanCredentials.email && e2eCleanCredentials.password);
 export const allowE2eMutation = process.env.E2E_ALLOW_MUTATION === "1";
 
-export async function loginWithEmail(page: Page) {
+export async function loginWithEmail(page: Page, credentials = e2eCredentials) {
   await page.goto("/login");
   await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
-  await page.getByLabel("E-mail").fill(e2eCredentials.email);
-  await page.locator('input[name="password"]').fill(e2eCredentials.password);
+  await page.getByLabel("E-mail").fill(credentials.email);
+  await page.locator('input[name="password"]').fill(credentials.password);
   await page.getByRole("button", { name: "Entrar" }).click();
 
   try {
@@ -74,6 +79,28 @@ export function skipAuthenticatedFlowWhenNeeded(testInfo: TestInfo) {
 
   if (isPlaceholderEmail(e2eCredentials.email)) {
     return "Troque E2E_USER_EMAIL por um usuário real de teste. O valor atual ainda parece placeholder.";
+  }
+
+  return null;
+}
+
+export function skipCleanAuthenticatedFlowWhenNeeded(testInfo: TestInfo) {
+  const baseSkipReason = skipAuthenticatedFlowWhenNeeded(testInfo);
+
+  if (baseSkipReason && !baseSkipReason.includes("E2E_USER_EMAIL")) {
+    return baseSkipReason;
+  }
+
+  if (!hasE2eCleanCredentials) {
+    return "Defina E2E_CLEAN_USER_EMAIL e E2E_CLEAN_USER_PASSWORD para rodar o fluxo de usuário limpo.";
+  }
+
+  if (!allowE2eMutation) {
+    return "Defina E2E_ALLOW_MUTATION=1 para criar carteira e importar dados no usuário limpo.";
+  }
+
+  if (isPlaceholderEmail(e2eCleanCredentials.email)) {
+    return "Troque E2E_CLEAN_USER_EMAIL por um usuário limpo real de teste.";
   }
 
   return null;

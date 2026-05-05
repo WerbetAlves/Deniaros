@@ -688,6 +688,57 @@
   line-height: 1.5;
 }
 
+.import-onboarding-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+  gap: 18px;
+  align-items: center;
+  border-color: rgba(45, 104, 75, 0.22);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(184, 137, 56, 0.13), transparent 14rem),
+    linear-gradient(180deg, rgba(255, 253, 247, 0.86), rgba(241, 232, 214, 0.74));
+}
+
+.import-onboarding-panel h3 {
+  margin: 4px 0 8px;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+}
+
+.import-onboarding-panel p:not(.section-label) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.import-onboarding-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.import-onboarding-steps span {
+  padding: 9px 10px;
+  border: 1px solid rgba(82, 58, 32, 0.14);
+  border-radius: 8px;
+  color: var(--muted);
+  background: rgba(255, 252, 245, 0.74);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.import-onboarding-steps span.done {
+  color: var(--accent-deep);
+  border-color: rgba(45, 104, 75, 0.24);
+  background: rgba(231, 242, 232, 0.82);
+}
+
+.import-empty-onboarding {
+  align-items: start;
+  justify-items: start;
+  text-align: left;
+}
+
 .sample-csv-block {
   margin-top: 14px;
   overflow: auto;

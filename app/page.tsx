@@ -548,10 +548,19 @@ function HomeEmergencyMode({
           <p className="section-label">Estou apertado</p>
           <h3>Vamos decidir por urgência.</h3>
           <p>{plan.survivalMessage}</p>
+          <div className="emergency-mode-actions">
+            <Link className="primary-button" href="/financial-agenda">
+              Ver contas por vencimento
+            </Link>
+            <Link className="ghost-button" href="#posso-gastar">
+              Simular antes de gastar
+            </Link>
+          </div>
         </div>
         <article>
           <span>Saldo agora</span>
           <strong>{formatCurrency(totalBalance, baseCurrency, locale)}</strong>
+          <small>{next7Total > totalBalance ? "A semana precisa de ajuste" : "Margem sob observação"}</small>
         </article>
       </div>
 
@@ -598,6 +607,7 @@ function HomeEmergencyMode({
           <ol>
             {plan.recommendedOrder.slice(0, 5).map((item) => (
               <li key={item.id}>
+                <i>{item.priority === "essential" ? "Essencial" : "Negociar"}</i>
                 <span>
                   <strong>{item.title}</strong>
                   {item.priority === "essential" ? "Essencial" : "Negociável"}

@@ -463,6 +463,10 @@
   gap: 12px;
 }
 
+.wallet-choice-grid-first {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .wallet-choice-card {
   padding: 16px;
   border: 1px solid rgba(82, 58, 32, 0.14);
@@ -512,6 +516,55 @@
   line-height: 1.45;
 }
 
+.wallet-first-guidance {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid rgba(45, 104, 75, 0.22);
+  border-radius: 8px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(184, 137, 56, 0.12), transparent 12rem),
+    rgba(255, 252, 245, 0.74);
+  box-shadow: var(--shadow-inset);
+}
+
+.wallet-first-guidance strong {
+  display: block;
+  color: var(--accent-deep);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+}
+
+.wallet-first-guidance p {
+  margin: 5px 0 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.wallet-first-guidance a {
+  color: var(--accent-deep);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.wallet-first-note,
+.wallet-first-next {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.wallet-first-next {
+  grid-column: 1 / -1;
+  margin-top: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(184, 137, 56, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 248, 229, 0.72);
+}
+
 .wallet-checkbox-label {
   grid-column: 1 / -1;
   display: flex !important;
@@ -559,6 +612,11 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(245, 236, 220, 0.9)),
     rgba(241, 232, 214, 0.9);
   box-shadow: 0 28px 60px rgba(0, 0, 0, 0.3), var(--shadow-inset);
+}
+
+.wallet-modal-card-first {
+  width: min(760px, 100%);
+  border-radius: 14px;
 }
 
 .wallet-modal-head {
@@ -620,6 +678,14 @@
   gap: 10px;
 }
 
+.wallet-modal-form-first {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wallet-modal-form-first > label:first-of-type {
+  grid-column: 1 / -1;
+}
+
 .wallet-modal-form label {
   display: grid;
   gap: 8px;
@@ -651,6 +717,30 @@
 .wallet-modal-actions .ghost-button,
 .wallet-modal-actions .primary-button {
   flex: 1 1 0;
+}
+
+.wallet-advanced-fields {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  border: 1px solid rgba(82, 58, 32, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.68);
+}
+
+.wallet-advanced-fields summary {
+  cursor: pointer;
+  color: var(--accent-deep);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.wallet-advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .account-questionnaire-shell {
