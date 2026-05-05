@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { deleteWorkspaceSystemData, restoreWorkspaceBackup } from "@/app/settings/backup/actions";
+import {
+  deleteUserAccount,
+  deleteWorkspaceSystemData,
+  restoreWorkspaceBackup
+} from "@/app/settings/backup/actions";
 import { getWorkspaceContext } from "@/lib/workspace-context";
 
 type BackupSettingsSearchParams = {
+  account_error?: string;
   delete_error?: string;
   delete_success?: string;
   restore_error?: string;
@@ -44,6 +49,7 @@ export default async function BackupSettingsPage({
         {params.restore_success ? <p className="form-success">{params.restore_success}</p> : null}
         {params.delete_error ? <p className="form-error">{params.delete_error}</p> : null}
         {params.delete_success ? <p className="form-success">{params.delete_success}</p> : null}
+        {params.account_error ? <p className="form-error">{params.account_error}</p> : null}
 
         <section className="panel backup-readiness-panel">
           <div>
@@ -151,6 +157,62 @@ export default async function BackupSettingsPage({
               </a>
               <button className="primary-button danger-button" type="submit">
                 Apagar dados do sistema
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section className="panel backup-danger-panel" id="account-deletion">
+          <div>
+            <p className="section-label">Conta de login</p>
+            <h3>Excluir minha conta Deniaros</h3>
+            <p>
+              Remove o usuario de login e encerra o workspace vinculado a esta conta. Esta acao
+              e diferente de apagar dados do sistema: aqui a conta deixa de existir.
+            </p>
+            <div className="backup-restore-summary danger-summary">
+              <strong>O que sera excluido</strong>
+              <span>Conta de login, workspace, carteiras, lancamentos, agenda, preferencias e permissoes familiares.</span>
+              <span>Se houver assinatura Stripe ativa, o Deniaros bloqueia a exclusao ate ela ser cancelada em Planos.</span>
+              <span>Um registro minimo de auditoria fica preservado para seguranca operacional e LGPD.</span>
+            </div>
+          </div>
+
+          <form action={deleteUserAccount} className="backup-delete-form">
+            <label>
+              Frase de exclusao
+              <input
+                autoComplete="off"
+                name="accountConfirmation"
+                placeholder="EXCLUIR MINHA CONTA"
+                required
+              />
+            </label>
+            <label>
+              Confirmacao de backup
+              <input
+                autoComplete="off"
+                name="backupConfirmation"
+                placeholder="CONFIRMO QUE TENHO BACKUP"
+                required
+              />
+            </label>
+            <label>
+              E-mail da conta
+              <input
+                autoComplete="off"
+                name="emailConfirmation"
+                placeholder={user.email ?? "seu e-mail de login"}
+                required
+                type="email"
+              />
+            </label>
+            <div className="form-actions">
+              <a className="ghost-button" href="/api/export/workspace">
+                Exportar backup
+              </a>
+              <button className="primary-button danger-button" type="submit">
+                Excluir minha conta
               </button>
             </div>
           </form>

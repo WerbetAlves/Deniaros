@@ -318,6 +318,11 @@ export default async function SettingsPage({
               o arquivo ou iniciar uma solicitação de apagamento.
             </p>
           </div>
+          <div className="settings-command-actions">
+            <Link className="ghost-button danger-button" href="/settings/backup#account-deletion">
+              Excluir minha conta
+            </Link>
+          </div>
         </section>
       </section>
     </AppShell>

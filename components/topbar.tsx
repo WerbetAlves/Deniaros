@@ -48,9 +48,14 @@ export function Topbar({
       </div>
 
       <div className="topbar-tools">
-        <span className={`topbar-plan-chip topbar-plan-chip-${planTier}`}>
+        <Link
+          aria-label="Abrir planos e assinatura"
+          className={`topbar-plan-chip topbar-plan-chip-${planTier}`}
+          href="/billing"
+          title="Abrir planos e assinatura"
+        >
           {planLabel ?? `Plano ${planTierLabels[planTier]}`}
-        </span>
+        </Link>
         <HelpCenter />
         <details className="topbar-notification-box">
           <summary
