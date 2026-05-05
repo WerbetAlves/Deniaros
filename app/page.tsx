@@ -29,6 +29,11 @@ import {
 import { getFinancialData } from "@/lib/financial-data";
 import { buildEmergencyModePlan, type EmergencyPlan } from "@/lib/emergency-mode";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
+import {
+  buildOnboardingGuidance,
+  getQuickOnboardingAnswers,
+  type OnboardingGuidance
+} from "@/lib/onboarding-guidance";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   canShowAdvancedInsights,
@@ -68,9 +73,9 @@ export default async function HomePage() {
     ? await Promise.all([
         supabase
           .from("personal_profiles")
-          .select("workspace_id")
+          .select("workspace_id,classic_answers")
           .eq("workspace_id", workspace.id)
-          .maybeSingle<Pick<PersonalProfileRow, "workspace_id">>(),
+          .maybeSingle<Pick<PersonalProfileRow, "workspace_id" | "classic_answers">>(),
         supabase
           .from("category_budgets")
           .select("id", { count: "exact", head: true })
@@ -108,6 +113,9 @@ export default async function HomePage() {
   if (!hasPersonalProfile && source !== "sample") {
     redirect("/personal-profile?onboarding=1&next=/");
   }
+  const onboardingGuidance = buildOnboardingGuidance(
+    getQuickOnboardingAnswers(personalProfileResult.data?.classic_answers)
+  );
 
   const budgetCount = budgetCountResult.error ? 0 : budgetCountResult.count ?? 0;
   const debtCount = debtCountResult.error ? 0 : debtCountResult.count ?? 0;
@@ -149,23 +157,23 @@ export default async function HomePage() {
     {
       id: "first-account",
       title: "Conectar sua base de dinheiro",
-      description: "Cadastre carteira fisica, conta manual ou prepare Open Finance para saldo confiavel.",
-      href: "/accounts",
-      actionLabel: "Abrir carteiras",
+      description: onboardingGuidance.accountDescription,
+      href: onboardingGuidance.accountHref,
+      actionLabel: onboardingGuidance.accountActionLabel,
       done: hasAtLeastOneAccount
     },
     {
       id: "first-transaction",
       title: "Trazer movimentos reais",
-      description: "Registre ou importe entradas e saidas para o sistema entender seu passado recente.",
-      href: "/transactions/new",
-      actionLabel: "Novo movimento",
+      description: onboardingGuidance.transactionDescription,
+      href: onboardingGuidance.transactionHref,
+      actionLabel: onboardingGuidance.transactionActionLabel,
       done: hasAtLeastOneTransaction
     },
     {
       id: "first-schedule",
       title: "Montar agenda de previsao",
-      description: "Cadastre contas, depositos ou lembretes para projetar o caixa antes do aperto.",
+      description: onboardingGuidance.scheduleDescription,
       href: "/financial-agenda",
       actionLabel: "Abrir agenda",
       done: hasOpenSchedule
@@ -173,7 +181,7 @@ export default async function HomePage() {
     {
       id: "first-diagnosis",
       title: "Pedir um diagnostico ao Consultor IA",
-      description: "Depois da base minima, use a IA para priorizar decisoes e proximos passos.",
+      description: onboardingGuidance.aiDescription,
       href: "/assistant?question=Me%20de%20um%20diagnostico%20acionavel%20de%20hoje",
       actionLabel: "Abrir Consultor IA",
       done: hasOperationalBase
@@ -215,11 +223,12 @@ export default async function HomePage() {
             financialNextStep={financialNextStep}
             locale={workspace.locale}
             maturity={workspaceMaturity}
+            onboardingGuidance={onboardingGuidance}
             totalBalance={totalBalance}
           />
           <QuickStartGuide
             steps={quickStartSteps}
-            subtitle="A sequência é proposital: primeiro sua carteira, depois movimento real, importação ou agenda. A previsão aparece quando a base existir."
+            subtitle={onboardingGuidance.quickStartSubtitle}
             title="Comece sem ruído"
           />
           {accountBalances.length ? (
@@ -329,7 +338,7 @@ export default async function HomePage() {
         <FinancialAgenda items={upcomingItems} locale={workspace.locale} payees={payees} />
         <QuickStartGuide
           steps={quickStartSteps}
-          subtitle="A ordem importa: perfil, base real, movimentos, agenda e diagnostico. Assim o Deniaros deixa de registrar o passado e comeca a projetar o futuro."
+          subtitle={onboardingGuidance.quickStartSubtitle}
           title="Prepare seu Deniaros para decidir com voce"
         />
         {showAdvancedInsights ? (
@@ -404,6 +413,7 @@ function HomeStarterExperience({
   financialNextStep,
   locale,
   maturity,
+  onboardingGuidance,
   totalBalance
 }: {
   accounts: ReturnType<typeof getAccountBalances>;
@@ -411,6 +421,7 @@ function HomeStarterExperience({
   financialNextStep: FinancialNextStep;
   locale: string;
   maturity: WorkspaceMaturity;
+  onboardingGuidance: OnboardingGuidance;
   totalBalance: number;
 }) {
   const isEmpty = maturity === "workspace_empty";
@@ -426,7 +437,7 @@ function HomeStarterExperience({
     },
     {
       done: false,
-      label: isEmpty ? "Primeiro movimento após a carteira" : "Primeiro movimento ou importação"
+      label: isEmpty ? "Primeiro movimento após a carteira" : onboardingGuidance.transactionActionLabel
     }
   ];
 
@@ -437,6 +448,7 @@ function HomeStarterExperience({
           <p className="section-label">Consultor guiado</p>
           <h2>{financialNextStep.title}</h2>
           <p className="supporting-copy">{financialNextStep.description}</p>
+          <p className="muted-copy">{onboardingGuidance.nextActionHint}</p>
           <div className="form-actions">
             <Link className="primary-button" href={financialNextStep.href}>
               {financialNextStep.actionLabel}
@@ -455,12 +467,12 @@ function HomeStarterExperience({
 
       <div className="home-starter-grid">
         <WidgetWrapper title="Próxima ação recomendada" tooltip="A Home inicial mostra apenas o próximo passo que libera valor real.">
-          <p className="section-label">{isEmpty ? "Base ausente" : "Histórico vazio"}</p>
-          <MetricValue>{isEmpty ? "Criar carteira" : "Registrar movimento"}</MetricValue>
+          <p className="section-label">{onboardingGuidance.starterMetricLabel}</p>
+          <MetricValue>{isEmpty ? onboardingGuidance.starterMetricValue : onboardingGuidance.transactionActionLabel}</MetricValue>
           <p className="muted-copy">
             {isEmpty
-              ? "Sem uma carteira, qualquer lançamento fica sem origem confiável."
-              : "Um movimento real já permite começar a formar histórico."}
+              ? onboardingGuidance.accountDescription
+              : onboardingGuidance.transactionDescription}
           </p>
         </WidgetWrapper>
 
