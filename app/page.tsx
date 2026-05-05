@@ -18,8 +18,16 @@ import { MarketingLanding } from "@/components/marketing-landing";
 import { QuickStartGuide } from "@/components/quick-start-guide";
 import { RecentActivities } from "@/components/recent-activities";
 import { RecentTransactions } from "@/components/recent-transactions";
+import { SpendingSimulatorCard } from "@/components/spending-simulator-card";
 import { MetricValue, WidgetWrapper } from "@/components/widget-wrapper";
+import {
+  classifyFinancialWorkspaceState,
+  getFinancialNextStep,
+  type FinancialWorkspaceState,
+  type FinancialNextStep
+} from "@/lib/financial-state";
 import { getFinancialData } from "@/lib/financial-data";
+import { buildEmergencyModePlan, type EmergencyPlan } from "@/lib/emergency-mode";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
@@ -111,6 +119,21 @@ export default async function HomePage() {
     scheduledCount: openScheduledItems.length,
     transactionCount: transactions.length
   });
+  const financialState = classifyFinancialWorkspaceState({
+    accountCount: accounts.length,
+    currentBalance: totalBalance,
+    dueSoonCommitmentCount: dueSoonScheduleCount,
+    firstNegativeDate: forecastProjection.summary.firstNegativeDate,
+    next7DaysNetCommitments: getNextDaysNetCommitments(forecastProjection.events, 7),
+    overdueCommitmentCount: overdueScheduleCount,
+    projectedLowestBalance: forecastProjection.summary.lowestBalance,
+    transactionCount: transactions.length
+  });
+  const financialNextStep = getFinancialNextStep(financialState);
+  const emergencyPlan = buildEmergencyModePlan({
+    currentBalance: totalBalance,
+    items: openScheduledItems
+  });
   const showAdvancedInsights = canShowAdvancedInsights(workspaceMaturity);
   const hasOperationalBase =
     hasPersonalProfile && hasAtLeastOneAccount && hasAtLeastOneTransaction && hasOpenSchedule;
@@ -181,20 +204,6 @@ export default async function HomePage() {
     scheduledCount: dashboard.scheduledCount,
     unclassifiedTransactionCount
   });
-  const nextBestAction = buildHomeNextBestAction({
-    baseCurrency: workspace.baseCurrency,
-    dueSoonScheduleCount,
-    hasAtLeastOneAccount,
-    hasAtLeastOneTransaction,
-    hasOpenSchedule,
-    hasPersonalProfile,
-    locale: workspace.locale,
-    overdueScheduleCount,
-    pendingTransactionCount,
-    projection: forecastProjection,
-    unclassifiedTransactionCount
-  });
-
   if (workspaceMaturity === "workspace_empty" || workspaceMaturity === "workspace_initialized") {
     return (
       <AppShell user={user} userEmail={user?.email} workspaceId={workspace.id}>
@@ -203,6 +212,7 @@ export default async function HomePage() {
           <HomeStarterExperience
             accounts={accountBalances}
             baseCurrency={workspace.baseCurrency}
+            financialNextStep={financialNextStep}
             locale={workspace.locale}
             maturity={workspaceMaturity}
             totalBalance={totalBalance}
@@ -229,8 +239,23 @@ export default async function HomePage() {
       />
       <div className="dashboard-grid gap-6 md:gap-8">
         <DataSourceBanner fallbackReason={fallbackReason} source={source} />
+        <HomeFinancialGuide action={financialNextStep} />
+        <SpendingSimulatorCard
+          accounts={accountBalances}
+          baseCurrency={workspace.baseCurrency}
+          locale={workspace.locale}
+          scheduledItems={openScheduledItems}
+        />
+        {financialState === "emergency" ? (
+          <HomeEmergencyMode
+            baseCurrency={workspace.baseCurrency}
+            locale={workspace.locale}
+            plan={emergencyPlan}
+            state={financialState}
+            totalBalance={totalBalance}
+          />
+        ) : null}
         <HeroPanel dashboard={dashboard} projection={forecastProjection} />
-        <HomeNextBestAction action={nextBestAction} />
         <HomeCommandActions actions={homeCommandActions} />
         {showAdvancedInsights ? (
           <>
@@ -373,39 +398,22 @@ type HomeCommandAction = {
   value: string;
 };
 
-type HomeNextBestAction = {
-  actionLabel: string;
-  description: string;
-  href: string;
-  metric: string;
-  reason: string;
-  title: string;
-  tone: "stable" | "attention" | "danger";
-};
-
 function HomeStarterExperience({
   accounts,
   baseCurrency,
+  financialNextStep,
   locale,
   maturity,
   totalBalance
 }: {
   accounts: ReturnType<typeof getAccountBalances>;
   baseCurrency: string;
+  financialNextStep: FinancialNextStep;
   locale: string;
   maturity: WorkspaceMaturity;
   totalBalance: number;
 }) {
   const isEmpty = maturity === "workspace_empty";
-  const primaryHref = isEmpty ? "/accounts?mode=create&kind=cash&first=1" : "/transactions/new";
-  const primaryLabel = isEmpty ? "Criar primeira carteira" : "Novo movimento";
-  const secondaryHref = "/imports?onboarding=1";
-  const title = isEmpty
-    ? "Vamos montar sua base financeira."
-    : "Sua base está pronta. Agora registre o primeiro movimento.";
-  const subtitle = isEmpty
-    ? "Antes de prever o futuro, o Deniaros precisa conhecer onde seu dinheiro começa."
-    : "Com entradas e saídas reais, o Deniaros começa a gerar previsão e orientação.";
 
   const checklist = [
     {
@@ -427,14 +435,14 @@ function HomeStarterExperience({
       <div className="home-starter-hero">
         <div>
           <p className="section-label">Consultor guiado</p>
-          <h2>{title}</h2>
-          <p className="supporting-copy">{subtitle}</p>
+          <h2>{financialNextStep.title}</h2>
+          <p className="supporting-copy">{financialNextStep.description}</p>
           <div className="form-actions">
-            <Link className="primary-button" href={primaryHref}>
-              {primaryLabel}
+            <Link className="primary-button" href={financialNextStep.href}>
+              {financialNextStep.actionLabel}
             </Link>
-            <Link className="ghost-button" href={secondaryHref}>
-              Importar extrato
+            <Link className="ghost-button" href={financialNextStep.secondaryHref}>
+              {financialNextStep.secondaryLabel}
             </Link>
           </div>
         </div>
@@ -485,21 +493,111 @@ function HomeStarterExperience({
   );
 }
 
-function HomeNextBestAction({ action }: { action: HomeNextBestAction }) {
+function HomeFinancialGuide({ action }: { action: FinancialNextStep }) {
   return (
-    <section className={`home-next-action home-next-action-${action.tone}`}>
-      <div className="home-next-action-copy">
-        <p className="section-label">Próxima melhor ação</p>
+    <section className={`home-financial-guide home-financial-guide-${action.tone}`}>
+      <div className="home-financial-guide-copy">
+        <p className="section-label">Seu próximo passo</p>
         <h3>{action.title}</h3>
         <p>{action.description}</p>
       </div>
-      <div className="home-next-action-result">
-        <span>{action.reason}</span>
-        <strong>{action.metric}</strong>
+      <div className="home-financial-guide-actions">
+        <Link className="primary-button" href={action.href}>
+          {action.actionLabel}
+        </Link>
+        <Link className="ghost-button" href={action.secondaryHref}>
+          {action.secondaryLabel}
+        </Link>
       </div>
-      <Link className={action.tone === "danger" ? "primary-button" : "ghost-button"} href={action.href}>
-        {action.actionLabel}
-      </Link>
+    </section>
+  );
+}
+
+function HomeEmergencyMode({
+  baseCurrency,
+  locale,
+  plan,
+  state,
+  totalBalance
+}: {
+  baseCurrency: string;
+  locale: string;
+  plan: EmergencyPlan;
+  state: FinancialWorkspaceState;
+  totalBalance: number;
+}) {
+  const firstRecommended = plan.recommendedOrder[0];
+  const next7Total = plan.dueNext7Days.reduce((total, item) => total + Math.abs(Math.min(item.amount, 0)), 0);
+
+  return (
+    <section className={`panel emergency-mode-panel emergency-mode-${state}`} id="modo-emergencia">
+      <div className="emergency-mode-head">
+        <div>
+          <p className="section-label">Estou apertado</p>
+          <h3>Vamos decidir por urgência.</h3>
+          <p>{plan.survivalMessage}</p>
+        </div>
+        <article>
+          <span>Saldo agora</span>
+          <strong>{formatCurrency(totalBalance, baseCurrency, locale)}</strong>
+        </article>
+      </div>
+
+      <div className="emergency-mode-grid">
+        <WidgetWrapper
+          label="Agora"
+          title="Vencidas"
+          tone={plan.overdue.length ? "danger" : "stable"}
+          tooltip="Contas vencidas entram primeiro porque já afetam sua margem de decisão."
+        >
+          <MetricValue tone={plan.overdue.length ? "danger" : "stable"}>{plan.overdue.length}</MetricValue>
+          <p className="muted-copy">Compromisso(s) para resolver ou renegociar.</p>
+        </WidgetWrapper>
+
+        <WidgetWrapper
+          label="7 dias"
+          title="Próximos compromissos"
+          tone={next7Total > totalBalance ? "danger" : "attention"}
+          tooltip="Soma das saídas em aberto nos próximos 7 dias."
+        >
+          <MetricValue tone={next7Total > totalBalance ? "danger" : "attention"}>
+            {formatCurrency(next7Total, baseCurrency, locale)}
+          </MetricValue>
+          <p className="muted-copy">{plan.dueNext7Days.length} item(ns) chegando.</p>
+        </WidgetWrapper>
+
+        <WidgetWrapper
+          label="Prioridade"
+          title="Essenciais"
+          tone="attention"
+          tooltip="Classificação inicial por palavras como aluguel, energia, mercado, saúde e transporte."
+        >
+          <MetricValue tone="attention">{plan.essentials.length}</MetricValue>
+          <p className="muted-copy">Itens que tendem a sustentar sua rotina.</p>
+        </WidgetWrapper>
+      </div>
+
+      <div className="emergency-mode-order">
+        <div>
+          <p className="section-label">Ordem recomendada</p>
+          <h4>{firstRecommended ? "Comece pelo que protege sua semana." : "Nenhuma urgência aberta agora."}</h4>
+        </div>
+        {plan.recommendedOrder.length ? (
+          <ol>
+            {plan.recommendedOrder.slice(0, 5).map((item) => (
+              <li key={item.id}>
+                <span>
+                  <strong>{item.title}</strong>
+                  {item.priority === "essential" ? "Essencial" : "Negociável"}
+                </span>
+                <em>{formatCurrency(Math.abs(item.amount), item.currency, locale)}</em>
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="muted-copy">Use o simulador antes de assumir um novo gasto.</p>
+        )}
+      </div>
     </section>
   );
 }
@@ -526,163 +624,16 @@ function HomeCommandActions({ actions }: { actions: HomeCommandAction[] }) {
   );
 }
 
-function buildHomeNextBestAction({
-  baseCurrency,
-  dueSoonScheduleCount,
-  hasAtLeastOneAccount,
-  hasAtLeastOneTransaction,
-  hasOpenSchedule,
-  hasPersonalProfile,
-  locale,
-  overdueScheduleCount,
-  pendingTransactionCount,
-  projection,
-  unclassifiedTransactionCount
-}: {
-  baseCurrency: string;
-  dueSoonScheduleCount: number;
-  hasAtLeastOneAccount: boolean;
-  hasAtLeastOneTransaction: boolean;
-  hasOpenSchedule: boolean;
-  hasPersonalProfile: boolean;
-  locale: string;
-  overdueScheduleCount: number;
-  pendingTransactionCount: number;
-  projection: ReturnType<typeof buildForecastProjection>;
-  unclassifiedTransactionCount: number;
-}): HomeNextBestAction {
-  if (!hasPersonalProfile) {
-    return {
-      actionLabel: "Completar perfil",
-      description: "Defina seu momento financeiro para o Deniaros priorizar metas, alertas e linguagem com mais precisão.",
-      href: "/personal-profile",
-      metric: "1 passo",
-      reason: "Personalização pendente",
-      title: "Comece pelo seu contexto.",
-      tone: "attention"
-    };
-  }
+function getNextDaysNetCommitments(events: ReturnType<typeof buildForecastProjection>["events"], days: number) {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0);
+  const limit = new Date(start);
+  limit.setDate(start.getDate() + days);
+  const limitIso = limit.toISOString().slice(0, 10);
 
-  if (!hasAtLeastOneAccount) {
-    return {
-      actionLabel: "Criar carteira",
-      description: "Sem uma carteira ou conta, o saldo não tem origem confiável e a previsão perde força.",
-      href: "/accounts",
-      metric: "0 contas",
-      reason: "Base financeira ausente",
-      title: "Conecte a base do seu dinheiro.",
-      tone: "attention"
-    };
-  }
-
-  if (!hasAtLeastOneTransaction) {
-    return {
-      actionLabel: "Registrar movimento",
-      description: "O primeiro lançamento dá histórico ao sistema para começar a enxergar padrões reais.",
-      href: "/transactions/new",
-      metric: "0 movimentos",
-      reason: "Histórico vazio",
-      title: "Alimente o passado para projetar o futuro.",
-      tone: "attention"
-    };
-  }
-
-  if (!hasOpenSchedule) {
-    return {
-      actionLabel: "Montar agenda",
-      description: "Cadastre contas, depósitos e lembretes para o saldo deixar de ser fotografia e virar previsão.",
-      href: "/financial-agenda",
-      metric: "0 compromissos",
-      reason: "Previsão incompleta",
-      title: "Transforme saldo em agenda.",
-      tone: "attention"
-    };
-  }
-
-  if (overdueScheduleCount > 0) {
-    return {
-      actionLabel: "Resolver agora",
-      description: "Compromissos vencidos contaminam saldo, relatórios e decisões. Baixe, reagende ou ajuste antes de qualquer análise.",
-      href: "/financial-agenda",
-      metric: String(overdueScheduleCount),
-      reason: "Atraso aberto",
-      title: "Corrija os vencidos primeiro.",
-      tone: "danger"
-    };
-  }
-
-  if (projection.summary.riskLevel === "danger") {
-    return {
-      actionLabel: "Simular decisão",
-      description: "A projeção aponta risco de saldo negativo. Teste cortes, antecipações ou mudança de data antes do aperto.",
-      href: "/decisions",
-      metric: formatShortDate(
-        projection.summary.firstNegativeDate ?? projection.summary.lowestDate,
-        locale
-      ),
-      reason: "Primeiro ponto crítico",
-      title: "O futuro acendeu alerta.",
-      tone: "danger"
-    };
-  }
-
-  if (pendingTransactionCount > 0) {
-    return {
-      actionLabel: "Conferir pendências",
-      description: "Movimentos pendentes reduzem a confiança do saldo. Finalize a conferência para limpar a mesa de decisão.",
-      href: "/transactions?status=pending",
-      metric: String(pendingTransactionCount),
-      reason: "Movimentos pendentes",
-      title: "Deixe o saldo pronto para decisão.",
-      tone: "attention"
-    };
-  }
-
-  if (unclassifiedTransactionCount > 0) {
-    return {
-      actionLabel: "Classificar",
-      description: "Categorias revelam onde o dinheiro escapa. Sem elas, relatórios e IA perdem contexto.",
-      href: "/transactions",
-      metric: String(unclassifiedTransactionCount),
-      reason: "Sem categoria",
-      title: "Dê contexto ao seu histórico.",
-      tone: "attention"
-    };
-  }
-
-  if (dueSoonScheduleCount > 0) {
-    return {
-      actionLabel: "Ver vencimentos",
-      description: "Há compromissos próximos. Antecipe o impacto no caixa antes de assumir novos gastos.",
-      href: "/financial-agenda",
-      metric: String(dueSoonScheduleCount),
-      reason: "Próximos dias",
-      title: "Antecipe o que está chegando.",
-      tone: "attention"
-    };
-  }
-
-  if (projection.summary.riskLevel === "attention") {
-    return {
-      actionLabel: "Ajustar plano",
-      description: "O menor saldo previsto pede cautela. Reorganize uma conta, meta ou despesa antes de perder margem.",
-      href: "/decisions",
-      metric: formatCurrency(projection.summary.lowestBalance, baseCurrency, locale),
-      reason: "Menor saldo previsto",
-      title: "Ainda dá para agir com calma.",
-      tone: "attention"
-    };
-  }
-
-  return {
-    actionLabel: "Pedir diagnóstico",
-    description: "Com a base saudável, use a IA para escolher a próxima melhoria: reserva, dívida, orçamento ou meta.",
-    href: "/assistant?question=Me%20de%20a%20proxima%20melhor%20acao%20para%20evoluir%20minha%20vida%20financeira",
-    metric: formatCurrency(projection.summary.lowestBalance, baseCurrency, locale),
-    reason: "Margem prevista",
-    title: "Aproveite a zona boa para evoluir.",
-    tone: "stable"
-  };
+  return events
+    .filter((event) => event.date <= limitIso)
+    .reduce((total, event) => total + event.amount, 0);
 }
 
 function buildHomeCommandActions({
