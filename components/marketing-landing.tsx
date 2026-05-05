@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   Brain,
+  CalendarClock,
   CheckCircle2,
   LineChart,
   ShieldCheck,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 const painPoints = [
   "O dinheiro acaba e você não viu chegando.",
@@ -58,6 +60,29 @@ const quickResults = [
   "Se vai faltar dinheiro no mês",
   "Onde está o risco antes dele acontecer",
   "O que fazer agora"
+];
+
+const operatingRhythm = [
+  {
+    icon: WalletCards,
+    title: "Base financeira",
+    text: "Carteiras, contas, importações e categorias no mesmo lugar."
+  },
+  {
+    icon: CalendarClock,
+    title: "Agenda viva",
+    text: "Contas futuras entram no calendário antes de apertar o caixa."
+  },
+  {
+    icon: LineChart,
+    title: "Previsão",
+    text: "O saldo projetado mostra risco, folga e pontos sensíveis."
+  },
+  {
+    icon: Brain,
+    title: "Próxima ação",
+    text: "A IA transforma contexto financeiro em decisão prática."
+  }
 ];
 
 const proofPoints = [
@@ -124,15 +149,15 @@ export function MarketingLanding() {
       </nav>
 
       <section className="marketing-hero">
-        <div className="marketing-hero-copy">
+        <div className="marketing-hero-copy marketing-reveal">
           <p className="marketing-eyebrow">
             <Sparkles aria-hidden="true" size={16} />
             Gestão financeira que olha para frente
           </p>
           <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mês.</h1>
           <p className="marketing-hero-lead">
-            O único sistema que não foca apenas no que você gastou, mas no que vai acontecer com seu
-            saldo nos próximos 90 dias. Tome decisões sem ansiedade.
+            Veja quanto você pode gastar hoje, o que vai acontecer com seu saldo e o que ajustar
+            antes do problema chegar.
           </p>
           <div className="marketing-hero-actions">
             <div className="marketing-hero-cta-wrapper">
@@ -162,42 +187,55 @@ export function MarketingLanding() {
           </div>
         </div>
 
-        <div className="marketing-decision-board" aria-label="Exemplo de mesa de decisão Deniaros">
-          <p className="marketing-board-kicker">Veja sua previsão antes do problema acontecer</p>
-          <div className="marketing-board-header">
-            <span>Mesa de decisão</span>
-            <strong>Próximos 30 dias</strong>
+        <div className="marketing-hero-board">
+          <div className="marketing-floating-card marketing-floating-card-left">
+            <span>Conta vencendo</span>
+            <strong>-R$ 118,40</strong>
+            <small>Energia em 01 de mai.</small>
           </div>
-          <div className="marketing-balance-card">
-            <span>Saldo projetado</span>
-            <strong>R$ 5.086,32</strong>
-            <small>Seu caixa previsto está sob controle, sem surpresas no fim do mês.</small>
+          <div className="marketing-floating-card marketing-floating-card-right">
+            <span>Decisão segura</span>
+            <strong>Adiar compra</strong>
+            <small>Evita caixa negativo.</small>
           </div>
-          <div className="marketing-board-grid">
-            <article>
-              <span>A pagar</span>
-              <strong>3</strong>
-              <small>1 vencendo hoje</small>
-            </article>
-            <article>
-              <span>Menor saldo</span>
-              <strong>R$ 2.814</strong>
-              <small>ponto sensível</small>
-            </article>
-            <article>
-              <span>Ação</span>
-              <strong>Priorizar</strong>
-              <small>energia e mercado</small>
-            </article>
-          </div>
-          <div className="marketing-chart">
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
+
+          <div className="marketing-decision-board" aria-label="Exemplo de mesa de decisão Deniaros">
+            <p className="marketing-board-kicker">Veja sua previsão antes do problema acontecer</p>
+            <div className="marketing-board-header">
+              <span>Mesa de decisão</span>
+              <strong>Próximos 30 dias</strong>
+            </div>
+            <div className="marketing-balance-card">
+              <span>Saldo projetado</span>
+              <strong>R$ 5.086,32</strong>
+              <small>Seu caixa previsto está sob controle, sem surpresas no fim do mês.</small>
+            </div>
+            <div className="marketing-board-grid">
+              <article>
+                <span>A pagar</span>
+                <strong>3</strong>
+                <small>1 vencendo hoje</small>
+              </article>
+              <article>
+                <span>Menor saldo</span>
+                <strong>R$ 2.814</strong>
+                <small>ponto sensível</small>
+              </article>
+              <article>
+                <span>Ação</span>
+                <strong>Priorizar</strong>
+                <small>energia e mercado</small>
+              </article>
+            </div>
+            <div className="marketing-chart">
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
           </div>
         </div>
       </section>
@@ -214,6 +252,30 @@ export function MarketingLanding() {
               {result}
             </p>
           ))}
+        </div>
+      </section>
+
+      <section className="marketing-live-flow" aria-labelledby="live-flow-title">
+        <div className="marketing-section-head marketing-section-head-narrow">
+          <p className="marketing-section-label">De registro para decisão</p>
+          <h2 id="live-flow-title">O Deniaros transforma dados em direção.</h2>
+          <p>
+            A experiência é rápida: você cria a base, o sistema projeta o caixa e a próxima ação
+            aparece antes do problema virar urgência.
+          </p>
+        </div>
+        <div className="marketing-flow-rail">
+          {operatingRhythm.map((item, index) => {
+            const Icon = item.icon;
+
+            return (
+              <article key={item.title} style={{ "--flow-delay": `${index * 140}ms` } as CSSProperties}>
+                <Icon aria-hidden="true" size={22} />
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -254,7 +316,7 @@ export function MarketingLanding() {
           </p>
         </div>
 
-        <div className="marketing-decision-board" aria-label="Simulação do Consultor IA">
+        <div className="marketing-decision-board marketing-ai-board" aria-label="Simulação do Consultor IA">
           <p className="marketing-board-kicker">
             <Sparkles aria-hidden="true" className="marketing-inline-icon" size={14} />
             O que a IA do Deniaros faria:
@@ -293,18 +355,14 @@ export function MarketingLanding() {
           <p className="marketing-section-label">Rotina de controle</p>
           <h2>Feche a semana antes que ela feche você.</h2>
         </div>
-        <p>
-          O Deniaros te guia semanalmente para manter controle, prever riscos e agir com clareza.
-        </p>
+        <p>O Deniaros te guia semanalmente para manter controle, prever riscos e agir com clareza.</p>
       </section>
 
       <section className="marketing-outcomes">
         <div className="marketing-outcome-card">
           <ShieldCheck aria-hidden="true" size={26} />
           <h2>O que muda na sua vida em poucos dias</h2>
-          <p>
-            Mais clareza para gastar, pagar, ajustar e decidir sem esperar o susto chegar.
-          </p>
+          <p>Mais clareza para gastar, pagar, ajustar e decidir sem esperar o susto chegar.</p>
         </div>
         <div className="marketing-outcome-list">
           {outcomes.map((outcome) => (
