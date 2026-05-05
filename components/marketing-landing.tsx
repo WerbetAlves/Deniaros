@@ -3,6 +3,7 @@ import {
   Brain,
   CalendarClock,
   CheckCircle2,
+  Import,
   LineChart,
   ShieldCheck,
   Sparkles,
@@ -14,10 +15,10 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 
 const painPoints = [
-  "O dinheiro acaba e você não viu chegando.",
-  "Você registra gastos, mas não enxerga o futuro.",
-  "As contas ficam espalhadas e sem direção.",
-  "Você vive apagando incêndio."
+  "Você gasta hoje sem saber o impacto de amanhã.",
+  "As contas parecem controladas até aparecer uma surpresa.",
+  "O saldo do banco engana porque não considera o que vem pela frente.",
+  "O Deniaros transforma saldo parado em decisão."
 ];
 
 const outcomes = [
@@ -31,95 +32,114 @@ const outcomes = [
 const journey = [
   {
     step: "01",
-    title: "Organize sua base",
-    description: "Registre ou importe seus dados rapidamente."
+    title: "Monte sua base",
+    description: "Crie carteiras, registre manualmente ou importe extratos."
   },
   {
     step: "02",
-    title: "Veja sua previsão",
-    description: "O sistema mostra o que vai acontecer com seu dinheiro."
+    title: "Veja a previsão",
+    description: "O Deniaros cruza saldo, agenda e movimentos do mês."
   },
   {
     step: "03",
-    title: "Tome decisões claras",
-    description: "Você sabe exatamente o que fazer agora."
+    title: "Decida com clareza",
+    description: "Você entende o risco e sabe o que ajustar agora."
   }
 ];
 
 const features = [
-  "Dashboard de decisão",
-  "Agenda financeira com previsão",
-  "Planejamento de dívidas",
-  "Orçamento com visão futura",
-  "Relatórios inteligentes",
-  "IA para orientação"
+  "Contas e carteiras",
+  "Lançamentos manuais",
+  "Importação de extratos",
+  "Agenda financeira",
+  "Previsão de saldo",
+  "Relatórios básicos"
 ];
 
 const quickResults = [
-  "Quanto você pode gastar hoje",
-  "Se vai faltar dinheiro no mês",
-  "Onde está o risco antes dele acontecer",
-  "O que fazer agora"
+  "Quanto posso gastar hoje?",
+  "O que vence nos próximos dias?",
+  "Meu saldo vai ficar negativo?",
+  "Qual decisão devo tomar agora?"
 ];
 
 const operatingRhythm = [
   {
     icon: WalletCards,
-    title: "Base financeira",
-    text: "Carteiras, contas, importações e categorias no mesmo lugar."
+    title: "Base manual ou importada",
+    text: "Comece com carteiras, lançamentos e extratos. Banco conectado não é requisito."
   },
   {
     icon: CalendarClock,
-    title: "Agenda viva",
-    text: "Contas futuras entram no calendário antes de apertar o caixa."
+    title: "Agenda financeira",
+    text: "Aluguel, cartão, mercado, combustível e boletos entram na previsão."
   },
   {
     icon: LineChart,
-    title: "Previsão",
-    text: "O saldo projetado mostra risco, folga e pontos sensíveis."
+    title: "Saldo projetado",
+    text: "O sistema mostra se o dinheiro aguenta até o fim do mês."
   },
   {
     icon: Brain,
-    title: "Próxima ação",
-    text: "A IA transforma contexto financeiro em decisão prática."
+    title: "Ação sugerida",
+    text: "A IA orienta próximos passos simples com base nos seus dados."
   }
+];
+
+const planItems = [
+  "Contas e carteiras",
+  "Lançamentos manuais",
+  "Importação de extratos",
+  "Agenda financeira",
+  "Previsão de saldo",
+  "Relatórios básicos",
+  "IA de orientação inicial"
 ];
 
 const proofPoints = [
   "Seus dados protegidos por autenticação, permissões e auditoria.",
   "Pagamentos preparados para o padrão Stripe.",
-  "Privacidade no controle: você decide como o contexto financeiro é usado.",
+  "Você começa manualmente ou por importação. Open Finance será evolução futura.",
   "Backup, restauração e logs para operar dinheiro real com segurança."
 ];
 
 const faqs = [
+  {
+    question: "Preciso conectar banco para usar?",
+    answer:
+      "Não. Você pode começar manualmente ou por importação. Open Finance será uma evolução para automatizar mais, não uma exigência para começar."
+  },
   {
     question: "Meus dados financeiros ficam seguros?",
     answer:
       "Sim. O Deniaros foi desenhado com autenticação, permissões, auditoria, backup e controles de privacidade para proteger seu workspace financeiro."
   },
   {
-    question: "Preciso conectar banco para usar?",
+    question: "A IA substitui consultoria financeira?",
     answer:
-      "Não. Você pode começar registrando ou importando dados manualmente. A conexão Open Finance entra como evolução para automatizar ainda mais a rotina."
-  },
-  {
-    question: "A IA vê todos os meus dados?",
-    answer:
-      "A IA usa apenas o contexto financeiro necessário para orientar sua decisão dentro do Deniaros, com foco em saldo, agenda, riscos e próximas ações."
+      "Não. A IA do Deniaros oferece orientação operacional baseada na sua base, agenda e previsão. Ela ajuda você a enxergar riscos e próximos passos, sem prometer resultado financeiro."
   },
   {
     question: "Consigo testar antes de pagar?",
     answer:
-      "Sim. A proposta é permitir que você veja sua previsão em minutos e entenda se o Deniaros resolve sua rotina antes de assumir um plano pago."
+      "Sim. Crie sua conta, monte sua primeira carteira e registre ou importe seus primeiros movimentos. A previsão aparece quando existe base real."
   }
 ];
+
+function ConversionCta({ label = "Ver minha previsão grátis" }: { label?: string }) {
+  return (
+    <Link className="marketing-primary marketing-primary-large" href="/login?mode=signup">
+      {label}
+      <ArrowRight aria-hidden="true" size={18} />
+    </Link>
+  );
+}
 
 export function MarketingLanding() {
   return (
     <main className="marketing-page">
       <Link className="marketing-mobile-sticky-cta" href="/login?mode=signup">
-        Começar grátis agora
+        Ver minha previsão grátis
         <ArrowRight aria-hidden="true" size={16} />
       </Link>
 
@@ -152,20 +172,17 @@ export function MarketingLanding() {
         <div className="marketing-hero-copy marketing-reveal">
           <p className="marketing-eyebrow">
             <Sparkles aria-hidden="true" size={16} />
-            Gestão financeira que olha para frente
+            Controle com previsão
           </p>
           <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mês.</h1>
           <p className="marketing-hero-lead">
-            Veja quanto você pode gastar hoje, o que vai acontecer com seu saldo e o que ajustar
-            antes do problema chegar.
+            Monte sua base financeira, veja seu saldo projetado e saiba o que ajustar antes do
+            problema chegar.
           </p>
           <div className="marketing-hero-actions">
             <div className="marketing-hero-cta-wrapper">
-              <Link className="marketing-primary marketing-primary-large marketing-hero-primary" href="/login?mode=signup">
-                Começar grátis agora
-                <ArrowRight aria-hidden="true" size={18} />
-              </Link>
-              <small className="marketing-cta-note">Não precisa de cartão de crédito</small>
+              <ConversionCta />
+              <small className="marketing-cta-note">Não precisa de cartão. Não precisa conectar banco.</small>
             </div>
             <Link className="marketing-secondary" href="#como-funciona">
               Ver como funciona
@@ -173,12 +190,12 @@ export function MarketingLanding() {
           </div>
           <div className="marketing-trust-row" aria-label="Compromissos do Deniaros">
             <span>
-              <LineChart aria-hidden="true" size={16} />
-              Previsão em minutos
+              <Import aria-hidden="true" size={16} />
+              Manual ou importação
             </span>
             <span>
-              <WalletCards aria-hidden="true" size={16} />
-              Base organizada
+              <LineChart aria-hidden="true" size={16} />
+              Previsão do mês
             </span>
             <span>
               <Brain aria-hidden="true" size={16} />
@@ -199,7 +216,7 @@ export function MarketingLanding() {
             <small>Evita caixa negativo.</small>
           </div>
 
-          <div className="marketing-decision-board" aria-label="Exemplo de mesa de decisão Deniaros">
+          <div className="marketing-decision-board" aria-label="Exemplo de previsão Deniaros">
             <p className="marketing-board-kicker">Veja sua previsão antes do problema acontecer</p>
             <div className="marketing-board-header">
               <span>Mesa de decisão</span>
@@ -243,7 +260,7 @@ export function MarketingLanding() {
       <section className="marketing-quick-results" aria-labelledby="quick-results-title">
         <div>
           <p className="marketing-section-label">Resultado rápido</p>
-          <h2 id="quick-results-title">Em 2 minutos você já sabe:</h2>
+          <h2 id="quick-results-title">Em poucos minutos, você sai do achismo.</h2>
         </div>
         <div className="marketing-quick-grid">
           {quickResults.map((result) => (
@@ -255,13 +272,40 @@ export function MarketingLanding() {
         </div>
       </section>
 
+      <section className="marketing-problem marketing-consequence" aria-labelledby="consequence-title">
+        <div>
+          <p className="marketing-section-label">Dor real</p>
+          <h2 id="consequence-title">Seu banco mostra saldo. O Deniaros mostra consequência.</h2>
+          <p className="marketing-consequence-text">
+            O problema não é só saber quanto tem agora. É saber se esse dinheiro aguenta aluguel,
+            cartão, mercado, combustível, boletos e imprevistos até o fim do mês.
+          </p>
+        </div>
+        <div className="marketing-pain-list">
+          {painPoints.map((pain) => (
+            <p key={pain}>
+              <CheckCircle2 aria-hidden="true" size={18} />
+              {pain}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      <section className="marketing-inline-cta" aria-label="Começar depois da dor">
+        <div>
+          <p className="marketing-section-label">Primeiro passo</p>
+          <h2>Monte sua base e veja se o mês fecha.</h2>
+        </div>
+        <ConversionCta label="Montar minha base financeira" />
+      </section>
+
       <section className="marketing-live-flow" aria-labelledby="live-flow-title">
         <div className="marketing-section-head marketing-section-head-narrow">
-          <p className="marketing-section-label">De registro para decisão</p>
-          <h2 id="live-flow-title">O Deniaros transforma dados em direção.</h2>
+          <p className="marketing-section-label">Sem depender de banco conectado</p>
+          <h2 id="live-flow-title">Comece manualmente. Importe quando quiser. Evolua depois.</h2>
           <p>
-            A experiência é rápida: você cria a base, o sistema projeta o caixa e a próxima ação
-            aparece antes do problema virar urgência.
+            O foco inicial é simples: organizar o que entra, o que sai e o que vem pela frente.
+            Conexão bancária será uma evolução futura para automatizar ainda mais.
           </p>
         </div>
         <div className="marketing-flow-rail">
@@ -279,75 +323,117 @@ export function MarketingLanding() {
         </div>
       </section>
 
-      <section className="marketing-problem" aria-labelledby="problema-title">
-        <div>
-          <p className="marketing-section-label">O problema real</p>
-          <h2 id="problema-title">Você só descobre o problema quando já é tarde.</h2>
+      <section className="marketing-section" id="como-funciona">
+        <div className="marketing-section-head marketing-section-head-narrow">
+          <p className="marketing-section-label">Como funciona</p>
+          <h2>Simples. Rápido. Direto.</h2>
         </div>
-        <div className="marketing-pain-list">
-          {painPoints.map((pain) => (
-            <p key={pain}>
-              <CheckCircle2 aria-hidden="true" size={18} />
-              {pain}
-            </p>
+        <div className="marketing-journey">
+          {journey.map((item) => (
+            <article key={item.step}>
+              <span>{item.step}</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className="marketing-turning-point">
+      <section className="marketing-inline-cta" aria-label="Começar depois do funcionamento">
         <div>
-          <p className="marketing-section-label">Virada de chave</p>
-          <h2>
-            A maioria dos apps mostra o passado.
-            <br />
-            O Deniaros te mostra o que vem pela frente.
-          </h2>
+          <p className="marketing-section-label">Sem enrolação</p>
+          <h2>Crie a conta, registre a base e veja a previsão nascer.</h2>
         </div>
-        <p>Aqui você não só organiza. Você decide antes do problema acontecer.</p>
+        <ConversionCta label="Começar agora" />
       </section>
 
       <section className="marketing-section" aria-labelledby="ai-advisor-title">
         <div className="marketing-section-head marketing-section-head-narrow">
-          <p className="marketing-section-label">Inteligência que orienta</p>
-          <h2 id="ai-advisor-title">Um consultor financeiro 24h à sua disposição.</h2>
+          <p className="marketing-section-label">Orientação com contexto</p>
+          <h2 id="ai-advisor-title">Orientação prática, sem conselho genérico.</h2>
           <p>
-            Pergunte em linguagem natural e receba respostas baseadas na sua projeção real, não em dicas
-            genéricas de internet.
+            A IA do Deniaros não tenta adivinhar sua vida. Ela lê sua base financeira, sua agenda
+            e sua previsão para sugerir próximos passos simples.
           </p>
         </div>
 
-        <div className="marketing-decision-board marketing-ai-board" aria-label="Simulação do Consultor IA">
+        <div className="marketing-decision-board marketing-ai-board" aria-label="Simulação da orientação Deniaros">
           <p className="marketing-board-kicker">
             <Sparkles aria-hidden="true" className="marketing-inline-icon" size={14} />
-            O que a IA do Deniaros faria:
+            Orientação baseada nos seus dados
           </p>
           <div className="marketing-board-header">
             <span>Você perguntou:</span>
-            <strong>"Posso trocar de carro no mês que vem?"</strong>
+            <strong>"Posso trocar de celular este mês?"</strong>
           </div>
           <div className="marketing-balance-card">
-            <span>Análise da IA (projeção de 90 dias)</span>
+            <span>Leitura da previsão</span>
             <strong>Não recomendo agora.</strong>
-            <small>Seu menor saldo previsto será de R$ 840,00 no dia 15 devido ao IPVA e seguro.</small>
+            <small>Seu menor saldo previsto cai para R$ 840,00 no dia 15 por causa do cartão e do seguro.</small>
           </div>
           <div className="marketing-board-grid">
             <article>
               <span>Ação sugerida</span>
-              <strong>Adiar para abril</strong>
-              <small>A margem sobe para R$ 3.200</small>
+              <strong>Adiar 30 dias</strong>
+              <small>A margem melhora</small>
             </article>
             <article>
               <span>Impacto</span>
               <strong>Risco evitado</strong>
-              <small>Uso do cheque especial</small>
+              <small>Caixa apertado</small>
             </article>
             <article>
-              <span>Decisão</span>
-              <strong>Segura</strong>
-              <small>Baseada nos seus dados</small>
+              <span>Base</span>
+              <strong>Seus dados</strong>
+              <small>Agenda e saldo</small>
             </article>
           </div>
         </div>
+      </section>
+
+      <section className="marketing-offer" aria-labelledby="offer-title">
+        <div>
+          <p className="marketing-section-label">Oferta inicial</p>
+          <h2 id="offer-title">Comece simples. Evolua quando fizer sentido.</h2>
+          <p>
+            O caminho inicial é o Plano Controle: organize contas, registre movimentos, importe
+            extratos e enxergue a previsão do mês.
+          </p>
+        </div>
+        <article className="marketing-plan-card">
+          <span>Plano Controle</span>
+          <h3>Para sair do escuro financeiro.</h3>
+          <p>
+            Feito para quem quer montar a base real e entender se o dinheiro aguenta o mês antes
+            de assumir compromissos maiores.
+          </p>
+          <div className="marketing-plan-list">
+            {planItems.map((item) => (
+              <p key={item}>
+                <CheckCircle2 aria-hidden="true" size={16} />
+                {item}
+              </p>
+            ))}
+          </div>
+          <div className="marketing-plan-actions">
+            <ConversionCta label="Começar pelo Controle" />
+            <Link className="marketing-secondary" href="/login?mode=signup">
+              Criar conta grátis
+            </Link>
+          </div>
+        </article>
+      </section>
+
+      <section className="marketing-proof-before-signup" aria-labelledby="proof-before-signup-title">
+        <div>
+          <p className="marketing-section-label">Antes de pagar</p>
+          <h2 id="proof-before-signup-title">Veja se o Deniaros resolve sua rotina.</h2>
+        </div>
+        <p>
+          Crie sua conta, monte sua primeira carteira e registre ou importe seus primeiros movimentos.
+          A previsão aparece quando existe base real.
+        </p>
+        <ConversionCta label="Testar agora" />
       </section>
 
       <section className="marketing-weekly-ritual">
@@ -374,25 +460,9 @@ export function MarketingLanding() {
         </div>
       </section>
 
-      <section className="marketing-section" id="como-funciona">
-        <div className="marketing-section-head marketing-section-head-narrow">
-          <p className="marketing-section-label">Como funciona</p>
-          <h2>Simples. Rápido. Direto.</h2>
-        </div>
-        <div className="marketing-journey">
-          {journey.map((item) => (
-            <article key={item.step}>
-              <span>{item.step}</span>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
       <section className="marketing-feature-band">
         <div>
-          <p className="marketing-section-label">Direção financeira</p>
+          <p className="marketing-section-label">Sistema completo, começo simples</p>
           <h2>Você não precisa de mais um app financeiro.</h2>
           <p>Você precisa de direção.</p>
         </div>
@@ -421,6 +491,14 @@ export function MarketingLanding() {
         </div>
       </section>
 
+      <section className="marketing-inline-cta" aria-label="Começar antes das perguntas frequentes">
+        <div>
+          <p className="marketing-section-label">Pronto para testar?</p>
+          <h2>Você só precisa de uma carteira e alguns movimentos para começar.</h2>
+        </div>
+        <ConversionCta />
+      </section>
+
       <section className="marketing-faq" aria-labelledby="faq-title">
         <div className="marketing-section-head marketing-section-head-narrow">
           <p className="marketing-section-label">Perguntas frequentes</p>
@@ -441,10 +519,7 @@ export function MarketingLanding() {
         <p className="marketing-section-label">Controle com previsão</p>
         <h2>Pare de adivinhar. Comece a decidir.</h2>
         <p>Crie sua conta gratuita e veja sua previsão em minutos.</p>
-        <Link className="marketing-primary marketing-primary-large marketing-final-primary" href="/login?mode=signup">
-          Começar grátis agora
-          <ArrowRight aria-hidden="true" size={18} />
-        </Link>
+        <ConversionCta />
       </section>
     </main>
   );

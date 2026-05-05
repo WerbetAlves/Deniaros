@@ -31,11 +31,14 @@
 .marketing-hero,
 .marketing-quick-results,
 .marketing-problem,
+.marketing-inline-cta,
 .marketing-turning-point,
 .marketing-weekly-ritual,
 .marketing-section,
 .marketing-outcomes,
 .marketing-live-flow,
+.marketing-offer,
+.marketing-proof-before-signup,
 .marketing-feature-band,
 .marketing-proof,
 .marketing-faq,
@@ -179,7 +182,10 @@
 .marketing-hero-copy h1,
 .marketing-section h2,
 .marketing-problem h2,
+.marketing-inline-cta h2,
 .marketing-outcomes h2,
+.marketing-offer h2,
+.marketing-proof-before-signup h2,
 .marketing-feature-band h2,
 .marketing-final-cta h2 {
   margin: 0;
@@ -478,6 +484,9 @@
 .marketing-problem,
 .marketing-quick-results,
 .marketing-live-flow,
+.marketing-inline-cta,
+.marketing-offer,
+.marketing-proof-before-signup,
 .marketing-weekly-ritual,
 .marketing-outcomes,
 .marketing-feature-band,
@@ -620,7 +629,10 @@
 
 .marketing-problem h2,
 .marketing-section h2,
+.marketing-inline-cta h2,
 .marketing-outcomes h2,
+.marketing-offer h2,
+.marketing-proof-before-signup h2,
 .marketing-feature-band h2,
 .marketing-proof h2,
 .marketing-final-cta h2 {
@@ -648,9 +660,46 @@
 
 .marketing-pain-list svg,
 .marketing-outcome-list svg,
-.marketing-feature-grid svg {
+.marketing-feature-grid svg,
+.marketing-plan-list svg {
   flex: 0 0 auto;
   color: var(--color-dourado-estrategico);
+}
+
+.marketing-consequence-text {
+  max-width: 62ch;
+  margin: 16px 0 0;
+  color: #5f5446;
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+
+.marketing-inline-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 18px;
+  padding: 22px 24px;
+  background:
+    linear-gradient(135deg, rgba(24, 59, 45, 0.96), rgba(19, 45, 35, 0.98));
+}
+
+.marketing-inline-cta .marketing-section-label {
+  color: #d9b66a;
+}
+
+.marketing-inline-cta h2 {
+  max-width: 20ch;
+  color: #fff8e9;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+}
+
+.marketing-inline-cta .marketing-primary {
+  flex: 0 0 auto;
+  border-color: rgba(255, 253, 247, 0.26);
+  color: var(--color-verde-profundo);
+  background: var(--color-dourado-estrategico);
 }
 
 .marketing-turning-point {
@@ -773,7 +822,9 @@
 .marketing-journey p,
 .marketing-outcome-card p,
 .marketing-final-cta p,
-.marketing-feature-band > div:first-child p:not(.marketing-section-label) {
+.marketing-feature-band > div:first-child p:not(.marketing-section-label),
+.marketing-offer > div:first-child p:not(.marketing-section-label),
+.marketing-proof-before-signup > p {
   margin: 0;
   color: var(--muted);
   line-height: 1.55;
@@ -821,6 +872,108 @@
   gap: 26px;
   margin-top: 70px;
   padding: 28px;
+}
+
+.marketing-offer {
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(340px, 1fr);
+  align-items: center;
+  gap: 28px;
+  margin-top: 70px;
+  padding: 28px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.88), rgba(239, 229, 209, 0.74));
+}
+
+.marketing-offer > div:first-child p:not(.marketing-section-label) {
+  max-width: 62ch;
+  margin-top: 14px;
+}
+
+.marketing-plan-card {
+  border: 1px solid rgba(45, 104, 75, 0.2);
+  border-top: 3px solid var(--color-dourado-estrategico);
+  border-radius: 8px;
+  padding: 22px;
+  background: rgba(255, 253, 247, 0.82);
+  box-shadow: 0 18px 44px rgba(51, 36, 20, 0.12);
+}
+
+.marketing-plan-card > span {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  border: 1px solid rgba(184, 137, 56, 0.32);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--color-verde-profundo);
+  background: rgba(246, 232, 194, 0.62);
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.marketing-plan-card h3 {
+  margin: 16px 0 10px;
+  color: var(--text);
+  font-family: var(--font-heading);
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+  line-height: 0.98;
+}
+
+.marketing-plan-card > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.marketing-plan-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.marketing-plan-list p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  margin: 0;
+  border: 1px solid rgba(45, 104, 75, 0.14);
+  border-radius: 8px;
+  padding: 9px 10px;
+  color: var(--accent-deep);
+  background: rgba(237, 247, 232, 0.52);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.marketing-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.marketing-proof-before-signup {
+  display: grid;
+  grid-template-columns: minmax(0, 0.74fr) minmax(220px, 0.62fr) auto;
+  align-items: center;
+  gap: 22px;
+  margin-top: 18px;
+  padding: 24px;
+  background:
+    linear-gradient(135deg, rgba(237, 247, 232, 0.7), rgba(255, 253, 247, 0.86));
+}
+
+.marketing-proof-before-signup h2 {
+  max-width: 18ch;
+}
+
+.marketing-proof-before-signup .marketing-primary {
+  white-space: nowrap;
 }
 
 .marketing-feature-grid {
@@ -1042,6 +1195,8 @@
   .marketing-section-head,
   .marketing-outcomes,
   .marketing-flow-rail,
+  .marketing-offer,
+  .marketing-proof-before-signup,
   .marketing-feature-band,
   .marketing-proof {
     grid-template-columns: 1fr;
@@ -1058,8 +1213,18 @@
   .marketing-pillar-grid,
   .marketing-journey,
   .marketing-quick-grid,
+  .marketing-plan-list,
   .marketing-proof-grid {
     grid-template-columns: 1fr;
+  }
+
+  .marketing-inline-cta {
+    display: grid;
+  }
+
+  .marketing-inline-cta .marketing-primary,
+  .marketing-proof-before-signup .marketing-primary {
+    width: 100%;
   }
 
   .marketing-flow-rail::before,
@@ -1078,6 +1243,9 @@
   .marketing-section,
   .marketing-outcomes,
   .marketing-live-flow,
+  .marketing-inline-cta,
+  .marketing-offer,
+  .marketing-proof-before-signup,
   .marketing-feature-band,
   .marketing-proof,
   .marketing-faq,
@@ -1150,19 +1318,27 @@
   }
 
   .marketing-board-grid,
-  .marketing-feature-grid {
+  .marketing-feature-grid,
+  .marketing-plan-list {
     grid-template-columns: 1fr;
   }
 
   .marketing-problem,
   .marketing-quick-results,
   .marketing-live-flow,
+  .marketing-inline-cta,
+  .marketing-offer,
+  .marketing-proof-before-signup,
   .marketing-turning-point,
   .marketing-weekly-ritual,
   .marketing-outcomes,
   .marketing-feature-band,
   .marketing-proof {
     padding: 20px;
+  }
+
+  .marketing-plan-actions {
+    display: grid;
   }
 
   .marketing-final-cta {
