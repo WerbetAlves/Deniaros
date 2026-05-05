@@ -14,6 +14,7 @@ import {
   transactions as sampleTransactions,
   workspace as sampleWorkspace
 } from "@/lib/sample-data";
+import { shouldUseSampleFinancialData } from "@/lib/sample-data-policy";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ensureDefaultWorkspace } from "@/lib/workspace-bootstrap";
@@ -260,14 +261,6 @@ function getFallbackFinancialData(fallbackReason: string, workspace?: Workspace)
     fallbackReason,
     source: "unavailable"
   };
-}
-
-function shouldUseSampleFinancialData() {
-  if (process.env.NODE_ENV === "production") {
-    return false;
-  }
-
-  return process.env.DENIAROS_ALLOW_SAMPLE_DATA !== "0";
 }
 
 function buildFallbackWorkspace(id = "workspace-unavailable"): Workspace {
