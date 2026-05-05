@@ -3,11 +3,11 @@
   z-index: 1;
   min-height: 100vh;
   overflow: hidden;
-  color: var(--text);
+  color: var(--color-grafite);
+  font-family: var(--font-body);
   background:
-    radial-gradient(circle at 12% 5%, rgba(184, 137, 56, 0.2), transparent 25rem),
-    radial-gradient(circle at 88% 10%, rgba(40, 90, 67, 0.16), transparent 26rem),
-    linear-gradient(135deg, #f9f5eb 0%, #efe2cc 50%, #f7efe1 100%);
+    linear-gradient(135deg, rgba(245, 235, 216, 0.96), rgba(255, 248, 234, 0.98) 48%, rgba(236, 219, 190, 0.94)),
+    var(--color-marfim-classico);
 }
 
 .marketing-page::before {
@@ -73,9 +73,9 @@
 }
 
 .marketing-brand strong {
-  color: var(--accent-deep);
+  color: var(--color-verde-profundo);
   font-family: var(--font-heading);
-  font-size: 1.45rem;
+  font-size: 1.62rem;
   line-height: 1;
 }
 
@@ -140,10 +140,10 @@
   gap: 8px;
   min-height: 42px;
   border: 1px solid rgba(255, 246, 223, 0.22);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0 17px;
-  color: #fff8e9;
-  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fffdf7;
+  background: var(--color-verde-profundo);
   box-shadow: 0 14px 28px rgba(24, 59, 45, 0.18);
   font-weight: 950;
   transition:
@@ -153,7 +153,7 @@
 }
 
 .marketing-primary:hover {
-  filter: brightness(1.04);
+  filter: brightness(1.08);
   transform: translateY(-1px);
   box-shadow: 0 18px 34px rgba(24, 59, 45, 0.23);
 }
@@ -186,7 +186,7 @@
 .marketing-hero-copy h1 {
   max-width: 13ch;
   font-size: clamp(3.05rem, 6.4vw, 6.2rem);
-  line-height: 0.92;
+  line-height: 0.94;
 }
 
 .marketing-eyebrow,
@@ -195,7 +195,7 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 14px;
-  color: var(--gold);
+  color: var(--color-dourado-estrategico);
   font-size: 0.72rem;
   font-weight: 950;
   letter-spacing: 0.12em;
@@ -205,7 +205,7 @@
 .marketing-hero-lead {
   max-width: 68ch;
   margin: 22px 0 0;
-  color: var(--muted);
+  color: #5f5446;
   font-size: clamp(1.02rem, 2vw, 1.2rem);
   line-height: 1.65;
 }
@@ -215,6 +215,17 @@
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 28px;
+}
+
+.marketing-hero-cta-wrapper {
+  display: grid;
+  gap: 7px;
+}
+
+.marketing-cta-note {
+  color: #5f5446;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .marketing-trust-row {
@@ -238,7 +249,7 @@
   border: 1px solid rgba(82, 58, 32, 0.13);
   border-radius: 999px;
   padding: 0 12px;
-  color: var(--accent-deep);
+  color: var(--color-verde-profundo);
   background: rgba(255, 253, 247, 0.62);
   font-size: 0.82rem;
   font-weight: 900;
@@ -248,24 +259,30 @@
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(82, 58, 32, 0.17);
-  border-top: 3px solid rgba(184, 137, 56, 0.8);
-  border-radius: 10px;
+  border-top: 3px solid var(--color-dourado-estrategico);
+  border-radius: 8px;
   padding: 18px;
   background:
-    radial-gradient(circle at 86% 10%, rgba(184, 137, 56, 0.2), transparent 13rem),
-    linear-gradient(145deg, rgba(255, 253, 247, 0.95), rgba(239, 229, 209, 0.9));
+    linear-gradient(145deg, rgba(255, 253, 247, 0.96), rgba(239, 229, 209, 0.91));
   box-shadow: 0 28px 60px rgba(51, 36, 20, 0.17);
 }
 
 .marketing-board-kicker {
   position: relative;
   z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 0 14px;
-  color: var(--gold);
+  color: var(--color-dourado-estrategico);
   font-size: 0.78rem;
   font-weight: 950;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.marketing-inline-icon {
+  flex: 0 0 auto;
 }
 
 .marketing-decision-board::after {
@@ -311,7 +328,7 @@
   border: 1px solid rgba(45, 104, 75, 0.2);
   border-radius: 8px;
   padding: 18px;
-  background: rgba(237, 247, 232, 0.74);
+  background: rgba(238, 247, 232, 0.78);
 }
 
 .marketing-balance-card span,
@@ -326,7 +343,7 @@
 .marketing-balance-card strong {
   display: block;
   margin-top: 5px;
-  color: var(--accent-deep);
+  color: var(--color-verde-profundo);
   font-family: var(--font-heading);
   font-size: clamp(2.6rem, 5vw, 4.4rem);
   line-height: 0.95;
@@ -405,7 +422,7 @@
 .marketing-proof,
 .marketing-final-cta {
   border: 1px solid rgba(82, 58, 32, 0.14);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(255, 253, 247, 0.72);
   box-shadow: var(--shadow-inset);
 }
@@ -418,8 +435,7 @@
   margin-bottom: 18px;
   padding: 24px 26px;
   background:
-    radial-gradient(circle at 10% 0%, rgba(184, 137, 56, 0.15), transparent 16rem),
-    rgba(255, 253, 247, 0.8);
+    linear-gradient(135deg, rgba(255, 253, 247, 0.86), rgba(245, 235, 216, 0.72));
 }
 
 .marketing-quick-results h2 {
@@ -453,7 +469,7 @@
 
 .marketing-quick-grid svg {
   flex: 0 0 auto;
-  color: var(--gold);
+  color: var(--color-dourado-estrategico);
 }
 
 .marketing-problem {
@@ -496,7 +512,7 @@
 .marketing-outcome-list svg,
 .marketing-feature-grid svg {
   flex: 0 0 auto;
-  color: var(--gold);
+  color: var(--color-dourado-estrategico);
 }
 
 .marketing-turning-point {
@@ -509,9 +525,7 @@
   border: 1px solid rgba(82, 58, 32, 0.14);
   border-left: 4px solid rgba(184, 137, 56, 0.78);
   border-radius: 10px;
-  background:
-    radial-gradient(circle at 90% 8%, rgba(184, 137, 56, 0.16), transparent 18rem),
-    rgba(255, 253, 247, 0.76);
+  background: rgba(255, 253, 247, 0.76);
   box-shadow: var(--shadow-inset);
 }
 
@@ -538,9 +552,8 @@
   gap: 24px;
   margin-top: 70px;
   padding: 28px;
-  border-top: 3px solid rgba(184, 137, 56, 0.8);
+  border-top: 3px solid var(--color-dourado-estrategico);
   background:
-    radial-gradient(circle at 92% 12%, rgba(184, 137, 56, 0.18), transparent 17rem),
     linear-gradient(135deg, rgba(24, 59, 45, 0.96), rgba(17, 25, 21, 0.98));
 }
 
@@ -636,7 +649,6 @@
   margin-top: 70px;
   padding: 28px;
   background:
-    radial-gradient(circle at 90% 12%, rgba(184, 137, 56, 0.16), transparent 18rem),
     linear-gradient(135deg, rgba(255, 253, 247, 0.86), rgba(239, 229, 209, 0.72));
 }
 
@@ -696,9 +708,7 @@
   gap: 26px;
   margin-top: 70px;
   padding: 28px;
-  background:
-    radial-gradient(circle at 6% 0%, rgba(184, 137, 56, 0.14), transparent 15rem),
-    rgba(255, 253, 247, 0.76);
+  background: rgba(255, 253, 247, 0.76);
 }
 
 .marketing-proof h2 {
@@ -731,7 +741,7 @@
 .marketing-proof-grid svg {
   flex: 0 0 auto;
   margin-top: 1px;
-  color: var(--gold);
+  color: var(--color-dourado-estrategico);
 }
 
 .marketing-faq {
@@ -765,7 +775,7 @@
 .marketing-faq-list summary::after {
   content: "+";
   float: right;
-  color: var(--gold);
+  color: var(--color-dourado-estrategico);
   font-weight: 950;
 }
 
@@ -789,7 +799,6 @@
   padding: clamp(30px, 6vw, 56px);
   text-align: center;
   background:
-    radial-gradient(circle at 50% 0%, rgba(184, 137, 56, 0.2), transparent 16rem),
     linear-gradient(135deg, rgba(24, 59, 45, 0.96), rgba(17, 25, 21, 0.98));
 }
 
@@ -807,6 +816,16 @@
   max-width: 68ch;
   margin: 16px 0 24px;
   color: rgba(255, 248, 233, 0.78);
+}
+
+.marketing-final-primary {
+  border-color: rgba(255, 253, 247, 0.28);
+  color: var(--color-verde-profundo);
+  background: var(--color-dourado-estrategico);
+}
+
+.marketing-final-primary:hover {
+  filter: brightness(1.05);
 }
 
 @media (max-width: 980px) {

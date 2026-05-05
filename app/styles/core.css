@@ -1,22 +1,30 @@
 
 :root {
-  --bg: #efe6d4;
+  --color-verde-profundo: #1d4d3a;
+  --color-dourado-estrategico: #b88938;
+  --color-marfim-classico: #f5ebd8;
+  --color-grafite: #2b241a;
+  --color-sucesso: #2d684b;
+  --color-info: #315e6d;
+  --color-alerta: #ad7630;
+  --color-erro: #9c3f29;
+  --bg: var(--color-marfim-classico);
   --bg-elevated: rgba(255, 250, 239, 0.94);
   --bg-strong: #fffaf0;
   --bg-dark: #172019;
   --bg-dark-soft: #223027;
   --line: rgba(82, 58, 32, 0.16);
   --line-strong: rgba(82, 58, 32, 0.26);
-  --text: #2b241a;
+  --text: var(--color-grafite);
   --muted: #746957;
-  --accent: #285a43;
-  --accent-deep: #183b2d;
+  --accent: var(--color-verde-profundo);
+  --accent-deep: #143828;
   --accent-soft: #e9dec7;
-  --gold: #b88938;
-  --warning: #ad7630;
-  --danger: #9c3f29;
-  --success: #2d684b;
-  --info: #315e6d;
+  --gold: var(--color-dourado-estrategico);
+  --warning: var(--color-alerta);
+  --danger: var(--color-erro);
+  --success: var(--color-sucesso);
+  --info: var(--color-info);
   --violet: #67536f;
   --radius-xl: 8px;
   --radius-lg: 8px;
@@ -25,12 +33,10 @@
   --shadow-lg: 0 22px 55px rgba(51, 36, 20, 0.2);
   --shadow-md: 0 14px 30px rgba(51, 36, 20, 0.1);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.58);
-  --font-body: "Trebuchet MS", "Segoe UI", sans-serif;
-  --font-heading: Georgia, "Times New Roman", serif;
+  --font-body: var(--font-manrope), "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-heading: var(--font-cormorant), Georgia, "Times New Roman", serif;
   --page-bg:
-    radial-gradient(circle at 18% 2%, rgba(184, 137, 56, 0.22), transparent 32rem),
-    radial-gradient(circle at 88% 18%, rgba(40, 90, 67, 0.16), transparent 30rem),
-    linear-gradient(135deg, #eadcc4 0%, #f6efe2 45%, #e6d3b4 100%);
+    linear-gradient(135deg, #f5ebd8 0%, #fff8ea 48%, #ead8bb 100%);
 }
 
 * {

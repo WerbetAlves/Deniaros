@@ -33,17 +33,19 @@ export async function createAccount(formData: FormData) {
   const openFinanceStatus = resolveOpenFinanceStatus(formData, connectionMode);
   const externalAccountRef = normalizeOptionalText(formData.get("externalAccountRef"));
   const accountType = normalizeAccountType(formData.get("type"));
+  const openingBalanceDate = normalizeDateInput(formData.get("openingBalanceDate"));
 
   if (!name) {
     redirect("/accounts?error=Informe o nome da conta.");
   }
 
-  const { error } = await supabase.from("accounts").insert({
+  const accountPayload = {
     workspace_id: workspaceId,
     name,
     type: accountType,
     currency: normalizeCurrency(formData.get("currency"), defaultCurrency),
     opening_balance: parseAmount(formData.get("openingBalance")),
+    opening_balance_date: openingBalanceDate,
     color: normalizeAccountColor(formData.get("color")),
     account_group: normalizeAccountGroup(formData.get("accountGroup"), accountType),
     connection_mode: connectionMode,
@@ -53,12 +55,21 @@ export async function createAccount(formData: FormData) {
     is_favorite: parseCheckbox(formData.get("isFavorite")),
     is_active: true,
     updated_at: new Date().toISOString()
-  });
+  };
+
+  let { error } = await supabase.from("accounts").insert(accountPayload);
+
+  if (isMissingOpeningBalanceDateColumn(error)) {
+    const { error: retryError } = await supabase
+      .from("accounts")
+      .insert(omitOpeningBalanceDate(accountPayload));
+    error = retryError;
+  }
 
   if (error) {
     if (error.code === "42703") {
       redirect(
-        "/accounts?error=Ative%20as%20migrations%200006_account_openfinance.sql%20e%200023_money99_account_structure.sql%20para%20usar%20a%20estrutura%20completa%20de%20contas."
+        "/accounts?error=Ative%20as%20migrations%200006_account_openfinance.sql%2C%200023_money99_account_structure.sql%20e%200038_account_opening_balance_date.sql%20para%20usar%20a%20estrutura%20completa%20de%20contas."
       );
     }
 
@@ -78,34 +89,47 @@ export async function updateAccount(formData: FormData) {
   const openFinanceStatus = resolveOpenFinanceStatus(formData, connectionMode);
   const externalAccountRef = normalizeOptionalText(formData.get("externalAccountRef"));
   const accountType = normalizeAccountType(formData.get("type"));
+  const openingBalanceDate = normalizeDateInput(formData.get("openingBalanceDate"));
 
   if (!itemId || !name) {
     redirect("/accounts?error=Preencha os dados da conta antes de salvar.");
   }
 
-  const { error } = await supabase
+  const accountPayload = {
+    name,
+    type: accountType,
+    currency: normalizeCurrency(formData.get("currency"), defaultCurrency),
+    opening_balance: parseAmount(formData.get("openingBalance")),
+    opening_balance_date: openingBalanceDate,
+    color: normalizeAccountColor(formData.get("color")),
+    account_group: normalizeAccountGroup(formData.get("accountGroup"), accountType),
+    connection_mode: connectionMode,
+    openfinance_provider: openFinanceProvider,
+    openfinance_status: openFinanceStatus,
+    external_account_ref: externalAccountRef,
+    is_favorite: parseCheckbox(formData.get("isFavorite")),
+    updated_at: new Date().toISOString()
+  };
+
+  let { error } = await supabase
     .from("accounts")
-    .update({
-      name,
-      type: accountType,
-      currency: normalizeCurrency(formData.get("currency"), defaultCurrency),
-      opening_balance: parseAmount(formData.get("openingBalance")),
-      color: normalizeAccountColor(formData.get("color")),
-      account_group: normalizeAccountGroup(formData.get("accountGroup"), accountType),
-      connection_mode: connectionMode,
-      openfinance_provider: openFinanceProvider,
-      openfinance_status: openFinanceStatus,
-      external_account_ref: externalAccountRef,
-      is_favorite: parseCheckbox(formData.get("isFavorite")),
-      updated_at: new Date().toISOString()
-    })
+    .update(accountPayload)
     .eq("id", itemId)
     .eq("workspace_id", workspaceId);
+
+  if (isMissingOpeningBalanceDateColumn(error)) {
+    const { error: retryError } = await supabase
+      .from("accounts")
+      .update(omitOpeningBalanceDate(accountPayload))
+      .eq("id", itemId)
+      .eq("workspace_id", workspaceId);
+    error = retryError;
+  }
 
   if (error) {
     if (error.code === "42703") {
       redirect(
-        "/accounts?error=Ative%20as%20migrations%200006_account_openfinance.sql%20e%200023_money99_account_structure.sql%20para%20usar%20a%20estrutura%20completa%20de%20contas."
+        "/accounts?error=Ative%20as%20migrations%200006_account_openfinance.sql%2C%200023_money99_account_structure.sql%20e%200038_account_opening_balance_date.sql%20para%20usar%20a%20estrutura%20completa%20de%20contas."
       );
     }
 
@@ -238,6 +262,17 @@ async function updateAccountState(
 function parseAmount(value: FormDataEntryValue | null) {
   const number = Number(value ?? 0);
   return Number.isFinite(number) ? number : 0;
+}
+
+function isMissingOpeningBalanceDateColumn(
+  error: { code?: string; details?: string; message?: string } | null
+) {
+  return /opening_balance_date/i.test(`${error?.code ?? ""} ${error?.message ?? ""} ${error?.details ?? ""}`);
+}
+
+function omitOpeningBalanceDate<T extends { opening_balance_date?: string }>(payload: T) {
+  const { opening_balance_date: _openingBalanceDate, ...legacyPayload } = payload;
+  return legacyPayload;
 }
 
 function parseLocalizedAmount(value: FormDataEntryValue | null) {

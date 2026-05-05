@@ -956,6 +956,11 @@ export function AccountsWorkspace({
                 </label>
 
                 <label>
+                  Data do saldo inicial
+                  <input defaultValue={new Date().toISOString().slice(0, 10)} name="openingBalanceDate" type="date" />
+                </label>
+
+                <label>
                   Moeda
                   <input
                     defaultValue={workspace.baseCurrency}
@@ -1062,6 +1067,15 @@ export function AccountsWorkspace({
                     name="openingBalance"
                     step="0.01"
                     type="number"
+                  />
+                </label>
+
+                <label>
+                  Data do saldo inicial
+                  <input
+                    defaultValue={accountInEdit.openingBalanceDate ?? new Date().toISOString().slice(0, 10)}
+                    name="openingBalanceDate"
+                    type="date"
                   />
                 </label>
 

@@ -93,6 +93,7 @@ export const payeeTypeLabels: Record<Payee["type"], string> = Object.fromEntries
 
 export type WorkspaceAccount = Account & {
   workspaceId: string;
+  openingBalanceDate?: string;
   isActive: boolean;
   accountGroup: AccountGroup;
   connectionMode: AccountConnectionMode;
@@ -125,6 +126,7 @@ export type WorkspaceAccountRow = {
   name: string;
   type: Account["type"] | null;
   opening_balance: number | string | null;
+  opening_balance_date?: string | null;
   currency: string | null;
   color: string | null;
   is_active: boolean | null;
@@ -193,6 +195,7 @@ export function mapWorkspaceAccount(row: WorkspaceAccountRow): WorkspaceAccount 
     name: row.name,
     type: normalizeAccountType(row.type),
     openingBalance: Number(row.opening_balance ?? 0),
+    openingBalanceDate: row.opening_balance_date ?? undefined,
     currency: normalizeCurrency(row.currency, "BRL"),
     color: normalizeAccountColor(row.color),
     isActive: row.is_active ?? true,

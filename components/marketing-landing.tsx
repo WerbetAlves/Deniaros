@@ -61,17 +61,17 @@ const quickResults = [
 ];
 
 const proofPoints = [
-  "Seus dados protegidos por criptografia de nível bancário.",
-  "Pagamentos processados com segurança mundial (padrão Stripe).",
-  "Privacidade total: você no controle do que a IA acessa.",
-  "Infraestrutura robusta que garante que seus dados nunca se percam."
+  "Seus dados protegidos por autenticação, permissões e auditoria.",
+  "Pagamentos preparados para o padrão Stripe.",
+  "Privacidade no controle: você decide como o contexto financeiro é usado.",
+  "Backup, restauração e logs para operar dinheiro real com segurança."
 ];
 
 const faqs = [
   {
     question: "Meus dados financeiros ficam seguros?",
     answer:
-      "Sim. O Deniaros foi desenhado com autenticação, permissões, auditoria, backup e controles de privacidade para proteger o workspace financeiro."
+      "Sim. O Deniaros foi desenhado com autenticação, permissões, auditoria, backup e controles de privacidade para proteger seu workspace financeiro."
   },
   {
     question: "Preciso conectar banco para usar?",
@@ -97,10 +97,11 @@ export function MarketingLanding() {
         Começar grátis agora
         <ArrowRight aria-hidden="true" size={16} />
       </Link>
+
       <nav className="marketing-nav" aria-label="Principal">
         <Link className="marketing-brand" href="/">
           <Image
-            alt="Deniaros"
+            alt="Logo oficial Deniaros"
             className="marketing-brand-mark"
             height={44}
             priority
@@ -130,8 +131,8 @@ export function MarketingLanding() {
           </p>
           <h1>Descubra hoje se seu dinheiro vai acabar antes do fim do mês.</h1>
           <p className="marketing-hero-lead">
-            O único sistema que não foca apenas no que você gastou, mas no que vai 
-            acontecer com seu saldo nos próximos 90 dias. Tome decisões sem ansiedade.
+            O único sistema que não foca apenas no que você gastou, mas no que vai acontecer com seu
+            saldo nos próximos 90 dias. Tome decisões sem ansiedade.
           </p>
           <div className="marketing-hero-actions">
             <div className="marketing-hero-cta-wrapper">
@@ -139,7 +140,7 @@ export function MarketingLanding() {
                 Começar grátis agora
                 <ArrowRight aria-hidden="true" size={18} />
               </Link>
-              <small className="marketing-cta-note">✓ Não precisa de cartão de crédito</small>
+              <small className="marketing-cta-note">Não precisa de cartão de crédito</small>
             </div>
             <Link className="marketing-secondary" href="#como-funciona">
               Ver como funciona
@@ -248,14 +249,14 @@ export function MarketingLanding() {
           <p className="marketing-section-label">Inteligência que orienta</p>
           <h2 id="ai-advisor-title">Um consultor financeiro 24h à sua disposição.</h2>
           <p>
-            Pergunte em linguagem natural e receba respostas baseadas na sua projeção real,
-            não em dicas genéricas de internet.
+            Pergunte em linguagem natural e receba respostas baseadas na sua projeção real, não em dicas
+            genéricas de internet.
           </p>
         </div>
 
         <div className="marketing-decision-board" aria-label="Simulação do Consultor IA">
           <p className="marketing-board-kicker">
-            <Sparkles aria-hidden="true" size={14} style={{ display: "inline", marginBottom: "-2px", marginRight: "4px" }} />
+            <Sparkles aria-hidden="true" className="marketing-inline-icon" size={14} />
             O que a IA do Deniaros faria:
           </p>
           <div className="marketing-board-header">
@@ -263,7 +264,7 @@ export function MarketingLanding() {
             <strong>"Posso trocar de carro no mês que vem?"</strong>
           </div>
           <div className="marketing-balance-card">
-            <span>Análise da IA (Projeção de 90 dias)</span>
+            <span>Análise da IA (projeção de 90 dias)</span>
             <strong>Não recomendo agora.</strong>
             <small>Seu menor saldo previsto será de R$ 840,00 no dia 15 devido ao IPVA e seguro.</small>
           </div>
@@ -381,9 +382,7 @@ export function MarketingLanding() {
         <TrendingUp aria-hidden="true" size={32} />
         <p className="marketing-section-label">Controle com previsão</p>
         <h2>Pare de adivinhar. Comece a decidir.</h2>
-        <p>
-          Crie sua conta gratuita e veja sua previsão em minutos.
-        </p>
+        <p>Crie sua conta gratuita e veja sua previsão em minutos.</p>
         <Link className="marketing-primary marketing-primary-large marketing-final-primary" href="/login?mode=signup">
           Começar grátis agora
           <ArrowRight aria-hidden="true" size={18} />

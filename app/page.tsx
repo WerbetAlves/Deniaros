@@ -22,7 +22,13 @@ import { MetricValue, WidgetWrapper } from "@/components/widget-wrapper";
 import { getFinancialData } from "@/lib/financial-data";
 import type { PersonalProfileRow } from "@/lib/money99-classic";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  canShowAdvancedInsights,
+  getWorkspaceMaturity,
+  type WorkspaceMaturity
+} from "@/lib/workspace-maturity";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   buildForecastProjection,
   formatCurrency,
@@ -91,11 +97,21 @@ export default async function HomePage() {
     (transaction) => transaction.source === "imported" || transaction.source === "openfinance"
   ).length;
   const hasPersonalProfile = Boolean(personalProfileResult.data);
+  if (!hasPersonalProfile && source !== "sample") {
+    redirect("/personal-profile?onboarding=1&next=/");
+  }
+
   const budgetCount = budgetCountResult.error ? 0 : budgetCountResult.count ?? 0;
   const debtCount = debtCountResult.error ? 0 : debtCountResult.count ?? 0;
   const hasAtLeastOneAccount = accounts.length > 0;
   const hasAtLeastOneTransaction = transactions.length > 0;
   const hasOpenSchedule = openScheduledItems.length > 0;
+  const workspaceMaturity = getWorkspaceMaturity({
+    accountCount: accounts.length,
+    scheduledCount: openScheduledItems.length,
+    transactionCount: transactions.length
+  });
+  const showAdvancedInsights = canShowAdvancedInsights(workspaceMaturity);
   const hasOperationalBase =
     hasPersonalProfile && hasAtLeastOneAccount && hasAtLeastOneTransaction && hasOpenSchedule;
   const quickStartSteps = [
@@ -179,6 +195,31 @@ export default async function HomePage() {
     unclassifiedTransactionCount
   });
 
+  if (workspaceMaturity === "workspace_empty" || workspaceMaturity === "workspace_initialized") {
+    return (
+      <AppShell user={user} userEmail={user?.email} workspaceId={workspace.id}>
+        <div className="dashboard-grid gap-6 md:gap-8">
+          <DataSourceBanner fallbackReason={fallbackReason} source={source} />
+          <HomeStarterExperience
+            accounts={accountBalances}
+            baseCurrency={workspace.baseCurrency}
+            locale={workspace.locale}
+            maturity={workspaceMaturity}
+            totalBalance={totalBalance}
+          />
+          <QuickStartGuide
+            steps={quickStartSteps}
+            subtitle="A sequência é proposital: primeiro sua carteira, depois movimento real, importação ou agenda. A previsão aparece quando a base existir."
+            title="Comece sem ruído"
+          />
+          {accountBalances.length ? (
+            <AccountsOverview accounts={accountBalances} locale={workspace.locale} />
+          ) : null}
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell user={user} userEmail={user?.email} workspaceId={workspace.id}>
       <FirstAccessShowcase
@@ -191,6 +232,8 @@ export default async function HomePage() {
         <HeroPanel dashboard={dashboard} projection={forecastProjection} />
         <HomeNextBestAction action={nextBestAction} />
         <HomeCommandActions actions={homeCommandActions} />
+        {showAdvancedInsights ? (
+          <>
         <HomeSecondaryTabs
           tabs={[
             {
@@ -256,50 +299,58 @@ export default async function HomePage() {
           projection={forecastProjection}
           transactions={transactions}
         />
+          </>
+        ) : null}
         <FinancialAgenda items={upcomingItems} locale={workspace.locale} payees={payees} />
         <QuickStartGuide
           steps={quickStartSteps}
           subtitle="A ordem importa: perfil, base real, movimentos, agenda e diagnostico. Assim o Deniaros deixa de registrar o passado e comeca a projetar o futuro."
           title="Prepare seu Deniaros para decidir com voce"
         />
-        <FinancialRoutinePanel
-          accountCount={dashboard.accountCount}
-          budgetCount={budgetCount}
-          dueSoonScheduleCount={dueSoonScheduleCount}
-          forecastRiskLevel={forecastProjection.summary.riskLevel}
-          hasPersonalProfile={hasPersonalProfile}
-          importedCount={importedCount}
-          includedDebtCount={debtCount}
-          openScheduledCount={dashboard.scheduledCount}
-          overdueScheduleCount={overdueScheduleCount}
-          pendingTransactionCount={pendingTransactionCount}
-          transactionCount={dashboard.transactionCount}
-          unclassifiedTransactionCount={unclassifiedTransactionCount}
-          workspaceName={workspace.name}
-        />
-        <FinancialHomePersonalizer
-          accountBalances={accountBalances}
-          baseCurrency={workspace.baseCurrency}
-          hasPersonalProfile={hasPersonalProfile}
-          importedCount={importedCount}
-          locale={workspace.locale}
-          openScheduledCount={dashboard.scheduledCount}
-          projection={forecastProjection}
-          transactionCount={dashboard.transactionCount}
-        />
+        {showAdvancedInsights ? (
+          <>
+            <FinancialRoutinePanel
+              accountCount={dashboard.accountCount}
+              budgetCount={budgetCount}
+              dueSoonScheduleCount={dueSoonScheduleCount}
+              forecastRiskLevel={forecastProjection.summary.riskLevel}
+              hasPersonalProfile={hasPersonalProfile}
+              importedCount={importedCount}
+              includedDebtCount={debtCount}
+              openScheduledCount={dashboard.scheduledCount}
+              overdueScheduleCount={overdueScheduleCount}
+              pendingTransactionCount={pendingTransactionCount}
+              transactionCount={dashboard.transactionCount}
+              unclassifiedTransactionCount={unclassifiedTransactionCount}
+              workspaceName={workspace.name}
+            />
+            <FinancialHomePersonalizer
+              accountBalances={accountBalances}
+              baseCurrency={workspace.baseCurrency}
+              hasPersonalProfile={hasPersonalProfile}
+              importedCount={importedCount}
+              locale={workspace.locale}
+              openScheduledCount={dashboard.scheduledCount}
+              projection={forecastProjection}
+              transactionCount={dashboard.transactionCount}
+            />
+          </>
+        ) : null}
         <AccountsOverview accounts={accountBalances} locale={workspace.locale} />
         <HighlightsGrid dashboard={dashboard} />
         <RecentActivities accounts={accountBalances} locale={workspace.locale} transactions={transactions} />
-        <ImpactEvolution
-          accountCount={dashboard.accountCount}
-          baseCurrency={dashboard.baseCurrency}
-          hasPersonalProfile={hasPersonalProfile}
-          importedCount={importedCount}
-          locale={dashboard.locale}
-          postedExpenses={dashboard.postedExpenses}
-          postedIncome={dashboard.postedIncome}
-          transactionCount={dashboard.transactionCount}
-        />
+        {showAdvancedInsights ? (
+          <ImpactEvolution
+            accountCount={dashboard.accountCount}
+            baseCurrency={dashboard.baseCurrency}
+            hasPersonalProfile={hasPersonalProfile}
+            importedCount={importedCount}
+            locale={dashboard.locale}
+            postedExpenses={dashboard.postedExpenses}
+            postedIncome={dashboard.postedIncome}
+            transactionCount={dashboard.transactionCount}
+          />
+        ) : null}
         <RecentTransactions
           accounts={accountBalances}
           categories={categories}
@@ -331,6 +382,108 @@ type HomeNextBestAction = {
   title: string;
   tone: "stable" | "attention" | "danger";
 };
+
+function HomeStarterExperience({
+  accounts,
+  baseCurrency,
+  locale,
+  maturity,
+  totalBalance
+}: {
+  accounts: ReturnType<typeof getAccountBalances>;
+  baseCurrency: string;
+  locale: string;
+  maturity: WorkspaceMaturity;
+  totalBalance: number;
+}) {
+  const isEmpty = maturity === "workspace_empty";
+  const primaryHref = isEmpty ? "/accounts?mode=create&kind=cash&first=1" : "/transactions/new";
+  const primaryLabel = isEmpty ? "Criar primeira carteira" : "Novo movimento";
+  const secondaryHref = "/imports?onboarding=1";
+  const title = isEmpty
+    ? "Vamos montar sua base financeira."
+    : "Sua base está pronta. Agora registre o primeiro movimento.";
+  const subtitle = isEmpty
+    ? "Antes de prever o futuro, o Deniaros precisa conhecer onde seu dinheiro começa."
+    : "Com entradas e saídas reais, o Deniaros começa a gerar previsão e orientação.";
+
+  const checklist = [
+    {
+      done: true,
+      label: "Contexto inicial definido"
+    },
+    {
+      done: !isEmpty,
+      label: "Primeira carteira criada"
+    },
+    {
+      done: false,
+      label: isEmpty ? "Primeiro movimento após a carteira" : "Primeiro movimento ou importação"
+    }
+  ];
+
+  return (
+    <section className="panel home-starter-panel">
+      <div className="home-starter-hero">
+        <div>
+          <p className="section-label">Consultor guiado</p>
+          <h2>{title}</h2>
+          <p className="supporting-copy">{subtitle}</p>
+          <div className="form-actions">
+            <Link className="primary-button" href={primaryHref}>
+              {primaryLabel}
+            </Link>
+            <Link className="ghost-button" href={secondaryHref}>
+              Importar extrato
+            </Link>
+          </div>
+        </div>
+        <article className="home-starter-balance-card">
+          <span>Saldo atual</span>
+          <strong>{formatCurrency(totalBalance, baseCurrency, locale)}</strong>
+          <p>{accounts.length} carteira(s) cadastrada(s)</p>
+        </article>
+      </div>
+
+      <div className="home-starter-grid">
+        <WidgetWrapper title="Próxima ação recomendada" tooltip="A Home inicial mostra apenas o próximo passo que libera valor real.">
+          <p className="section-label">{isEmpty ? "Base ausente" : "Histórico vazio"}</p>
+          <MetricValue>{isEmpty ? "Criar carteira" : "Registrar movimento"}</MetricValue>
+          <p className="muted-copy">
+            {isEmpty
+              ? "Sem uma carteira, qualquer lançamento fica sem origem confiável."
+              : "Um movimento real já permite começar a formar histórico."}
+          </p>
+        </WidgetWrapper>
+
+        <WidgetWrapper title="Checklist de início" tooltip="A sequência evita módulos avançados antes da base financeira existir.">
+          <div className="home-starter-checklist">
+            {checklist.map((item) => (
+              <span className={item.done ? "done" : ""} key={item.label}>
+                {item.done ? "✓" : "•"} {item.label}
+              </span>
+            ))}
+          </div>
+        </WidgetWrapper>
+
+        <WidgetWrapper title="Carteiras" tooltip="As carteiras reais são criadas pelo usuário. Dados de exemplo não entram como base financeira real.">
+          {accounts.length ? (
+            <div className="home-starter-accounts">
+              {accounts.slice(0, 3).map((account) => (
+                <span key={account.id}>
+                  <strong>{account.name}</strong>
+                  {formatCurrency(account.currentBalance, account.currency, locale)}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="muted-copy">Nenhuma carteira real cadastrada ainda.</p>
+          )}
+        </WidgetWrapper>
+      </div>
+    </section>
+  );
+}
 
 function HomeNextBestAction({ action }: { action: HomeNextBestAction }) {
   return (

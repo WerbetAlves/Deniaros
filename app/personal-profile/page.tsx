@@ -9,6 +9,7 @@ import {
 import { getWorkspaceContext } from "@/lib/workspace-context";
 import {
   resetPersonalProfile,
+  saveQuickOnboarding,
   savePersonalProfile,
   skipPersonalProfileOnboarding
 } from "@/app/personal-profile/actions";
@@ -40,6 +41,111 @@ export default async function PersonalProfilePage({
   const answers = profile.classicAnswers;
   const questionProgress = getQuestionProgress(answers);
   const answeredCount = questionProgress.filter(Boolean).length;
+
+  if (isOnboarding) {
+    return (
+      <AppShell userEmail={user.email}>
+        <section className="module-page">
+          <div className="module-hero panel">
+            <div>
+              <p className="section-label">Primeiros passos</p>
+              <h2>Vamos configurar seu Deniaros em poucos minutos</h2>
+              <p className="supporting-copy">
+                Responda só o essencial agora. Depois da sua primeira carteira, o sistema passa a
+                guiar a próxima ação sem jogar todos os módulos na sua frente.
+              </p>
+            </div>
+            <div className="profile-badges">
+              <span className="status-chip">5 escolhas rápidas</span>
+              <span className="status-chip">Sem formulário longo</span>
+            </div>
+          </div>
+
+          {loadError ? (
+            <p className="form-error">
+              O perfil inicial ainda não está disponível neste ambiente.
+            </p>
+          ) : null}
+
+          {error ? <p className="form-error">{error}</p> : null}
+          {success ? <p className="form-success">{success}</p> : null}
+
+          <form action={saveQuickOnboarding} className="classic-profile-form">
+            {nextPath ? <input name="nextPath" type="hidden" value={nextPath} /> : null}
+
+            <QuickOnboardingStep
+              index={1}
+              name="usage"
+              title="Como você quer usar o Deniaros?"
+              options={[
+                ["personal", "Vida pessoal"],
+                ["family", "Família"],
+                ["small_business", "Negócio pequeno"],
+                ["driver_self_employed", "Motorista/autônomo"],
+                ["other", "Outro"]
+              ]}
+            />
+
+            <QuickOnboardingStep
+              index={2}
+              name="goal"
+              title="Qual é seu principal objetivo agora?"
+              options={[
+                ["organize_spending", "Organizar gastos"],
+                ["leave_debt", "Sair das dívidas"],
+                ["build_reserve", "Criar reserva"],
+                ["variable_income", "Controlar renda variável"],
+                ["plan_month", "Planejar o mês"]
+              ]}
+            />
+
+            <QuickOnboardingStep
+              index={3}
+              name="incomeMode"
+              title="Como você recebe dinheiro?"
+              options={[
+                ["fixed_salary", "Salário fixo"],
+                ["variable_income", "Renda variável"],
+                ["business_sales", "Vendas/negócio"],
+                ["apps_freelas", "Apps/freelas"],
+                ["multiple_sources", "Mais de uma fonte"]
+              ]}
+            />
+
+            <QuickOnboardingStep
+              index={4}
+              name="startMode"
+              title="Você quer começar como?"
+              options={[
+                ["manual", "Manualmente"],
+                ["import_csv", "Importando extrato CSV"],
+                ["structure_only", "Só criar estrutura agora"]
+              ]}
+            />
+
+            <QuickOnboardingStep
+              index={5}
+              name="aiLevel"
+              title="Qual nível de ajuda você quer da IA?"
+              options={[
+                ["basic", "Básica"],
+                ["consultative", "Consultiva"],
+                ["active", "Mais ativa"]
+              ]}
+            />
+
+            <footer className="classic-profile-footer">
+              <div className="form-actions">
+                <button className="primary-button" type="submit">
+                  Continuar para minha primeira carteira
+                </button>
+              </div>
+            </footer>
+          </form>
+        </section>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell userEmail={user.email}>
@@ -485,6 +591,35 @@ export default async function PersonalProfilePage({
         <SpouseQuestionGuard />
       </section>
     </AppShell>
+  );
+}
+
+function QuickOnboardingStep({
+  index,
+  name,
+  options,
+  title
+}: {
+  index: number;
+  name: string;
+  options: Array<[string, string]>;
+  title: string;
+}) {
+  return (
+    <QuestionCard index={index} title={title}>
+      {options.map(([value, label], optionIndex) => (
+        <label className="classic-radio-option" key={value}>
+          <input
+            defaultChecked={optionIndex === 0}
+            name={name}
+            required
+            type="radio"
+            value={value}
+          />
+          {label}
+        </label>
+      ))}
+    </QuestionCard>
   );
 }
 

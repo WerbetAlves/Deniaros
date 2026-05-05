@@ -11,6 +11,14 @@ import { getWorkspaceContext } from "@/lib/workspace-context";
 const profileOnboardingCookie = "deniaros-profile-onboarding-ready";
 const profileOnboardingSkipCookie = "deniaros-profile-onboarding-skipped";
 
+const quickOnboardingOptions = {
+  usage: ["personal", "family", "small_business", "driver_self_employed", "other"],
+  goal: ["organize_spending", "leave_debt", "build_reserve", "variable_income", "plan_month"],
+  incomeMode: ["fixed_salary", "variable_income", "business_sales", "apps_freelas", "multiple_sources"],
+  startMode: ["manual", "import_csv", "structure_only"],
+  aiLevel: ["basic", "consultative", "active"]
+} as const;
+
 export async function savePersonalProfile(formData: FormData) {
   const { supabase, user, workspaceId } = await getWorkspaceContext();
   const cookieStore = await cookies();
@@ -103,6 +111,86 @@ export async function savePersonalProfile(formData: FormData) {
   redirect("/personal-profile?success=Perguntas do perfil pessoal salvas.");
 }
 
+export async function saveQuickOnboarding(formData: FormData) {
+  const { supabase, user, workspaceId } = await getWorkspaceContext();
+  const cookieStore = await cookies();
+  const usage = normalizeQuickOption(formData.get("usage"), quickOnboardingOptions.usage, "personal");
+  const goal = normalizeQuickOption(formData.get("goal"), quickOnboardingOptions.goal, "organize_spending");
+  const incomeMode = normalizeQuickOption(
+    formData.get("incomeMode"),
+    quickOnboardingOptions.incomeMode,
+    "fixed_salary"
+  );
+  const startMode = normalizeQuickOption(formData.get("startMode"), quickOnboardingOptions.startMode, "manual");
+  const aiLevel = normalizeQuickOption(formData.get("aiLevel"), quickOnboardingOptions.aiLevel, "consultative");
+  const classicAnswers = {
+    ...getDefaultPersonalProfileClassicAnswers(),
+    quickOnboarding: {
+      usage,
+      goal,
+      incomeMode,
+      startMode,
+      aiLevel,
+      completedAt: new Date().toISOString()
+    }
+  };
+  const planningHorizon = goal === "leave_debt" ? "stability" : goal === "build_reserve" ? "growth" : "balanced";
+  const notes = [
+    `uso_${usage}`,
+    `objetivo_${goal}`,
+    `renda_${incomeMode}`,
+    `inicio_${startMode}`,
+    `ia_${aiLevel}`
+  ].join(", ");
+
+  const { error } = await supabase.from("personal_profiles").upsert(
+    {
+      workspace_id: workspaceId,
+      classic_answers: classicAnswers,
+      planning_horizon: planningHorizon,
+      marital_status: usage === "family" ? "partnered" : "single",
+      dependents: usage === "family" ? 1 : 0,
+      notes,
+      updated_at: new Date().toISOString()
+    },
+    {
+      onConflict: "workspace_id"
+    }
+  );
+
+  if (error) {
+    if (error.code === "42703") {
+      redirect(
+        "/personal-profile?onboarding=1&error=Ative%20a%20migration%200007_personal_profile_classic_questionnaire.sql%20para%20salvar%20o%20perfil%20inicial."
+      );
+    }
+
+    redirect(`/personal-profile?onboarding=1&error=${encodeURIComponent(error.message)}`);
+  }
+
+  await supabase
+    .from("workspaces")
+    .update({
+      type: usage === "family" ? "family" : usage === "small_business" ? "business" : "personal",
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", workspaceId);
+
+  cookieStore.set(profileOnboardingCookie, user.id, {
+    httpOnly: true,
+    maxAge: 60 * 60 * 24 * 180,
+    path: "/",
+    sameSite: "lax"
+  });
+  cookieStore.delete(profileOnboardingSkipCookie);
+
+  if (startMode === "import_csv") {
+    redirect("/imports?onboarding=1");
+  }
+
+  redirect("/accounts?mode=create&kind=cash&first=1");
+}
+
 export async function skipPersonalProfileOnboarding(formData: FormData) {
   const { user } = await getWorkspaceContext();
   const cookieStore = await cookies();
@@ -169,6 +257,15 @@ function parseYesNo(value: FormDataEntryValue | null, fallback: boolean) {
 
 function normalizeText(value: FormDataEntryValue | null) {
   return String(value ?? "").trim();
+}
+
+function normalizeQuickOption<const T extends readonly string[]>(
+  value: FormDataEntryValue | null,
+  allowed: T,
+  fallback: T[number]
+) {
+  const raw = String(value ?? "").trim();
+  return (allowed as readonly string[]).includes(raw) ? (raw as T[number]) : fallback;
 }
 
 function normalizeDateInput(value: FormDataEntryValue | null) {

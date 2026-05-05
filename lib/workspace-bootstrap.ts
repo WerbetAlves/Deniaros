@@ -112,7 +112,7 @@ export async function ensureDefaultWorkspace(
     throw error ?? new Error("Could not create default workspace.");
   }
 
-  await seedDefaultWorkspaceData(supabase, workspace.id);
+  await ensureDefaultWorkspaceTaxonomy(supabase, workspace.id);
 
   return workspace.id;
 }
@@ -138,52 +138,12 @@ async function getPrimarySharedWorkspaceId(
   return data?.workspace_id ?? null;
 }
 
-async function seedDefaultWorkspaceData(
+async function ensureDefaultWorkspaceTaxonomy(
   supabase: SupabaseClient,
   workspaceId: string
 ) {
-  const { data: accounts } = await supabase
-    .from("accounts")
-    .insert([
-      {
-        workspace_id: workspaceId,
-        name: "Carteira física",
-        type: "cash",
-        currency: "BRL",
-        opening_balance: 0,
-        color: "emerald"
-      },
-      {
-        workspace_id: workspaceId,
-        name: "Conta principal",
-        type: "checking",
-        currency: "BRL",
-        opening_balance: 0,
-        color: "blue"
-      }
-    ])
-    .select("id,name");
-
   await ensureDefaultCategories(supabase, workspaceId);
   await ensureDefaultPayees(supabase, workspaceId);
-
-  const primaryAccount = accounts?.[0];
-
-  if (!primaryAccount) {
-    return;
-  }
-
-  await supabase.from("scheduled_items").insert({
-    workspace_id: workspaceId,
-    account_id: primaryAccount.id,
-    kind: "deposit",
-    title: "Primeiro depósito previsto",
-    amount: 0,
-    currency: "BRL",
-    due_on: new Date().toISOString().slice(0, 10),
-    recurrence: "once",
-    status: "scheduled"
-  });
 }
 
 async function ensureDefaultPayees(

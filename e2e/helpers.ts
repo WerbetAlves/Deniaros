@@ -44,14 +44,21 @@ export async function gotoAuthenticatedPage(page: Page, path: string) {
 
 export async function dismissPersonalProfileGate(page: Page) {
   const skipButton = page.getByRole("button", { name: "Pular por enquanto" });
+  const continueButton = page.getByRole("button", { name: /Continuar para minha primeira carteira/i });
   const isProfileGate = page.url().includes("/personal-profile");
   const hasSkipButton = await skipButton.isVisible().catch(() => false);
+  const hasContinueButton = await continueButton.isVisible().catch(() => false);
 
-  if (!isProfileGate && !hasSkipButton) {
+  if (!isProfileGate && !hasSkipButton && !hasContinueButton) {
     return false;
   }
 
-  await skipButton.click();
+  if (hasContinueButton) {
+    await continueButton.click();
+  } else {
+    await skipButton.click();
+  }
+
   await expect(page).not.toHaveURL(/\/personal-profile(?:\?|$)/, { timeout: 15_000 });
   return true;
 }

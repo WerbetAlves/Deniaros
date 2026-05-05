@@ -1,5 +1,18 @@
 import type { Metadata } from "next";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-cormorant"
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-manrope"
+});
 
 export const metadata: Metadata = {
   title: "Deniaros",
@@ -17,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html data-scroll-behavior="smooth" lang="pt-BR">
+    <html className={`${cormorant.variable} ${manrope.variable}`} data-scroll-behavior="smooth" lang="pt-BR">
       <body suppressHydrationWarning>{children}</body>
     </html>
   );
