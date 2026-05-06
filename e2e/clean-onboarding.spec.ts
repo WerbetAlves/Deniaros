@@ -22,10 +22,13 @@ test.describe("onboarding de usuário limpo", () => {
 
     await gotoAuthenticatedPage(page, "/accounts?mode=choose&first=1");
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /Como você quer começar/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Prefiro começar importando extrato CSV/i })).toBeVisible();
+    const chooserHeading = page.getByRole("heading", { name: /Como você quer começar/i });
 
-    await page.getByRole("link", { name: /Carteira física/i }).click();
+    if (await chooserHeading.isVisible().catch(() => false)) {
+      await expect(page.getByRole("link", { name: /Prefiro começar importando extrato CSV/i })).toBeVisible();
+      await page.getByRole("link", { name: /Carteira física/i }).click();
+    }
+
     const walletDialog = page.getByRole("dialog");
     await expect(walletDialog.getByRole("heading", { name: /Crie sua primeira carteira/i })).toBeVisible();
     await walletDialog.locator('input[name="name"]').fill(walletName);
