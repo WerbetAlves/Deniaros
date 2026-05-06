@@ -29,6 +29,10 @@ type PlanByPriceRow = {
   id: string;
 };
 
+type SubscriptionIdRow = {
+  id: string;
+};
+
 export async function POST(request: Request) {
   if (!hasStripeSecretKey() || !hasStripeWebhookSecret()) {
     return NextResponse.json(
@@ -132,25 +136,28 @@ async function syncStripeSubscription(
   const { currentPeriodEnd, currentPeriodStart } = getStripeSubscriptionPeriod(subscription);
   const seats = readPositiveInteger(subscription.metadata.seats, 1);
 
-  const { error } = await supabase.from("saas_subscriptions").upsert(
-    {
-      cancel_at_period_end: subscription.cancel_at_period_end,
-      current_period_ends_at: currentPeriodEnd,
-      current_period_starts_at: currentPeriodStart,
-      plan_id: planId,
-      seats,
-      status: mapStripeSubscriptionStatus(subscription.status),
-      stripe_customer_id: customerId,
-      stripe_price_id: priceId,
-      stripe_status: subscription.status,
-      stripe_subscription_id: subscriptionId,
-      trial_ends_at: dateFromStripeTimestamp(subscription.trial_end),
-      updated_at: new Date().toISOString(),
-      user_id: userId,
-      workspace_id: workspaceId
-    },
-    { onConflict: "workspace_id" }
-  );
+  const payload = {
+    cancel_at_period_end: subscription.cancel_at_period_end,
+    current_period_ends_at: currentPeriodEnd,
+    current_period_starts_at: currentPeriodStart,
+    plan_id: planId,
+    seats,
+    status: mapStripeSubscriptionStatus(subscription.status),
+    stripe_customer_id: customerId,
+    stripe_price_id: priceId,
+    stripe_status: subscription.status,
+    stripe_subscription_id: subscriptionId,
+    trial_ends_at: dateFromStripeTimestamp(subscription.trial_end),
+    updated_at: new Date().toISOString(),
+    user_id: userId,
+    workspace_id: workspaceId
+  };
+
+  const existingSubscriptionId = await loadWorkspaceSubscriptionId(workspaceId, userId);
+
+  const { error } = existingSubscriptionId
+    ? await supabase.from("saas_subscriptions").update(payload).eq("id", existingSubscriptionId)
+    : await supabase.from("saas_subscriptions").insert(payload);
 
   if (error) {
     throw error;
@@ -192,6 +199,24 @@ async function loadExistingSubscription(subscriptionId: string) {
   }
 
   return data ?? null;
+}
+
+async function loadWorkspaceSubscriptionId(workspaceId: string, userId: string) {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("saas_subscriptions")
+    .select("id")
+    .eq("workspace_id", workspaceId)
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<SubscriptionIdRow>();
+
+  if (error) {
+    throw error;
+  }
+
+  return data?.id ?? null;
 }
 
 async function loadPlanIdByStripePrice(priceId: string | null, lookupKey: string | null) {
