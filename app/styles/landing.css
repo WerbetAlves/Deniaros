@@ -928,6 +928,15 @@
   line-height: 1.55;
 }
 
+.marketing-plan-price {
+  display: block;
+  margin: 0 0 12px;
+  color: var(--color-verde-profundo);
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 0.95;
+}
+
 .marketing-plan-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

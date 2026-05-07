@@ -25,17 +25,17 @@ export type SaasSubscriptionLike = {
 
 export const planTierLabels: Record<PlanVisualTier, string> = {
   bronze: "Bronze",
-  gold: "Ouro",
+  gold: "Inteligente",
   platinum: "Platina",
-  silver: "Prata"
+  silver: "Controle"
 };
 
 export const planCommercialLabels: Record<PlanCommercialTier, string> = {
   bronze: "Bronze",
   family: "Família",
-  gold: "Ouro",
+  gold: "Inteligente",
   platinum: "Platina",
-  silver: "Prata"
+  silver: "Controle"
 };
 
 export function resolvePlanVisualTier(planId?: string | null, tier?: string | null): PlanVisualTier {
@@ -87,25 +87,29 @@ export function resolvePlanCommercialTier(planId?: string | null, tier?: string 
 
 export function getPlanDisplayName(plan?: SaasPlanLike | null) {
   if (!plan) {
-    return "Plano Bronze";
+    return "Deniaros Controle";
   }
 
   return getPlanDisplayNameFromId(plan.id, plan.tier);
 }
 
 export function getPlanDisplayNameFromId(planId?: string | null, tier?: string | null) {
+  if (String(planId ?? "").toLowerCase() === "pro") {
+    return "Deniaros Controle";
+  }
+
   const commercialTier = resolvePlanCommercialTier(planId, tier);
-  return `Plano ${planCommercialLabels[commercialTier]}`;
+  return `Deniaros ${planCommercialLabels[commercialTier]}`;
 }
 
 export function getPlanPosition(plan?: SaasPlanLike | null) {
   const tier = resolvePlanCommercialTier(plan?.id, plan?.tier);
   const labels: Record<PlanCommercialTier, string> = {
-    bronze: "Entrada assistida",
-    family: "Ouro compartilhado para duas pessoas",
-    gold: "Controle avançado individual",
+    bronze: "Base inicial",
+    family: "Em desenvolvimento",
+    gold: "Em desenvolvimento",
     platinum: "Liberação privada do fundador",
-    silver: "Controle pessoal completo"
+    silver: "Descubra antes se o mês vai apertar"
   };
   return labels[tier];
 }
@@ -113,11 +117,11 @@ export function getPlanPosition(plan?: SaasPlanLike | null) {
 export function getPlanSummary(plan?: SaasPlanLike | null) {
   const tier = resolvePlanCommercialTier(plan?.id, plan?.tier);
   const summaries: Record<PlanCommercialTier, string> = {
-    bronze: "Comece com agenda, relatórios básicos e limite enxuto para organizar a vida financeira.",
-    family: "Dois acessos Ouro com desconto para casal ou família gerenciarem finanças individuais e compartilhadas.",
-    gold: "Recursos avançados, Open Finance quando liberado e suporte prioritário para uso individual.",
+    bronze: "Comece simples: monte sua base financeira e veja sua previsão sem conectar banco.",
+    family: "Controle financeiro compartilhado para casal e família.",
+    gold: "Conexão bancária automática, automações e inteligência avançada.",
     platinum: "Plano oculto e manual para clientes estratégicos, fundadores, parceiros e liberações especiais.",
-    silver: "Mais automação, importação e análises para quem já usa o Deniaros como rotina."
+    silver: "O Deniaros ajuda você a organizar contas, visualizar sua previsão financeira e tomar decisões antes do problema acontecer."
   };
   return summaries[tier];
 }
@@ -125,15 +129,19 @@ export function getPlanSummary(plan?: SaasPlanLike | null) {
 export function getPlanFeatureLabels(plan?: SaasPlanLike | null) {
   const features = plan?.features ?? {};
   const labels: Record<string, string> = {
+    accounts_wallets: "Contas e carteiras",
     agenda: "Agenda financeira",
-    ai_deep_analysis: "Análise profunda com IA",
+    ai_deep_analysis: "Orientação inteligente inicial",
+    emergency_mode: "Modo emergência",
     founder_release_channel: "Canal privado do fundador",
     family_workspace: "Workspace familiar",
-    imports: "Importação de dados",
+    imports: "Importação CSV",
     joint_reports: "Relatórios consolidados",
-    open_finance: "Open Finance",
-    reports_advanced: "Relatórios avançados",
-    reports_basic: "Relatórios básicos",
+    manual_entries: "Lançamentos manuais",
+    open_finance: "Open Finance em desenvolvimento",
+    reports_advanced: "Relatórios essenciais",
+    reports_basic: "Relatórios essenciais",
+    spending_simulator: "Simulador Posso gastar?",
     support_priority: "Suporte prioritário",
     team_controls: "Controles de equipe"
   };

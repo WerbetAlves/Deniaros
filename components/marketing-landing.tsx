@@ -31,29 +31,29 @@ const outcomes = [
 
 const journey = [
   {
+    description: "Crie carteiras, registre manualmente ou importe extratos.",
     step: "01",
-    title: "Monte sua base",
-    description: "Crie carteiras, registre manualmente ou importe extratos."
+    title: "Monte sua base"
   },
   {
+    description: "O Deniaros cruza saldo, agenda e movimentos do mês.",
     step: "02",
-    title: "Veja a previsão",
-    description: "O Deniaros cruza saldo, agenda e movimentos do mês."
+    title: "Veja a previsão"
   },
   {
+    description: "Você entende o risco e sabe o que ajustar agora.",
     step: "03",
-    title: "Decida com clareza",
-    description: "Você entende o risco e sabe o que ajustar agora."
+    title: "Decida com clareza"
   }
 ];
 
 const features = [
-  "Contas e carteiras",
-  "Lançamentos manuais",
-  "Importação de extratos",
-  "Agenda financeira",
-  "Previsão de saldo",
-  "Relatórios básicos"
+  "Dashboard de decisão",
+  "Agenda financeira com previsão",
+  "Simulador Posso gastar?",
+  "Modo emergência",
+  "Relatórios essenciais",
+  "Orientação inteligente inicial"
 ];
 
 const quickResults = [
@@ -66,34 +66,47 @@ const quickResults = [
 const operatingRhythm = [
   {
     icon: WalletCards,
-    title: "Base manual ou importada",
-    text: "Comece com carteiras, lançamentos e extratos. Banco conectado não é requisito."
+    text: "Comece com carteiras, lançamentos e extratos. Banco conectado não é requisito.",
+    title: "Base manual ou importada"
   },
   {
     icon: CalendarClock,
-    title: "Agenda financeira",
-    text: "Aluguel, cartão, mercado, combustível e boletos entram na previsão."
+    text: "Aluguel, cartão, mercado, combustível e boletos entram na previsão.",
+    title: "Agenda financeira"
   },
   {
     icon: LineChart,
-    title: "Saldo projetado",
-    text: "O sistema mostra se o dinheiro aguenta até o fim do mês."
+    text: "O sistema mostra se o dinheiro aguenta até o fim do mês.",
+    title: "Saldo projetado"
   },
   {
     icon: Brain,
-    title: "Ação sugerida",
-    text: "A IA orienta próximos passos simples com base nos seus dados."
+    text: "A orientação sugere próximos passos simples com base nos seus dados.",
+    title: "Próxima ação"
   }
 ];
 
 const planItems = [
   "Contas e carteiras",
   "Lançamentos manuais",
-  "Importação de extratos",
+  "Importação CSV",
   "Agenda financeira",
   "Previsão de saldo",
-  "Relatórios básicos",
-  "IA de orientação inicial"
+  "Simulador Posso gastar?",
+  "Modo emergência",
+  "Relatórios essenciais",
+  "Orientação inteligente inicial"
+];
+
+const futurePlans = [
+  {
+    description: "Conexão bancária automática, automações e inteligência avançada.",
+    title: "Deniaros Inteligente"
+  },
+  {
+    description: "Controle financeiro compartilhado para casal e família.",
+    title: "Deniaros Família"
+  }
 ];
 
 const proofPoints = [
@@ -105,24 +118,24 @@ const proofPoints = [
 
 const faqs = [
   {
-    question: "Preciso conectar banco para usar?",
     answer:
-      "Não. Você pode começar manualmente ou por importação. Open Finance será uma evolução para automatizar mais, não uma exigência para começar."
+      "Não. Você pode começar manualmente ou por importação. Open Finance será uma evolução para automatizar mais, não uma exigência para começar.",
+    question: "Preciso conectar banco para usar?"
   },
   {
-    question: "Meus dados financeiros ficam seguros?",
     answer:
-      "Sim. O Deniaros foi desenhado com autenticação, permissões, auditoria, backup e controles de privacidade para proteger seu workspace financeiro."
+      "Sim. O Deniaros foi desenhado com autenticação, permissões, auditoria, backup e controles de privacidade para proteger seu workspace financeiro.",
+    question: "Meus dados financeiros ficam seguros?"
   },
   {
-    question: "A IA substitui consultoria financeira?",
     answer:
-      "Não. A IA do Deniaros oferece orientação operacional baseada na sua base, agenda e previsão. Ela ajuda você a enxergar riscos e próximos passos, sem prometer resultado financeiro."
+      "Não. A orientação inteligente do Deniaros usa sua base, agenda e previsão para sugerir próximos passos operacionais, sem prometer resultado financeiro e sem substituir um profissional.",
+    question: "A IA substitui consultoria financeira?"
   },
   {
-    question: "Consigo testar antes de pagar?",
     answer:
-      "Sim. Crie sua conta, monte sua primeira carteira e registre ou importe seus primeiros movimentos. A previsão aparece quando existe base real."
+      "Sim. Crie sua conta, monte sua primeira carteira e registre ou importe seus primeiros movimentos. A previsão aparece quando existe base real.",
+    question: "Consigo testar antes de pagar?"
   }
 ];
 
@@ -352,8 +365,8 @@ export function MarketingLanding() {
           <p className="marketing-section-label">Orientação com contexto</p>
           <h2 id="ai-advisor-title">Orientação prática, sem conselho genérico.</h2>
           <p>
-            A IA do Deniaros não tenta adivinhar sua vida. Ela lê sua base financeira, sua agenda
-            e sua previsão para sugerir próximos passos simples.
+            A orientação inteligente do Deniaros não tenta adivinhar sua vida. Ela lê sua base
+            financeira, sua agenda e sua previsão para sugerir próximos passos simples.
           </p>
         </div>
 
@@ -396,16 +409,17 @@ export function MarketingLanding() {
           <p className="marketing-section-label">Oferta inicial</p>
           <h2 id="offer-title">Comece simples. Evolua quando fizer sentido.</h2>
           <p>
-            O caminho inicial é o Plano Controle: organize contas, registre movimentos, importe
-            extratos e enxergue a previsão do mês.
+            Um plano ativo agora: controle, previsão e decisão. Os recursos automáticos entram como
+            evolução, não como barreira para começar.
           </p>
         </div>
         <article className="marketing-plan-card">
-          <span>Plano Controle</span>
-          <h3>Para sair do escuro financeiro.</h3>
+          <span>Deniaros Controle</span>
+          <h3>Descubra antes se o mês vai apertar.</h3>
+          <strong className="marketing-plan-price">R$ 29/mês</strong>
           <p>
-            Feito para quem quer montar a base real e entender se o dinheiro aguenta o mês antes
-            de assumir compromissos maiores.
+            Para quem quer organizar contas, registrar movimentos, importar extratos e enxergar a
+            previsão do mês.
           </p>
           <div className="marketing-plan-list">
             {planItems.map((item) => (
@@ -417,9 +431,6 @@ export function MarketingLanding() {
           </div>
           <div className="marketing-plan-actions">
             <ConversionCta label="Começar pelo Controle" />
-            <Link className="marketing-secondary" href="/login?mode=signup">
-              Criar conta grátis
-            </Link>
           </div>
         </article>
       </section>
@@ -438,10 +449,10 @@ export function MarketingLanding() {
 
       <section className="marketing-weekly-ritual">
         <div>
-          <p className="marketing-section-label">Rotina de controle</p>
-          <h2>Feche a semana antes que ela feche você.</h2>
+          <p className="marketing-section-label">Mensagem central</p>
+          <h2>O Deniaros não mostra apenas saldo. Ele mostra o que pode acontecer com seu dinheiro.</h2>
         </div>
-        <p>O Deniaros te guia semanalmente para manter controle, prever riscos e agir com clareza.</p>
+        <p>Feche a semana antes que ela feche você.</p>
       </section>
 
       <section className="marketing-outcomes">
@@ -472,6 +483,21 @@ export function MarketingLanding() {
               <CheckCircle2 aria-hidden="true" size={16} />
               {feature}
             </span>
+          ))}
+        </div>
+      </section>
+
+      <section className="marketing-proof" aria-labelledby="roadmap-title">
+        <div>
+          <p className="marketing-section-label">Roadmap</p>
+          <h2 id="roadmap-title">O que vem depois do Controle.</h2>
+        </div>
+        <div className="marketing-proof-grid">
+          {futurePlans.map((plan) => (
+            <p key={plan.title}>
+              <ShieldCheck aria-hidden="true" size={17} />
+              <strong>{plan.title}</strong> em desenvolvimento: {plan.description}
+            </p>
           ))}
         </div>
       </section>
@@ -518,7 +544,7 @@ export function MarketingLanding() {
         <TrendingUp aria-hidden="true" size={32} />
         <p className="marketing-section-label">Controle com previsão</p>
         <h2>Pare de adivinhar. Comece a decidir.</h2>
-        <p>Crie sua conta gratuita e veja sua previsão em minutos.</p>
+        <p>Crie sua conta e veja sua previsão em minutos.</p>
         <ConversionCta />
       </section>
     </main>

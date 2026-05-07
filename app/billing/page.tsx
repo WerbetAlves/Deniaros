@@ -9,7 +9,6 @@ import {
   getPlanPosition,
   getPlanSummary,
   getPublicPlanCatalog,
-  planTierLabels,
   resolvePlanVisualTier,
   sortPlansByVisualTier,
   translateSubscriptionStatus,
@@ -36,6 +35,17 @@ type SubscriptionRow = SaasSubscriptionLike & {
   workspace_id: string | null;
 };
 
+const roadmapPlans = [
+  {
+    description: "Conexão bancária automática, automações e inteligência avançada.",
+    name: "Deniaros Inteligente"
+  },
+  {
+    description: "Controle financeiro compartilhado para casal e família.",
+    name: "Deniaros Família"
+  }
+];
+
 export default async function BillingPage({
   searchParams
 }: {
@@ -44,23 +54,26 @@ export default async function BillingPage({
   const { supabase, user, workspaceId } = await getWorkspaceContext();
   const { error, success } = await searchParams;
   const [subscriptionResult, plansResult] = await Promise.all([
-      supabase
-        .from("saas_subscriptions")
-        .select("id,workspace_id,plan_id,status,seats,trial_ends_at,current_period_starts_at,current_period_ends_at,notes,stripe_customer_id,stripe_subscription_id")
-        .eq("workspace_id", workspaceId)
-        .eq("user_id", user.id)
-        .maybeSingle<SubscriptionRow>(),
-      supabase
-        .from("saas_plans")
-        .select("id,name,tier,price_cents,billing_interval,is_public,is_active,limits,features,stripe_price_id,stripe_product_id,stripe_lookup_key")
-        .returns<PlanRow[]>()
+    supabase
+      .from("saas_subscriptions")
+      .select("id,workspace_id,plan_id,status,seats,trial_ends_at,current_period_starts_at,current_period_ends_at,notes,stripe_customer_id,stripe_subscription_id")
+      .eq("workspace_id", workspaceId)
+      .eq("user_id", user.id)
+      .maybeSingle<SubscriptionRow>(),
+    supabase
+      .from("saas_plans")
+      .select("id,name,tier,price_cents,billing_interval,is_public,is_active,limits,features,stripe_price_id,stripe_product_id,stripe_lookup_key")
+      .returns<PlanRow[]>()
   ]);
   const plans = sortPlansByVisualTier(plansResult.data ?? []);
   const subscription = subscriptionResult.data;
+  const controlPlan = plans.find((plan) => plan.id === "pro") ?? null;
   const currentPlan = plans.find((plan) => plan.id === subscription?.plan_id) ?? null;
-  const currentTier = resolvePlanVisualTier(currentPlan?.id ?? subscription?.plan_id, currentPlan?.tier);
-  const publicPlans = getPublicPlanCatalog(plans, subscription?.plan_id);
-  const familyPlan = plans.find((plan) => plan.id === "family");
+  const effectivePlan = currentPlan ?? controlPlan;
+  const currentTier = resolvePlanVisualTier(effectivePlan?.id ?? subscription?.plan_id, effectivePlan?.tier);
+  const publicPlans = getPublicPlanCatalog(plans, subscription?.plan_id).filter(
+    (plan) => plan.id === "pro" || plan.id === subscription?.plan_id
+  );
   const loadError = subscriptionResult.error || plansResult.error;
   const isStripeConfigured = hasStripeSecretKey();
   const stripeReadyPlanCount = publicPlans.filter((plan) => plan.stripe_price_id || plan.stripe_lookup_key).length;
@@ -75,17 +88,17 @@ export default async function BillingPage({
       <section className="module-page billing-workspace">
         <div className={`module-hero panel billing-hero billing-tier-${currentTier}`}>
           <div>
-            <p className="section-label">Assinatura e planos</p>
-            <h2>{getPlanDisplayName(currentPlan)}</h2>
+            <p className="section-label">Assinatura</p>
+            <h2>{getPlanDisplayName(effectivePlan)}</h2>
             <p className="supporting-copy">
-              {currentPlan
-                ? `${getPlanPosition(currentPlan)}. ${getPlanSummary(currentPlan)}`
-                : "Sua assinatura ainda não foi criada no SaaS. Você pode solicitar um plano e acompanhar pelo suporte."}
+              {effectivePlan
+                ? `${getPlanPosition(effectivePlan)}. ${getPlanSummary(effectivePlan)}`
+                : "Comece simples: monte sua base financeira, veja sua previsão e decida antes do aperto chegar."}
             </p>
           </div>
           <div className={`billing-current-card billing-current-card-${currentTier}`}>
-            <span>{currentPlan ? getPlanDisplayName(currentPlan).replace("Plano ", "") : planTierLabels[currentTier]}</span>
-            <strong>{currentPlan ? formatPlanPrice(currentPlan) : "Sem cobrança"}</strong>
+            <span>{getPlanDisplayName(effectivePlan)}</span>
+            <strong>{effectivePlan ? formatPlanPrice(effectivePlan) : "R$ 29,00 / mês"}</strong>
             <small>{translateSubscriptionStatus(subscription?.status)}</small>
           </div>
         </div>
@@ -95,8 +108,8 @@ export default async function BillingPage({
 
         {loadError ? (
           <section className="source-banner">
-            <strong>Catalogo parcialmente indisponivel</strong>
-            <span>Nao conseguimos carregar todos os planos agora. Tente atualizar a pagina em instantes.</span>
+            <strong>Catálogo parcialmente indisponível</strong>
+            <span>Não conseguimos carregar todos os dados de assinatura agora. Tente atualizar a página em instantes.</span>
           </section>
         ) : null}
 
@@ -114,7 +127,7 @@ export default async function BillingPage({
           <article className="panel billing-status-card">
             <p className="section-label">Assentos</p>
             <strong>{subscription?.seats ?? 1}</strong>
-            <p>Quantidade de usuários liberados para o workspace atual.</p>
+            <p>Um acesso para validar a rotina financeira com foco e sem complexidade.</p>
           </article>
         </section>
 
@@ -154,31 +167,31 @@ export default async function BillingPage({
         <section className="panel billing-current-panel">
           <div className="panel-header">
             <div>
-              <p className="section-label">Plano atual</p>
-              <h3>O que está liberado agora</h3>
+              <p className="section-label">Liberado agora</p>
+              <h3>Um plano para começar sem confusão</h3>
             </div>
             <span className={`topbar-plan-chip topbar-plan-chip-${currentTier} billing-plan-chip`}>
-              Plano {planTierLabels[currentTier]}
+              {getPlanDisplayName(effectivePlan)}
             </span>
           </div>
           <div className="billing-feature-grid">
             <article>
-              <strong>Recursos</strong>
+              <strong>Recursos incluídos</strong>
               <ul>
-                {getPlanFeatureLabels(currentPlan).length ? (
-                  getPlanFeatureLabels(currentPlan).map((feature) => <li key={feature}>{feature}</li>)
+                {getPlanFeatureLabels(effectivePlan).length ? (
+                  getPlanFeatureLabels(effectivePlan).map((feature) => <li key={feature}>{feature}</li>)
                 ) : (
-                  <li>Recursos básicos do Deniaros</li>
+                  <li>Contas, carteiras, agenda, previsão e orientação inicial.</li>
                 )}
               </ul>
             </article>
             <article>
               <strong>Limites</strong>
               <ul>
-                {getPlanLimitLabels(currentPlan).length ? (
-                  getPlanLimitLabels(currentPlan).map((limit) => <li key={limit}>{limit}</li>)
+                {getPlanLimitLabels(effectivePlan).length ? (
+                  getPlanLimitLabels(effectivePlan).map((limit) => <li key={limit}>{limit}</li>)
                 ) : (
-                  <li>Limites ainda não configurados</li>
+                  <li>Limites comerciais em ativação.</li>
                 )}
               </ul>
             </article>
@@ -188,29 +201,13 @@ export default async function BillingPage({
         <section className="billing-catalog-section">
           <div className="panel-header">
             <div>
-              <p className="section-label">Catálogo público</p>
-              <h3>Escolha o próximo nível</h3>
+              <p className="section-label">Plano disponível agora</p>
+              <h3>Uma decisão simples para validar sua rotina</h3>
             </div>
             <Link className="ghost-button" href="/support">
               Falar com suporte
             </Link>
           </div>
-          {familyPlan ? (
-            <article className="panel billing-family-callout">
-              <div>
-                <p className="section-label">Plano Família</p>
-                <h3>Ouro compartilhado para duas pessoas</h3>
-                <p>
-                  Ideal para casal ou família: titular e mais um usuário gerenciam contas próprias e
-                  compartilhadas, com Open Finance individual quando liberado e visão consolidada.
-                </p>
-              </div>
-              <strong>{formatPlanPrice(familyPlan)}</strong>
-              <Link className="ghost-button" href="/settings/family">
-                Gerenciar familia
-              </Link>
-            </article>
-          ) : null}
           <div className="billing-plan-grid">
             {publicPlans.length ? (
               publicPlans.map((plan) => (
@@ -225,7 +222,7 @@ export default async function BillingPage({
             ) : (
               <article className="panel empty-state">
                 <strong>Nenhum plano público carregado.</strong>
-                <p>Confirme as policies de leitura dos planos ou solicite suporte.</p>
+                <p>Confirme se o plano Deniaros Controle está ativo no catálogo.</p>
               </article>
             )}
           </div>
@@ -233,17 +230,21 @@ export default async function BillingPage({
 
         <section className="panel billing-private-panel">
           <div>
-            <p className="section-label">Plano privado</p>
-            <h3>Platina não aparece para venda pública</h3>
+            <p className="section-label">Roadmap comercial</p>
+            <h3>Próximos planos ficam como evolução, não como escolha agora</h3>
             <p>
-              O Platina é uma liberação manual para casos estratégicos. Ele pode aparecer aqui se já
-              estiver ativo no seu workspace; caso contrário, a solicitação vira ticket para análise.
+              O foco atual é validar retenção no Deniaros Controle. Open Finance, automações avançadas
+              e família aparecem como evolução da plataforma, sem atrapalhar a primeira compra.
             </p>
           </div>
-          <div className="billing-private-actions">
-            <Link className="ghost-button" href="/support">
-              Solicitar análise
-            </Link>
+          <div className="billing-roadmap-grid">
+            {roadmapPlans.map((plan) => (
+              <article key={plan.name}>
+                <span>Em desenvolvimento</span>
+                <strong>{plan.name}</strong>
+                <p>{plan.description}</p>
+              </article>
+            ))}
           </div>
         </section>
       </section>
@@ -281,11 +282,9 @@ function PlanCard({
         <p>{getPlanSummary(plan)}</p>
       </div>
       <ul>
-        {getPlanFeatureLabels(plan)
-          .slice(0, 5)
-          .map((feature) => (
-            <li key={feature}>{feature}</li>
-          ))}
+        {getPlanFeatureLabels(plan).map((feature) => (
+          <li key={feature}>{feature}</li>
+        ))}
       </ul>
       <form action={requestPlanChange}>
         <input name="planId" type="hidden" value={plan.id} />
@@ -300,11 +299,11 @@ function PlanCard({
             ? "Plano atual"
             : canUseStripe
               ? hasStripeCustomer
-                ? "Alterar pela Stripe"
-                : "Assinar com Stripe"
+                ? "Gerenciar plano"
+                : "Assinar Deniaros Controle"
               : isStripeReady
                 ? "Checkout em ativação"
-              : "Solicitar alteração"}
+                : "Falar com suporte"}
         </button>
       </form>
     </article>
@@ -331,7 +330,7 @@ function getBillingReadiness({
   if (isStripeConfigured && stripeReadyPlanCount > 0) {
     return {
       description:
-        "O checkout pode receber assinaturas. Depois do pagamento, a Stripe avisa o Deniaros e o plano é atualizado automaticamente.",
+        "O checkout pode receber assinaturas do Deniaros Controle. Depois do pagamento, a Stripe avisa o Deniaros e o plano é atualizado automaticamente.",
       title: "Cobrança pronta para clientes reais",
       tone: "ready"
     };
@@ -340,7 +339,7 @@ function getBillingReadiness({
   if (stripeReadyPlanCount > 0) {
     return {
       description:
-        "Os planos já têm chaves de preço. Falta publicar as variáveis da Stripe no ambiente para liberar o checkout.",
+        "O plano já tem chave de preço. Falta publicar as variáveis da Stripe no ambiente para liberar o checkout.",
       title: "Stripe quase pronta",
       tone: "pending"
     };
@@ -348,8 +347,8 @@ function getBillingReadiness({
 
   return {
     description: hasSubscription
-      ? "Seu plano atual está registrado, mas os preços da Stripe ainda precisam ser vinculados ao catálogo."
-      : "Crie ou vincule os preços da Stripe para transformar os planos em assinatura sem depender de atendimento manual.",
+      ? "Seu plano atual está registrado, mas o preço da Stripe ainda precisa ser vinculado ao catálogo."
+      : "Crie ou vincule o preço da Stripe para transformar o Deniaros Controle em assinatura sem atendimento manual.",
     title: "Cobrança em configuração",
     tone: "manual"
   };
@@ -419,7 +418,7 @@ function formatDate(value: string) {
 
 function getSubscriptionGuidance(subscription?: SubscriptionRow | null) {
   if (!subscription) {
-    return "Solicite um plano para ativar o faturamento e os limites do workspace.";
+    return "Assine o Deniaros Controle para ativar faturamento e limites do workspace.";
   }
   if (subscription.status === "past_due") {
     return "Há pendência de pagamento. Regularize para evitar bloqueio de recursos.";
